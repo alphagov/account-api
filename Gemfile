@@ -29,6 +29,7 @@ group :development do
 end
 
 group :test do
+  gem "climate_control"
   gem "simplecov"
   gem "webmock"
 end
