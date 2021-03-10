@@ -15,6 +15,7 @@ gem "puma"
 
 group :development, :test do
   gem "awesome_print"
+  gem "bullet"
   gem "factory_bot_rails"
   gem "govuk_test"
   gem "pry-byebug"
