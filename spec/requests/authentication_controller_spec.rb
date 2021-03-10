@@ -1,15 +1,8 @@
 RSpec.describe AuthenticationController do
   before do
-    discovery_response = instance_double(
-      "OpenIDConnect::Discovery::Provider::Config::Response",
-      authorization_endpoint: "http://openid-provider/authorization-endpoint",
-      token_endpoint: "http://openid-provider/token-endpoint",
-      userinfo_endpoint: "http://openid-provider/userinfo-endpoint",
-      end_session_endpoint: "http://openid-provider/end-session-endpoint",
-    )
+    stub_oidc_discovery
 
     # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OidcClient).to receive(:discover).and_return(discovery_response)
     allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
     # rubocop:enable RSpec/AnyInstance
   end
