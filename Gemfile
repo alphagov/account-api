@@ -11,7 +11,6 @@ gem "bootsnap"
 gem "gds-sso"
 gem "govuk_app_config"
 gem "pg"
-gem "puma"
 
 group :development, :test do
   gem "awesome_print"
