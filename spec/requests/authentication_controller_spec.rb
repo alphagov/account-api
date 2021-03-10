@@ -31,6 +31,12 @@ RSpec.describe AuthenticationController do
       get sign_in_path(redirect_path: "/hello-world")
       expect(AuthRequest.last.redirect_path).to eq("/hello-world")
     end
+
+    it "deletes old expired AuthRequests" do
+      auth_request_id = AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path", created_at: 1.day.ago).id
+      get sign_in_path
+      expect(AuthRequest.exists?(auth_request_id)).to be(false)
+    end
   end
 
   describe "/callback" do

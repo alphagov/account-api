@@ -1,5 +1,7 @@
 class AuthenticationController < ApplicationController
   def sign_in
+    AuthRequest.expired.delete_all
+
     auth_request = AuthRequest.create!(
       oauth_state: params.fetch(:state_id, SecureRandom.hex(16)),
       oidc_nonce: SecureRandom.hex(16),
@@ -25,7 +27,7 @@ class AuthenticationController < ApplicationController
 
     redirect_path = auth_request.redirect_path
 
-    auth_request.delete!
+    auth_request.delete
 
     render json: {
       govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
