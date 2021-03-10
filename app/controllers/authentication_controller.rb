@@ -36,5 +36,21 @@ class AuthenticationController < ApplicationController
     head :unauthorized
   end
 
-  def create_state; end
+  def create_state
+    payload = {
+      attributes: params[:attributes].permit!.to_h,
+    }.compact
+
+    client = OidcClient.new
+    tokens = client.tokens!
+    oauth_response = client.submit_jwt(
+      jwt: JWT.encode(payload, nil, "none"),
+      access_token: tokens[:access_token],
+      refresh_token: tokens[:refresh_token],
+    )
+
+    render json: {
+      state_id: oauth_response[:result]["id"],
+    }
+  end
 end

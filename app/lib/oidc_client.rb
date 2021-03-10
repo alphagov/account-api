@@ -67,6 +67,23 @@ class OidcClient
     end
   end
 
+  def submit_jwt(jwt:, access_token:, refresh_token: nil)
+    response = oauth_request(
+      access_token: access_token,
+      refresh_token: refresh_token,
+      method: :post,
+      uri: jwt_uri,
+      arg: { jwt: jwt },
+    )
+
+    body = response[:result].body
+    if body.empty?
+      raise OAuthFailure
+    else
+      response.merge(result: JSON.parse(body))
+    end
+  end
+
 protected
 
   OK_STATUSES = [200, 204, 404, 410].freeze
@@ -109,6 +126,12 @@ protected
   def ephemeral_state_uri
     URI.parse(provider_uri).tap do |u|
       u.path = "/api/v1/ephemeral-state"
+    end
+  end
+
+  def jwt_uri
+    URI.parse(provider_uri).tap do |u|
+      u.path = "/api/v1/jwt"
     end
   end
 

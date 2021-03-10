@@ -67,4 +67,16 @@ RSpec.describe AuthenticationController do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe "/state" do
+    it "submits a JWT to the account manager" do
+      stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt")
+        .with(headers: { "Authorization" => "Bearer access-token" })
+        .to_return(status: 200, body: { id: "jwt-id" }.to_json)
+
+      post state_path(attributes: { key: "value" })
+      expect(response).to be_successful
+      expect(JSON.parse(response.body)).to include("state_id" => "jwt-id")
+    end
+  end
 end
