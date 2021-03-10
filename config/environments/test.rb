@@ -10,6 +10,13 @@ Rails.application.configure do
 
   config.cache_classes = true
 
+  # Check for common ActiveRecord performance problems
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.bullet_logger = true
+    Bullet.rails_logger = true
+  end
+
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
   # preloads Rails for running tests, you may have to set it to true.
