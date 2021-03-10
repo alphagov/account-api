@@ -15,6 +15,14 @@ ActiveRecord::Schema.define(version: 2021_03_10_153334) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "auth_requests", force: :cascade do |t|
+    t.string "oauth_state", null: false
+    t.string "oidc_nonce", null: false
+    t.string "redirect_path"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"

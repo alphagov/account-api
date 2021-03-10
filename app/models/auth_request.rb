@@ -1,0 +1,2 @@
+class AuthRequest < ApplicationRecord
+end
