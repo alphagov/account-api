@@ -9,5 +9,8 @@ Rails.application.routes.draw do
       post "/callback", to: "authentication#callback"
       post "/state", to: "authentication#create_state"
     end
+
+    get "/transition-checker-email-subscription", to: "transition_checker_email_subscription#show"
+    post "/transition-checker-email-subscription", to: "transition_checker_email_subscription#update"
   end
 end
