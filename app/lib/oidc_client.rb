@@ -67,6 +67,32 @@ class OidcClient
     end
   end
 
+  def get_attribute(attribute:, access_token:, refresh_token: nil)
+    response = oauth_request(
+      access_token: access_token,
+      refresh_token: refresh_token,
+      method: :get,
+      uri: attribute_uri(attribute),
+    )
+
+    body = response[:result].body
+    if response[:result].status != 200 || body.empty?
+      response.merge(result: nil)
+    else
+      response.merge(result: JSON.parse(body)["claim_value"])
+    end
+  end
+
+  def bulk_set_attributes(attributes:, access_token:, refresh_token: nil)
+    oauth_request(
+      access_token: access_token,
+      refresh_token: refresh_token,
+      method: :post,
+      uri: bulk_attribute_uri,
+      arg: attributes.transform_keys { |key| "attributes[#{key}]" },
+    )
+  end
+
   def submit_jwt(jwt:, access_token:, refresh_token: nil)
     response = oauth_request(
       access_token: access_token,
@@ -147,6 +173,18 @@ protected
   def ephemeral_state_uri
     URI.parse(provider_uri).tap do |u|
       u.path = "/api/v1/ephemeral-state"
+    end
+  end
+
+  def attribute_uri(attribute)
+    URI.parse(userinfo_endpoint).tap do |u|
+      u.path = "/v1/attributes/#{attribute}"
+    end
+  end
+
+  def bulk_attribute_uri
+    URI.parse(userinfo_endpoint).tap do |u|
+      u.path = "/v1/attributes"
     end
   end
 

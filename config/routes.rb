@@ -10,6 +10,9 @@ Rails.application.routes.draw do
       post "/state", to: "authentication#create_state"
     end
 
+    get "/attributes", to: "attributes#show"
+    patch "/attributes", to: "attributes#update"
+
     get "/transition-checker-email-subscription", to: "transition_checker_email_subscription#show"
     post "/transition-checker-email-subscription", to: "transition_checker_email_subscription#update"
   end
