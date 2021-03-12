@@ -10,6 +10,7 @@ gem "rails", "6.1.3"
 gem "bootsnap"
 gem "gds-sso"
 gem "govuk_app_config"
+gem "openid_connect"
 gem "pg"
 
 group :development, :test do
@@ -28,6 +29,7 @@ group :development do
 end
 
 group :test do
+  gem "climate_control"
   gem "simplecov"
   gem "webmock"
 end
