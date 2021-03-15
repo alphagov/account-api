@@ -12,9 +12,9 @@ class ApplicationController < ActionController::API
         request.headers.to_h["GOVUK-Account-Session"]
       end
 
-    head :unauthorized and return unless govuk_account_session_header
-
     @govuk_account_session = from_account_session(govuk_account_session_header)
+
+    head :unauthorized unless @govuk_account_session
   end
 
 protected

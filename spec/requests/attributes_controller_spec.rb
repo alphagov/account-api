@@ -52,6 +52,13 @@ RSpec.describe AttributesController do
       end
     end
 
+    context "when an invalid govuk-account-session is provided" do
+      it "returns a 401" do
+        get attributes_path, headers: { "GOVUK-Account-Session" => "not-a-base64-string" }, params: params
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
     context "when multiple attributes are requested" do
       before do
         stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
