@@ -1,0 +1,26 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "561df849df725485ca107e96433c44479c5e3977e99ff4b0eab18e62f0ffd971",
+      "check_name": "MassAssignment",
+      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
+      "file": "app/controllers/attributes_controller.rb",
+      "line": 30,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.fetch(:attributes).permit!",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AttributesController",
+        "method": "update"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "note": "This isn't a problem as if an invalid attribute name is given the attribute-service will reject it."
+    }
+  ],
+  "updated": "2021-03-12 12:50:04 +0000",
+  "brakeman_version": "4.10.1"
+}
