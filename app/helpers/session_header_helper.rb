@@ -11,5 +11,7 @@ module SessionHeaderHelper
         refresh_token: Base64.urlsafe_decode64(bits[1]),
       }
     end
+  rescue ArgumentError
+    nil
   end
 end
