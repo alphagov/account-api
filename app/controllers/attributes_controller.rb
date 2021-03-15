@@ -19,7 +19,7 @@ class AttributesController < ApplicationController
     end
 
     render json: {
-      govuk_account_session: to_account_session(@govuk_account_session[:access_token], @govuk_account_session[:refresh_token]),
+      govuk_account_session: to_account_session(access_token, refresh_token),
       values: values.compact,
     }
   rescue OidcClient::OAuthFailure
