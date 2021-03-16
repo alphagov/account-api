@@ -1,0 +1,2 @@
+GovukError.configure do
+end
