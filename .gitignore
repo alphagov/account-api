@@ -23,5 +23,6 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+/spec/reports/pacts
 /spec/examples.txt
 /coverage

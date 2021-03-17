@@ -2,9 +2,8 @@ class AuthenticationController < ApplicationController
   def sign_in
     AuthRequest.expired.delete_all
 
-    auth_request = AuthRequest.create!(
-      oauth_state: params.fetch(:state_id, SecureRandom.hex(16)),
-      oidc_nonce: SecureRandom.hex(16),
+    auth_request = AuthRequest.generate!(
+      oauth_state: params[:state_id],
       redirect_path: params[:redirect_path],
     )
 
