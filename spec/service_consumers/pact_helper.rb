@@ -7,14 +7,20 @@ Pact.configure do |config|
   config.include WebMock::Matchers
 end
 
+def url_encode(str)
+  ERB::Util.url_encode(str)
+end
+
 Pact.service_provider "Account API" do
   honours_pact_with "GDS API Adapters" do
     if ENV["PACT_URI"]
       pact_uri ENV["PACT_URI"]
     else
-      abort("Not set up to work with the pact-broker yet, only local usage is implemented.
-      1. Run the gds-api-adapters tests
-      2. Call with PACT_URI=../gds-api-adapters/spec/pacts/gds_api_adapters-account_api.json")
+      base_url = "https://pact-broker.cloudapps.digital"
+      path = "pacts/provider/#{url_encode(name)}/consumer/#{url_encode(consumer_name)}"
+      version_modifier = "versions/#{url_encode(ENV.fetch('GDS_API_ADAPTERS_PACT_VERSION', 'master'))}"
+
+      pact_uri("#{base_url}/#{path}/#{version_modifier}")
     end
   end
 end
