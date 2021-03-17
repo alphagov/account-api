@@ -18,6 +18,8 @@ group :development, :test do
   gem "bullet"
   gem "factory_bot_rails"
   gem "govuk_test"
+  gem "pact", require: false
+  gem "pact_broker-client"
   gem "pry-byebug"
   gem "pry-rails"
   gem "rspec-rails"
