@@ -3,12 +3,12 @@
 Provides sign in / sign out and attribute storage functionality to
 other GOV.UK applications.
 
-In production this currently uses the [GOV.UK account manager
+In production this app currently uses the [GOV.UK account manager
 prototype][] as an authentication service and the [GOV.UK attribute
 service prototype][] as a user data store.
 
-This app does not serve any user-facing pages.  To see it working you
-will need to run an app which uses it, such as [Finder Frontend][].
+This app does not serve any user-facing pages. To see the app working, you
+must run an app which uses it, such as [Finder Frontend][].
 
 After starting Finder Frontend, you should be able to access the
 following links:
@@ -37,7 +37,7 @@ conventions][].
 
 [our Rails app conventions]: https://docs.publishing.service.gov.uk/manual/conventions-for-rails-applications.html
 
-**Use GOV.UK Docker to run any commands that follow.**
+Use GOV.UK Docker to run any of the following commands.
 
 ### Testing
 
@@ -61,7 +61,7 @@ bundle exec rake
 
 #### Changing the Pact tests
 
-If you make changes to the API, you'll need to update the Pact tests.
+If you make changes to the API, you must update the Pact tests.
 
 A Pact test has two parts:
 
@@ -79,6 +79,11 @@ See the GOV.UK Developer Docs for [how to update a Pact test][].
 [in this repo]: https://github.com/alphagov/account-api/blob/main/spec/service_consumers/pact_helper.rb
 [in gds-api-adapters]: https://github.com/alphagov/gds-api-adapters/blob/master/test/account_api_test.rb
 [how to update a Pact test]: https://docs.publishing.service.gov.uk/manual/pact-broker.html#updating-pact-tests
+
+
+## Further documentation
+
+- [API documentation](docs/api.md)
 
 
 ## Licence
