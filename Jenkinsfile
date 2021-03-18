@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-library("govuk@default-branch")
+library("govuk")
 
 node {
   govuk.buildProject()
