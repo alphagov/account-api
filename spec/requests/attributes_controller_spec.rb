@@ -87,12 +87,11 @@ RSpec.describe AttributesController do
 
   describe "PATCH" do
     let(:attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
-    let(:encoded_attributes) { { attribute_name1 => attribute_value1.to_json, attribute_name2 => attribute_value2.to_json } }
     let(:params) { { attributes: attributes } }
 
     it "calls the attribute service" do
       stub = stub_request(:post, "http://openid-provider/v1/attributes")
-        .with(body: { attributes: encoded_attributes })
+        .with(body: { attributes: attributes.transform_values(&:to_json) })
         .to_return(status: 200)
 
       patch attributes_path, headers: headers, params: params.to_json
@@ -100,26 +99,12 @@ RSpec.describe AttributesController do
       expect(stub).to have_been_made
     end
 
-    context "with JSON-encoded values" do
-      let(:attributes) { encoded_attributes }
-
-      it "doesn't double-encode the attributes" do
-        stub = stub_request(:post, "http://openid-provider/v1/attributes")
-          .with(body: { attributes: encoded_attributes })
-          .to_return(status: 200)
-
-        patch attributes_path, headers: headers, params: params.to_json
-        expect(response).to be_successful
-        expect(stub).to have_been_made
-      end
-    end
-
     context "when the tokens are rejected" do
       before do
         stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
 
         stub_request(:post, "http://openid-provider/v1/attributes")
-          .with(body: { attributes: encoded_attributes })
+          .with(body: { attributes: attributes.transform_values(&:to_json) })
           .to_return(status: 401)
       end
 
