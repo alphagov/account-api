@@ -7,4 +7,4 @@ Rails.application.load_tasks
 
 Rake::Task[:default].clear if Rake::Task.task_defined?(:default)
 
-task default: %i[lint spec]
+task default: %i[lint spec pact:verify]

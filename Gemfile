@@ -16,6 +16,7 @@ gem "pg"
 group :development, :test do
   gem "awesome_print"
   gem "bullet"
+  gem "climate_control"
   gem "factory_bot_rails"
   gem "govuk_test"
   gem "pact", require: false
@@ -31,7 +32,6 @@ group :development do
 end
 
 group :test do
-  gem "climate_control"
   gem "simplecov"
   gem "webmock"
 end
