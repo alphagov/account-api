@@ -29,8 +29,11 @@ class AttributesController < ApplicationController
   def update
     attributes = params.fetch(:attributes).permit!.to_h
 
+    already_encoded = attributes.values.all? { |v| is_json_encoded v }
+
     oauth_response = OidcClient.new.bulk_set_attributes(
       attributes: attributes,
+      already_encoded: already_encoded,
       access_token: @govuk_account_session[:access_token],
       refresh_token: @govuk_account_session[:refresh_token],
     )
@@ -40,5 +43,16 @@ class AttributesController < ApplicationController
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
+  end
+
+protected
+
+  def is_json_encoded(value)
+    return false unless value.is_a? String
+
+    JSON.parse(value)
+    true
+  rescue JSON::ParserError
+    false
   end
 end
