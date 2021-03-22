@@ -83,13 +83,13 @@ class OidcClient
     end
   end
 
-  def bulk_set_attributes(attributes:, already_encoded:, access_token:, refresh_token: nil)
+  def bulk_set_attributes(attributes:, access_token:, refresh_token: nil)
     oauth_request(
       access_token: access_token,
       refresh_token: refresh_token,
       method: :post,
       uri: bulk_attribute_uri,
-      arg: attributes.transform_keys { |key| "attributes[#{key}]" }.transform_values { |v| already_encoded ? v : v.to_json },
+      arg: attributes.transform_keys { |key| "attributes[#{key}]" }.transform_values(&:to_json),
     )
   end
 
