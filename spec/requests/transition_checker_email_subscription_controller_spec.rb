@@ -7,7 +7,7 @@ RSpec.describe TransitionCheckerEmailSubscriptionController do
     # rubocop:enable RSpec/AnyInstance
   end
 
-  let(:headers) { { "GOVUK-Account-Session" => placeholder_govuk_account_session } }
+  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => placeholder_govuk_account_session } }
 
   describe "GET" do
     before do
@@ -71,7 +71,7 @@ RSpec.describe TransitionCheckerEmailSubscriptionController do
         .with(body: hash_including(topic_slug: "slug"))
         .to_return(status: 200)
 
-      post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }
+      post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }.to_json
       expect(response).to be_successful
       expect(stub).to have_been_made
     end
@@ -84,7 +84,7 @@ RSpec.describe TransitionCheckerEmailSubscriptionController do
           .with(body: hash_including(topic_slug: "slug"))
           .to_return(status: 401)
 
-        post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }
+        post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }.to_json
         expect(response).to have_http_status(:unauthorized)
       end
     end

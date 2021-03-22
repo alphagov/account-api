@@ -7,6 +7,8 @@ RSpec.describe AuthenticationController do
     # rubocop:enable RSpec/AnyInstance
   end
 
+  let(:headers) { { "Content-Type" => "application/json" } }
+
   describe "/sign-in" do
     it "creates an AuthRequest to persist the attributes" do
       expect { get sign_in_path }.to change(AuthRequest, :count)
@@ -23,12 +25,12 @@ RSpec.describe AuthenticationController do
     end
 
     it "uses a provided state_id" do
-      get sign_in_path(state_id: "hello-world")
+      get sign_in_path, params: { state_id: "hello-world" }
       expect(AuthRequest.last.oauth_state).to eq("hello-world")
     end
 
     it "uses a provided redirect_path" do
-      get sign_in_path(redirect_path: "/hello-world")
+      get sign_in_path, params: { redirect_path: "/hello-world" }
       expect(AuthRequest.last.redirect_path).to eq("/hello-world")
     end
 
@@ -47,13 +49,13 @@ RSpec.describe AuthenticationController do
         .with(headers: { "Authorization" => "Bearer access-token" })
         .to_return(status: 200, body: { _ga: "ga-client-id" }.to_json)
 
-      post callback_path(state: auth_request.to_oauth_state, code: "12345")
+      post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "ga_client_id" => "ga-client-id")
     end
 
     it "returns a 401 if there is no matching AuthRequest" do
-      post callback_path(state: "something-else")
+      post callback_path, headers: headers, params: { state: "something-else" }.to_json
       expect(response).to have_http_status(:unauthorized)
     end
 
@@ -62,7 +64,7 @@ RSpec.describe AuthenticationController do
       allow_any_instance_of(OidcClient).to receive(:tokens!).and_raise(OidcClient::OAuthFailure)
       # rubocop:enable RSpec/AnyInstance
 
-      post callback_path(state: auth_request.to_oauth_state, code: "12345")
+      post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to have_http_status(:unauthorized)
     end
   end
@@ -73,7 +75,7 @@ RSpec.describe AuthenticationController do
         .with(headers: { "Authorization" => "Bearer access-token" })
         .to_return(status: 200, body: { id: "jwt-id" }.to_json)
 
-      post state_path(attributes: { key: "value" })
+      post state_path, headers: headers, params: { attributes: { key: "value" } }.to_json
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to include("state_id" => "jwt-id")
     end

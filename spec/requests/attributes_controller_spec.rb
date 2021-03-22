@@ -1,7 +1,7 @@
 RSpec.describe AttributesController do
   before { stub_oidc_discovery }
 
-  let(:headers) { { "GOVUK-Account-Session" => placeholder_govuk_account_session } }
+  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => placeholder_govuk_account_session } }
 
   let(:attribute_name1) { "name" }
   let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
@@ -94,7 +94,7 @@ RSpec.describe AttributesController do
         .with(body: { attributes: attributes })
         .to_return(status: 200)
 
-      patch attributes_path, headers: headers, params: params
+      patch attributes_path, headers: headers, params: params.to_json
       expect(response).to be_successful
       expect(stub).to have_been_made
     end
@@ -109,14 +109,14 @@ RSpec.describe AttributesController do
       end
 
       it "returns a 401" do
-        patch attributes_path, headers: headers, params: params
+        patch attributes_path, headers: headers, params: params.to_json
         expect(response).to have_http_status(:unauthorized)
       end
     end
 
     context "when no govuk-account-session is provided" do
       it "returns a 401" do
-        patch attributes_path, params: params
+        patch attributes_path, headers: { "Content-Type" => "application/json" }, params: params.to_json
         expect(response).to have_http_status(:unauthorized)
       end
     end
