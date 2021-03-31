@@ -29,7 +29,7 @@ class AuthRequest < ApplicationRecord
     return if redirect_path.nil?
     return if redirect_path.empty?
 
-    if redirect_path&.starts_with? "//"
+    if redirect_path.starts_with? "//"
       errors.add(:redirect_path, "can't be protocol-relative")
       return
     end
