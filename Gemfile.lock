@@ -123,9 +123,10 @@ GEM
       sentry-raven (~> 3.1.1)
       statsd-ruby (~> 1.5.0)
       unicorn (>= 5.4, < 5.9)
-    govuk_test (2.1.1)
+    govuk_test (2.1.2)
       brakeman (~> 4.6)
       capybara
+      climate_control
       pact
       puma
       selenium-webdriver (>= 3.142)
@@ -169,7 +170,7 @@ GEM
     multi_xml (0.6.0)
     multipart-post (2.1.1)
     nio4r (2.5.7)
-    nokogiri (1.11.2)
+    nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
     oauth2 (1.4.4)
