@@ -59,7 +59,7 @@ Pact.provider_states_for "GDS API Adapters" do
       auth_request = AuthRequest.generate!
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
 
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id" }.to_json)
+      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end
 
@@ -68,7 +68,7 @@ Pact.provider_states_for "GDS API Adapters" do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
 
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id" }.to_json)
+      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end
 

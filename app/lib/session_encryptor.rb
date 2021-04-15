@@ -1,15 +1,20 @@
+# frozen_string_literal: true
+
 class SessionEncryptor
   KEY_LEN = ActiveSupport::MessageEncryptor.key_len
+
+  LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
   def initialize(session_signing_key:)
     @session_signing_key = session_signing_key
   end
 
-  def encrypt_session(access_token:, refresh_token:)
+  def encrypt_session(access_token:, refresh_token:, level_of_authentication:)
     encrypt_string(
       {
         access_token: access_token,
         refresh_token: refresh_token,
+        level_of_authentication: level_of_authentication,
       }.to_json,
     )
   end
@@ -20,7 +25,9 @@ class SessionEncryptor
     plaintext = decrypt_string(ciphertext)
     return unless plaintext
 
-    JSON.parse(plaintext).symbolize_keys
+    {
+      level_of_authentication: LOWEST_LEVEL_OF_AUTHENTICATION,
+    }.merge(JSON.parse(plaintext).symbolize_keys)
   end
 
 private

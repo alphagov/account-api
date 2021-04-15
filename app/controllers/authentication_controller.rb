@@ -31,9 +31,13 @@ class AuthenticationController < ApplicationController
     auth_request.delete
 
     render json: {
-      govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
+      govuk_account_session: to_account_session(
+        access_token: oauth_response.fetch(:access_token),
+        refresh_token: oauth_response.fetch(:refresh_token),
+        level_of_authentication: oauth_response.fetch(:result).fetch("level_of_authentication"),
+      ),
       redirect_path: redirect_path,
-      ga_client_id: oauth_response[:result]["_ga"],
+      ga_client_id: oauth_response.fetch(:result)["_ga"],
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized

@@ -19,7 +19,11 @@ class AttributesController < ApplicationController
     end
 
     render json: {
-      govuk_account_session: to_account_session(access_token, refresh_token),
+      govuk_account_session: to_account_session(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        level_of_authentication: @govuk_account_session[:level_of_authentication],
+      ),
       values: values.compact,
     }
   rescue OidcClient::OAuthFailure
@@ -36,7 +40,11 @@ class AttributesController < ApplicationController
     )
 
     render json: {
-      govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
+      govuk_account_session: to_account_session(
+        access_token: oauth_response[:access_token],
+        refresh_token: oauth_response[:refresh_token],
+        level_of_authentication: @govuk_account_session[:level_of_authentication],
+      ),
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
