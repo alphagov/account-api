@@ -77,7 +77,13 @@ private
   def validate_attributes(names)
     undefined = names.reject { |n| user_attributes.defined? n }
     if undefined.any?
-      render json: { title: "undefined attributes", detail: undefined }, status: :unprocessable_entity
+      render status: :unprocessable_entity, json:
+        {
+          type: I18n.t("errors.unknown_attribute_names.type"),
+          title: I18n.t("errors.unknown_attribute_names.title"),
+          detail: I18n.t("errors.unknown_attribute_names.detail", attribute_names: undefined.join(", ")),
+          attributes: undefined,
+        }
       return false
     end
 

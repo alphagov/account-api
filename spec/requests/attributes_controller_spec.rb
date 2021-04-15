@@ -82,6 +82,20 @@ RSpec.describe AttributesController do
           expect(JSON.parse(response.body)["values"]).to eq({ attribute_name2 => attribute_value2 })
         end
       end
+
+      context "when some of the attributes are undefined" do
+        let(:bad_attributes) { %w[bad1 bad2] }
+        let(:params) { { attributes: [attribute_name1, attribute_name2] + bad_attributes } }
+
+        it "lists the undefined ones" do
+          get attributes_path, headers: headers, params: params
+          expect(response).to have_http_status(:unprocessable_entity)
+
+          error = JSON.parse(response.body)
+          expect(error["type"]).to eq(I18n.t("errors.unknown_attribute_names.type"))
+          expect(error["attributes"]).to eq(bad_attributes)
+        end
+      end
     end
   end
 
