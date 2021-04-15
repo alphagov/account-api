@@ -11,6 +11,7 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
       govuk_account_session: to_account_session(
         access_token: oauth_response[:access_token],
         refresh_token: oauth_response[:refresh_token],
+        level_of_authentication: @govuk_account_session[:level_of_authentication],
       ),
       has_subscription: oauth_response[:result],
     }
@@ -29,6 +30,7 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
       govuk_account_session: to_account_session(
         access_token: oauth_response[:access_token],
         refresh_token: oauth_response[:refresh_token],
+        level_of_authentication: @govuk_account_session[:level_of_authentication],
       ),
     }
   rescue OidcClient::OAuthFailure

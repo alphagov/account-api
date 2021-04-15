@@ -1,6 +1,14 @@
 RSpec.describe SessionEncryptor do
   let(:key) { "encryption-key" }
-  let(:encoded) { described_class.new(session_signing_key: key).encrypt_session(access_token: "access-token", refresh_token: "refresh-token") }
+  let(:encoded) do
+    described_class
+      .new(session_signing_key: key)
+      .encrypt_session(
+        access_token: "access-token",
+        refresh_token: "refresh-token",
+        level_of_authentication: "level42",
+      )
+  end
 
   it "rejects if the salt has been tampered with" do
     bits = Base64.urlsafe_decode64(encoded).split("$$")

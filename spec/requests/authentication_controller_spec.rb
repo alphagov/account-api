@@ -44,10 +44,10 @@ RSpec.describe AuthenticationController do
   describe "/callback" do
     let!(:auth_request) { AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path") }
 
-    it "fetches the tokens & GA client ID" do
+    it "fetches the tokens & ephemeral state" do
       stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state")
         .with(headers: { "Authorization" => "Bearer access-token" })
-        .to_return(status: 200, body: { _ga: "ga-client-id" }.to_json)
+        .to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level42" }.to_json)
 
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
