@@ -1,5 +1,5 @@
 module SessionHeaderHelper
-  def to_account_session(access_token, refresh_token)
+  def to_account_session(access_token:, refresh_token:)
     SessionEncryptor
       .new(session_signing_key: Rails.application.secrets.session_signing_key)
       .encrypt_session(

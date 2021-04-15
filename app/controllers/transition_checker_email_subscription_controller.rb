@@ -8,7 +8,10 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
     )
 
     render json: {
-      govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
+      govuk_account_session: to_account_session(
+        access_token: oauth_response[:access_token],
+        refresh_token: oauth_response[:refresh_token],
+      ),
       has_subscription: oauth_response[:result],
     }
   rescue OidcClient::OAuthFailure
@@ -23,7 +26,10 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
     )
 
     render json: {
-      govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
+      govuk_account_session: to_account_session(
+        access_token: oauth_response[:access_token],
+        refresh_token: oauth_response[:refresh_token],
+      ),
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized

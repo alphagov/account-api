@@ -2,7 +2,7 @@ RSpec.describe SessionHeaderHelper do
   let(:tokens) { { access_token: SecureRandom.hex(10), refresh_token: SecureRandom.hex(10) } }
 
   it "round-trips" do
-    encoded = to_account_session(*token_values(tokens))
+    encoded = to_account_session(**tokens)
     decoded = from_account_session(encoded)
 
     expect(decoded).to eq(tokens)
@@ -29,9 +29,5 @@ RSpec.describe SessionHeaderHelper do
       expect(from_legacy_account_session(Base64.urlsafe_encode64("1"))).to be_nil
       expect(from_legacy_account_session(Base64.urlsafe_encode64("1") + "." + Base64.urlsafe_encode64("2") + "." + Base64.urlsafe_encode64("3"))).to be_nil
     end
-  end
-
-  def token_values(access_token:, refresh_token:)
-    [access_token, refresh_token]
   end
 end

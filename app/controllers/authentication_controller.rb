@@ -31,7 +31,10 @@ class AuthenticationController < ApplicationController
     auth_request.delete
 
     render json: {
-      govuk_account_session: to_account_session(oauth_response[:access_token], oauth_response[:refresh_token]),
+      govuk_account_session: to_account_session(
+        access_token: oauth_response[:access_token],
+        refresh_token: oauth_response[:refresh_token],
+      ),
       redirect_path: redirect_path,
       ga_client_id: oauth_response[:result]["_ga"],
     }
