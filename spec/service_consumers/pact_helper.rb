@@ -77,6 +77,7 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_request(:get, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: 404)
       stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: 200)
       stub_request(:get, "http://openid-provider/v1/attributes/foo").to_return(status: 404)
+      stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 404)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
     end
   end
@@ -90,6 +91,12 @@ Pact.provider_states_for "GDS API Adapters" do
   provider_state "there is a valid user session, with an attribute called 'foo'" do
     set_up do
       stub_request(:get, "http://openid-provider/v1/attributes/foo").to_return(status: 200, body: { claim_value: { bar: "baz" } }.to_json)
+    end
+  end
+
+  provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
+    set_up do
+      stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 200, body: { claim_value: { bar: "baz" } }.to_json)
     end
   end
 end
