@@ -3,10 +3,10 @@ RSpec.describe AttributesController do
 
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => placeholder_govuk_account_session } }
 
-  let(:attribute_name1) { "name" }
+  # names must be defined in spec/fixtures/user_attributes.yml
+  let(:attribute_name1) { "test_attribute_1" }
+  let(:attribute_name2) { "test_attribute_2" }
   let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
-
-  let(:attribute_name2) { "name2" }
   let(:attribute_value2) { [1, 2, 3, 4, 5] }
 
   describe "GET" do
@@ -80,6 +80,20 @@ RSpec.describe AttributesController do
           get attributes_path, headers: headers, params: params
           expect(response).to be_successful
           expect(JSON.parse(response.body)["values"]).to eq({ attribute_name2 => attribute_value2 })
+        end
+      end
+
+      context "when some of the attributes are undefined" do
+        let(:bad_attributes) { %w[bad1 bad2] }
+        let(:params) { { attributes: [attribute_name1, attribute_name2] + bad_attributes } }
+
+        it "lists the undefined ones" do
+          get attributes_path, headers: headers, params: params
+          expect(response).to have_http_status(:unprocessable_entity)
+
+          error = JSON.parse(response.body)
+          expect(error["type"]).to eq(I18n.t("errors.unknown_attribute_names.type"))
+          expect(error["attributes"]).to eq(bad_attributes)
         end
       end
     end

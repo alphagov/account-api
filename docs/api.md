@@ -18,6 +18,8 @@ management. This API is not for other government services.
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
+- [API errors](#api-errors)
+  - [Unknown attribute names](#unknown-attribute-names)
 - [Healthcheck](#healthcheck)
 
 ## Nomenclature
@@ -344,6 +346,7 @@ Retrieves attribute values for the current user.
 
 #### Response codes
 
+- 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -391,6 +394,7 @@ Updates the attributes of the current user.
 
 #### Response codes
 
+- 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -496,6 +500,35 @@ Response:
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg=="
 }
 ```
+
+
+## API errors
+
+API errors are returned as an [RFC 7807][] "Problem Detail" object, in
+the following format:
+
+```json
+{
+  "type": "URI which identifies the problem type and points to further information",
+  "title": "Short human-readable summary of the problem type",
+  "detail": "Human-readable explanation of this specific instance of the problem."
+}
+```
+
+Each error type may define additional response fields.
+
+[RFC 7807]: https://tools.ietf.org/html/rfc7807
+
+### Unknown attribute names
+
+One or more of the attribute names you have specified are not known.
+The `attributes` response field lists these.
+
+#### Debugging steps
+
+- check that you don't have a typo in the attribute names
+- check that the attributes are defined in `config/user_attributes.yml`
+- check that you are running the latest version of account-api
 
 
 ## Healthcheck

@@ -1,0 +1,11 @@
+test_attribute_1:
+  is_stored_locally: false
+
+test_attribute_2:
+  is_stored_locally: false
+
+foo:
+  is_stored_locally: false
+
+bar:
+  is_stored_locally: false
