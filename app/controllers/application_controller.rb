@@ -17,4 +17,12 @@ protected
   def authorise
     authorise_user!("internal_app")
   end
+
+  def account_session_header_value
+    to_account_session(
+      access_token: @govuk_account_session[:access_token],
+      refresh_token: @govuk_account_session[:refresh_token],
+      level_of_authentication: @govuk_account_session[:level_of_authentication],
+    )
+  end
 end
