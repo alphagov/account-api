@@ -26,6 +26,8 @@ RSpec.configure do |config|
     config.after { Bullet.end_request }
   end
 
+  config.before { Rails.application.load_seed }
+
   config.around do |example|
     ClimateControl.modify(GOVUK_ACCOUNT_OAUTH_CLIENT_ID: "client-id", GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET: "client-secret") do
       example.run
