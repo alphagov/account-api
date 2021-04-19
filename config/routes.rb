@@ -3,6 +3,11 @@ Rails.application.routes.draw do
     GovukHealthcheck::ActiveRecord,
   )
 
+  get "/healthcheck/live", to: proc { [200, {}, %w[OK]] }
+  get "/healthcheck/ready", to: GovukHealthcheck.rack_response(
+    GovukHealthcheck::ActiveRecord,
+  )
+
   scope :api do
     scope :oauth2 do
       get "/sign-in", to: "authentication#sign_in"
