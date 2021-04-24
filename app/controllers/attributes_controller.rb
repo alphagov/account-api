@@ -12,17 +12,17 @@ class AttributesController < ApplicationController
       else
         oauth_response = OidcClient.new.get_attribute(
           attribute: name,
-          access_token: @govuk_account_session[:access_token],
-          refresh_token: @govuk_account_session[:refresh_token],
+          access_token: @govuk_account_session.access_token,
+          refresh_token: @govuk_account_session.refresh_token,
         )
-        @govuk_account_session[:access_token] = oauth_response[:access_token]
-        @govuk_account_session[:refresh_token] = oauth_response[:refresh_token]
+        @govuk_account_session.access_token = oauth_response[:access_token]
+        @govuk_account_session.refresh_token = oauth_response[:refresh_token]
         values_hash[name] = oauth_response[:result]
       end
     end
 
     render json: {
-      govuk_account_session: account_session_header_value,
+      govuk_account_session: @govuk_account_session.serialise,
       values: values.compact,
     }
   rescue OidcClient::OAuthFailure
@@ -44,15 +44,15 @@ class AttributesController < ApplicationController
     if remote_attributes.any?
       oauth_response = OidcClient.new.bulk_set_attributes(
         attributes: remote_attributes,
-        access_token: @govuk_account_session[:access_token],
-        refresh_token: @govuk_account_session[:refresh_token],
+        access_token: @govuk_account_session.access_token,
+        refresh_token: @govuk_account_session.refresh_token,
       )
-      @govuk_account_session[:access_token] = oauth_response[:access_token]
-      @govuk_account_session[:refresh_token] = oauth_response[:refresh_token]
+      @govuk_account_session.access_token = oauth_response[:access_token]
+      @govuk_account_session.refresh_token = oauth_response[:refresh_token]
     end
 
     render json: {
-      govuk_account_session: account_session_header_value,
+      govuk_account_session: @govuk_account_session.serialise,
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
