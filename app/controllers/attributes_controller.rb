@@ -1,5 +1,5 @@
 class AttributesController < ApplicationController
-  before_action :fetch_govuk_account_session
+  before_action :require_govuk_account_session!
 
   def show
     attribute_names = params.fetch(:attributes)

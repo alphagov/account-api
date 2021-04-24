@@ -3,7 +3,7 @@ class ApplicationController < ActionController::API
 
   before_action :authorise!
 
-  def fetch_govuk_account_session
+  def require_govuk_account_session!
     @govuk_account_session = AccountSession.deserialise(
       encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
       session_signing_key: Rails.application.secrets.session_signing_key,
