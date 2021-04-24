@@ -6,20 +6,12 @@ class AttributesController < ApplicationController
 
     return unless validate_attributes(attribute_names)
 
-    values = attribute_names.each_with_object({}) do |name, values_hash|
-      if user_attributes.stored_locally? name
-        raise NotImplementedError
-      else
-        oauth_response = OidcClient.new.get_attribute(
-          attribute: name,
-          access_token: @govuk_account_session.access_token,
-          refresh_token: @govuk_account_session.refresh_token,
-        )
-        @govuk_account_session.access_token = oauth_response[:access_token]
-        @govuk_account_session.refresh_token = oauth_response[:refresh_token]
-        values_hash[name] = oauth_response[:result]
-      end
-    end
+    local_attributes = attribute_names.select { |name| user_attributes.stored_locally? name }
+    remote_attributes = attribute_names.reject { |name| user_attributes.stored_locally? name }
+
+    raise NotImplementedError if local_attributes.any?
+
+    values = @govuk_account_session.get_remote_attributes(remote_attributes)
 
     render json: {
       govuk_account_session: @govuk_account_session.serialise,
@@ -37,19 +29,9 @@ class AttributesController < ApplicationController
     local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
     remote_attributes = attributes.reject { |name| user_attributes.stored_locally? name }
 
-    if local_attributes.any?
-      raise NotImplementedError
-    end
+    raise NotImplementedError if local_attributes.any?
 
-    if remote_attributes.any?
-      oauth_response = OidcClient.new.bulk_set_attributes(
-        attributes: remote_attributes,
-        access_token: @govuk_account_session.access_token,
-        refresh_token: @govuk_account_session.refresh_token,
-      )
-      @govuk_account_session.access_token = oauth_response[:access_token]
-      @govuk_account_session.refresh_token = oauth_response[:refresh_token]
-    end
+    @govuk_account_session.set_remote_attributes(remote_attributes)
 
     render json: {
       govuk_account_session: @govuk_account_session.serialise,

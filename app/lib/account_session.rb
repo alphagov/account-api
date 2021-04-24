@@ -3,7 +3,7 @@
 class AccountSession
   LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
-  attr_accessor :access_token, :refresh_token, :level_of_authentication
+  attr_reader :level_of_authentication
 
   def initialize(session_signing_key:, access_token:, refresh_token:, level_of_authentication:)
     @session_signing_key = session_signing_key
@@ -51,13 +51,45 @@ class AccountSession
 
   def to_hash
     {
-      access_token: access_token,
-      refresh_token: refresh_token,
+      access_token: @access_token,
+      refresh_token: @refresh_token,
       level_of_authentication: level_of_authentication,
     }
+  end
+
+  def get_remote_attributes(remote_attributes)
+    remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }
+  end
+
+  def set_remote_attributes(remote_attributes)
+    return if remote_attributes.empty?
+
+    oidc_do :bulk_set_attributes, { attributes: remote_attributes }
+  end
+
+  def has_email_subscription?
+    oidc_do :has_email_subscription
+  end
+
+  def set_email_subscription(slug)
+    oidc_do :update_email_subscription, { slug: slug }
   end
 
 private
 
   attr_reader :session_signing_key
+
+  def oidc_do(method, args = {})
+    oauth_response = oidc_client.public_send(
+      method,
+      **args.merge(access_token: @access_token, refresh_token: @refresh_token),
+    )
+    @access_token = oauth_response[:access_token]
+    @refresh_token = oauth_response[:refresh_token]
+    oauth_response[:result]
+  end
+
+  def oidc_client
+    @oidc_client ||= OidcClient.new
+  end
 end
