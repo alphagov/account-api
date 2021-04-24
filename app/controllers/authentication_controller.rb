@@ -1,5 +1,5 @@
 class AuthenticationController < ApplicationController
-  skip_before_action :authorise, only: %i[sign_in callback]
+  skip_before_action :authorise!, only: %i[sign_in callback]
 
   def sign_in
     AuthRequest.expired.delete_all

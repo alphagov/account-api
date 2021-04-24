@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
 
-  before_action :authorise
+  before_action :authorise!
 
   def fetch_govuk_account_session
     @govuk_account_session = AccountSession.deserialise(
@@ -12,9 +12,9 @@ class ApplicationController < ActionController::API
     head :unauthorized unless @govuk_account_session
   end
 
-protected
+private
 
-  def authorise
+  def authorise!
     authorise_user!("internal_app")
   end
 end
