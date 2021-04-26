@@ -2,14 +2,7 @@ class AttributesController < ApplicationController
   before_action :require_govuk_account_session!
 
   def show
-    attribute_names = params.fetch(:attributes)
-
-    return unless validate_attributes(attribute_names)
-
-    local_attributes = attribute_names.select { |name| user_attributes.stored_locally? name }
-    remote_attributes = attribute_names.reject { |name| user_attributes.stored_locally? name }
-
-    raise NotImplementedError if local_attributes.any?
+    remote_attributes = get_attributes_from_params(params.fetch(:attributes))
 
     values = @govuk_account_session.get_remote_attributes(remote_attributes)
 
@@ -22,14 +15,7 @@ class AttributesController < ApplicationController
   end
 
   def update
-    attributes = params.fetch(:attributes).permit!.to_h
-
-    return unless validate_attributes(attributes.keys)
-
-    local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
-    remote_attributes = attributes.reject { |name| user_attributes.stored_locally? name }
-
-    raise NotImplementedError if local_attributes.any?
+    remote_attributes = get_attributes_from_params(params.fetch(:attributes).permit!.to_h, is_hash: true)
 
     @govuk_account_session.set_remote_attributes(remote_attributes)
 
@@ -42,20 +28,18 @@ class AttributesController < ApplicationController
 
 private
 
-  def validate_attributes(names)
-    undefined = names.reject { |n| user_attributes.defined? n }
-    if undefined.any?
-      render status: :unprocessable_entity, json:
-        {
-          type: I18n.t("errors.unknown_attribute_names.type"),
-          title: I18n.t("errors.unknown_attribute_names.title"),
-          detail: I18n.t("errors.unknown_attribute_names.detail", attribute_names: undefined.join(", ")),
-          attributes: undefined,
-        }
-      return false
-    end
+  def get_attributes_from_params(attributes, is_hash: false)
+    attribute_names = is_hash ? attributes.keys : attributes
 
-    true
+    unknown_attributes = attribute_names.reject { |name| user_attributes.defined? name }
+    raise ApiError::UnknownAttributeNames, unknown_attributes if unknown_attributes.any?
+
+    local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
+    remote_attributes = attributes.reject { |name| user_attributes.stored_locally? name }
+
+    raise NotImplementedError if local_attributes.any?
+
+    remote_attributes
   end
 
   def user_attributes
