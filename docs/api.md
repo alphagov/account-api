@@ -20,7 +20,6 @@ management. This API is not for other government services.
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
 - [API errors](#api-errors)
   - [Unknown attribute names](#unknown-attribute-names)
-- [Healthcheck](#healthcheck)
 
 ## Nomenclature
 
@@ -529,19 +528,3 @@ The `attributes` response field lists these.
 - check that you don't have a typo in the attribute names
 - check that the attributes are defined in `config/user_attributes.yml`
 - check that you are running the latest version of account-api
-
-
-## Healthcheck
-
-A database health check endpoint is available at `/healthcheck`.
-
-```json
-{
-  "checks": {
-    "database_connectivity": {
-      "status": "ok"
-    }
-  },
-  "status": "ok"
-}
-```
