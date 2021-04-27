@@ -41,13 +41,27 @@ Pact.provider_states_for "GDS API Adapters" do
       end_session_endpoint: "http://openid-provider/end-session-endpoint",
     )
 
+    token_response = {
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      id_token: instance_double(
+        "OpenIDConnect::ResponseObject::IdToken",
+        iss: "http://openid-provider",
+        sub: "user-id",
+        aud: "oauth-client",
+        exp: 300,
+        iat: 0,
+      ),
+    }
+
     # rubocop:disable RSpec/AnyInstance
     allow_any_instance_of(OidcClient).to receive(:discover).and_return(discovery_response)
-    allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
+    allow_any_instance_of(OidcClient).to receive(:tokens!).and_return(token_response)
     # rubocop:enable RSpec/AnyInstance
 
     account_session = AccountSession.new(
       session_signing_key: Rails.application.secrets.session_signing_key,
+      user_id: "user-id",
       access_token: "access-token",
       refresh_token: "refresh-token",
       level_of_authentication: "level1",

@@ -5,14 +5,16 @@ class AccountSession
 
   LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
-  attr_reader :level_of_authentication
+  attr_reader :user_id, :level_of_authentication
 
-  def initialize(session_signing_key:, access_token:, refresh_token:, level_of_authentication:)
+  def initialize(session_signing_key:, access_token:, refresh_token:, level_of_authentication:, user_id: nil)
     @session_signing_key = session_signing_key
     @access_token = access_token
     @refresh_token = refresh_token
     @level_of_authentication = level_of_authentication
     @frozen = false
+
+    @user_id = user_id || oidc_do(:userinfo)["sub"]
   end
 
   def self.deserialise(encoded_session:, session_signing_key:)
@@ -55,6 +57,7 @@ class AccountSession
 
   def to_hash
     {
+      user_id: user_id,
       access_token: @access_token,
       refresh_token: @refresh_token,
       level_of_authentication: level_of_authentication,
