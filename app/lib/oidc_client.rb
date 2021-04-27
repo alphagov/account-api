@@ -52,6 +52,21 @@ class OidcClient
     raise OAuthFailure
   end
 
+  def userinfo(access_token:, refresh_token:)
+    response = oauth_request(
+      access_token: access_token,
+      refresh_token: refresh_token,
+      method: :get,
+      uri: userinfo_endpoint,
+    )
+
+    begin
+      response.merge(result: JSON.parse(response[:result].body))
+    rescue JSON::ParserError
+      raise OAuthFailure
+    end
+  end
+
   def get_ephemeral_state(access_token:, refresh_token:)
     response = oauth_request(
       access_token: access_token,

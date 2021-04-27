@@ -1,10 +1,7 @@
 RSpec.describe AuthenticationController do
   before do
     stub_oidc_discovery
-
-    # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
-    # rubocop:enable RSpec/AnyInstance
+    stub_token_response
   end
 
   let(:headers) { { "Content-Type" => "application/json" } }
