@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class AccountSession
+  class Frozen < StandardError; end
+
   LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
   attr_reader :level_of_authentication
@@ -10,6 +12,7 @@ class AccountSession
     @access_token = access_token
     @refresh_token = refresh_token
     @level_of_authentication = level_of_authentication
+    @frozen = false
   end
 
   def self.deserialise(encoded_session:, session_signing_key:)
@@ -46,6 +49,7 @@ class AccountSession
   end
 
   def serialise
+    @frozen = true
     StringEncryptor.new(signing_key: session_signing_key).encrypt_string(to_hash.to_json)
   end
 
@@ -80,6 +84,8 @@ private
   attr_reader :session_signing_key
 
   def oidc_do(method, args = {})
+    raise Frozen if @frozen
+
     oauth_response = oidc_client.public_send(
       method,
       **args.merge(access_token: @access_token, refresh_token: @refresh_token),

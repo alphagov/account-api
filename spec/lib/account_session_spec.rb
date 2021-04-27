@@ -53,6 +53,11 @@ RSpec.describe AccountSession do
     let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
     let(:attribute_value2) { [1, 2, 3, 4, 5] }
 
+    it "throws an error if making an OAuth call after serialising the session" do
+      account_session.serialise
+      expect { account_session.get_remote_attributes(%w[foo bar]) }.to raise_error(AccountSession::Frozen)
+    end
+
     describe "get_remote_attributes" do
       before do
         stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
