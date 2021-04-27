@@ -113,6 +113,20 @@ RSpec.describe AttributesController do
       expect(stub).to have_been_made
     end
 
+    context "when there are no attributes" do
+      let(:attributes) { {} }
+
+      it "doesn't call the attribute service" do
+        stub = stub_request(:post, "http://openid-provider/v1/attributes")
+          .with(body: { attributes: {} })
+          .to_return(status: 200)
+
+        patch attributes_path, headers: headers, params: params.to_json
+        expect(response).to be_successful
+        expect(stub).not_to have_been_made
+      end
+    end
+
     context "when the tokens are rejected" do
       before do
         stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)

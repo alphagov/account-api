@@ -44,8 +44,15 @@ Pact.provider_states_for "GDS API Adapters" do
     # rubocop:disable RSpec/AnyInstance
     allow_any_instance_of(OidcClient).to receive(:discover).and_return(discovery_response)
     allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
-    allow_any_instance_of(ApplicationController).to receive(:from_account_session).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
     # rubocop:enable RSpec/AnyInstance
+
+    account_session = AccountSession.new(
+      session_signing_key: Rails.application.secrets.session_signing_key,
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      level_of_authentication: "level1",
+    )
+    allow(AccountSession).to receive(:deserialise).and_return(account_session)
 
     stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
   end

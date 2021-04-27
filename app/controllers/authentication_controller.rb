@@ -1,5 +1,5 @@
 class AuthenticationController < ApplicationController
-  skip_before_action :authorise, only: %i[sign_in callback]
+  skip_before_action :authorise!, only: %i[sign_in callback]
 
   def sign_in
     AuthRequest.expired.delete_all
@@ -31,11 +31,12 @@ class AuthenticationController < ApplicationController
     auth_request.delete
 
     render json: {
-      govuk_account_session: to_account_session(
+      govuk_account_session: AccountSession.new(
+        session_signing_key: Rails.application.secrets.session_signing_key,
         access_token: oauth_response.fetch(:access_token),
         refresh_token: oauth_response.fetch(:refresh_token),
         level_of_authentication: oauth_response.fetch(:result).fetch("level_of_authentication"),
-      ),
+      ).serialise,
       redirect_path: redirect_path,
       ga_client_id: oauth_response.fetch(:result)["_ga"],
     }

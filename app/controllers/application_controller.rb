@@ -1,28 +1,30 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
-  include SessionHeaderHelper
 
-  before_action :authorise
+  before_action :authorise!
 
-  def fetch_govuk_account_session
-    govuk_account_session_header = request.headers["HTTP_GOVUK_ACCOUNT_SESSION"]
+  rescue_from ApiError::Base, with: :json_api_error
 
-    @govuk_account_session = from_account_session(govuk_account_session_header)
+  def require_govuk_account_session!
+    @govuk_account_session = AccountSession.deserialise(
+      encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
+      session_signing_key: Rails.application.secrets.session_signing_key,
+    )
 
     head :unauthorized unless @govuk_account_session
   end
 
-protected
+private
 
-  def authorise
+  def authorise!
     authorise_user!("internal_app")
   end
 
-  def account_session_header_value
-    to_account_session(
-      access_token: @govuk_account_session[:access_token],
-      refresh_token: @govuk_account_session[:refresh_token],
-      level_of_authentication: @govuk_account_session[:level_of_authentication],
-    )
+  def json_api_error(error)
+    render status: error.status_code, json: {
+      type: error.type,
+      title: error.title,
+      detail: error.detail,
+    }.merge(error.extra_detail)
   end
 end
