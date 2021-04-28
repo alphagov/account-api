@@ -5,16 +5,7 @@ class UserAttributes
   attr_reader :attributes
 
   def initialize(attributes = nil)
-    if attributes
-      @attributes = attributes
-    else
-      @attributes = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
-
-      if Rails.env.test?
-        test_attributes = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-        @attributes.merge!(test_attributes)
-      end
-    end
+    @attributes = attributes || UserAttributes.load_config_file
   end
 
   def defined?(name)
@@ -75,5 +66,9 @@ class UserAttributes
 
       errors[name] = this_errors if this_errors.any?
     end
+  end
+
+  def self.load_config_file
+    YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
   end
 end

@@ -68,6 +68,9 @@ Pact.provider_states_for "GDS API Adapters" do
     )
     allow(AccountSession).to receive(:deserialise).and_return(account_session)
 
+    fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
+    allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
+
     stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
   end
 
