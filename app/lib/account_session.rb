@@ -34,6 +34,8 @@ class AccountSession
         session_signing_key: session_signing_key,
       )
     end
+  rescue OidcClient::OAuthFailure
+    nil
   end
 
   def self.deserialise_legacy_base64_session(encoded_session:, session_signing_key:)

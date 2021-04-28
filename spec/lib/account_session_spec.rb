@@ -28,12 +28,13 @@ RSpec.describe AccountSession do
     context "when there isn't a user ID in the header" do
       let(:user_id) { nil }
       let(:user_id_from_userinfo) { "user-id-from-userinfo" }
+      let(:userinfo_status) { 200 }
 
       before do
         stub_oidc_discovery
 
         stub_request(:get, "http://openid-provider/userinfo-endpoint")
-          .to_return(status: 200, body: { sub: user_id_from_userinfo }.to_json)
+          .to_return(status: userinfo_status, body: { sub: user_id_from_userinfo }.to_json)
       end
 
       it "queries userinfo for the user ID" do
@@ -45,6 +46,17 @@ RSpec.describe AccountSession do
         decoded = described_class.deserialise(encoded_session: encoded, session_signing_key: "secret").to_hash
 
         expect(decoded).to eq(params.merge(user_id: user_id_from_userinfo))
+      end
+
+      context "when the userinfo request fails" do
+        let(:userinfo_status) { 401 }
+
+        before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
+
+        it "returns nil" do
+          encoded = "#{Base64.urlsafe_encode64(access_token)}.#{Base64.urlsafe_encode64(refresh_token)}"
+          expect(described_class.deserialise(encoded_session: encoded, session_signing_key: "secret")).to be_nil
+        end
       end
     end
 
