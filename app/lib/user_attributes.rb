@@ -3,12 +3,16 @@ class UserAttributes
 
   attr_reader :attributes
 
-  def initialize
-    @attributes = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
+  def initialize(attributes = nil)
+    if attributes
+      @attributes = attributes
+    else
+      @attributes = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
 
-    if Rails.env.test?
-      test_attributes = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-      @attributes.merge!(test_attributes)
+      if Rails.env.test?
+        test_attributes = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
+        @attributes.merge!(test_attributes)
+      end
     end
   end
 
@@ -20,6 +24,10 @@ class UserAttributes
     attributes.fetch(name)[:is_stored_locally]
   end
 
+  def self.validate(attributes)
+    new(attributes).errors
+  end
+
   def errors
     attributes.each_with_object({}) do |(name, config), errors|
       config ||= {}
@@ -29,7 +37,7 @@ class UserAttributes
 
       invalid_keys = []
       unless config["is_stored_locally"].in?([nil, false, true])
-        invalid_keys << :is_stored_locally
+        invalid_keys << "is_stored_locally"
       end
 
       this_errors = {
