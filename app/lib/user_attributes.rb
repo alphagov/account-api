@@ -1,5 +1,6 @@
 class UserAttributes
-  CONFIG_KEYS = %w[is_stored_locally].freeze
+  CONFIG_KEYS = %w[is_stored_locally permissions].freeze
+  PERMISSION_KEYS = %w[check get set].freeze
 
   attr_reader :attributes
 
@@ -32,12 +33,30 @@ class UserAttributes
     attributes.each_with_object({}) do |(name, config), errors|
       config ||= {}
 
-      missing_keys = CONFIG_KEYS.reject { |key| config.keys.include? key }
-      unknown_keys = config.keys.reject { |key| CONFIG_KEYS.include? key }
+      missing_keys = CONFIG_KEYS - config.keys
+      unknown_keys = config.keys - CONFIG_KEYS
 
       invalid_keys = []
       unless config["is_stored_locally"].in?([nil, false, true])
         invalid_keys << "is_stored_locally"
+      end
+
+      permissions = config["permissions"]
+      if permissions
+        missing_keys.concat((PERMISSION_KEYS - permissions.keys).map { |key| "permissions.#{key}" })
+        unknown_keys.concat((permissions.keys - PERMISSION_KEYS).map { |key| "permissions.#{key}" })
+
+        non_integer_values = permissions.keys.reject { |key| permissions[key].is_a? Integer }.map { |key| "permissions.#{key}" }
+        if non_integer_values.any?
+          invalid_keys.concat non_integer_values
+        else
+          if permissions["check"] && permissions["get"] && permissions["check"] > permissions["get"]
+            invalid_keys << "permissions.check"
+          end
+          if permissions["get"] && permissions["set"] && permissions["get"] > permissions["set"]
+            invalid_keys << "permissions.get"
+          end
+        end
       end
 
       this_errors = {
