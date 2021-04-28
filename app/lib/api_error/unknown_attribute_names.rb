@@ -1,16 +1,16 @@
 module ApiError
   class UnknownAttributeNames < ApiError::Base
-    def initialize(attribute_names)
-      @attribute_names = attribute_names
+    def initialize(attributes:)
+      @attributes = attributes
     end
 
     def detail
-      I18n.t("errors.unknown_attribute_names.detail", attribute_names: @attribute_names.join(", "))
+      I18n.t("errors.unknown_attribute_names.detail", attributes: @attributes.join(", "))
     end
 
     def extra_detail
       {
-        attributes: @attribute_names,
+        attributes: @attributes,
       }
     end
   end

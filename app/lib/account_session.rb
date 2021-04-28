@@ -52,6 +52,10 @@ class AccountSession
     nil
   end
 
+  def level_of_authentication_as_integer
+    @level_of_authentication_as_integer ||= LevelOfAuthentication.name_to_integer level_of_authentication
+  end
+
   def serialise
     @frozen = true
     StringEncryptor.new(signing_key: session_signing_key).encrypt_string(to_hash.to_json)

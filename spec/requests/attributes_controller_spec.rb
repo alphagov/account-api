@@ -1,7 +1,8 @@
 RSpec.describe AttributesController do
   before { stub_oidc_discovery }
 
-  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => placeholder_govuk_account_session } }
+  let(:session_identifier) { placeholder_govuk_account_session }
+  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
   # names must be defined in spec/fixtures/user_attributes.yml
   let(:attribute_name1) { "test_attribute_1" }
@@ -56,6 +57,20 @@ RSpec.describe AttributesController do
       it "returns a 401" do
         get attributes_path, headers: { "GOVUK-Account-Session" => "not-a-base64-string" }, params: params
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the user doesn't have a high enough level of authentication" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+
+      it "returns a 403 and the required level" do
+        get attributes_path, headers: headers, params: params
+        expect(response).to have_http_status(:forbidden)
+
+        error = JSON.parse(response.body)
+        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["attributes"]).to eq([attribute_name1])
+        expect(error["needed_level_of_authentication"]).to eq("level0")
       end
     end
 
@@ -146,6 +161,20 @@ RSpec.describe AttributesController do
       it "returns a 401" do
         patch attributes_path, headers: { "Content-Type" => "application/json" }, params: params.to_json
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the user doesn't have a high enough level of authentication" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+
+      it "returns a 403 and the required level" do
+        patch attributes_path, headers: headers, params: params.to_json
+        expect(response).to have_http_status(:forbidden)
+
+        error = JSON.parse(response.body)
+        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["attributes"]).to eq([attribute_name1, attribute_name2])
+        expect(error["needed_level_of_authentication"]).to eq("level0")
       end
     end
   end

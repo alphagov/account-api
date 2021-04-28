@@ -25,6 +25,14 @@ class UserAttributes
     attributes.fetch(name)[:is_stored_locally]
   end
 
+  def has_permission_for?(name, permission_level, user_session)
+    user_session.level_of_authentication_as_integer >= level_of_authentication_for(name, permission_level)
+  end
+
+  def level_of_authentication_for(name, permission_level)
+    attributes.fetch(name)[:permissions].fetch(permission_level)
+  end
+
   def self.validate(attributes)
     new(attributes).errors
   end
