@@ -41,10 +41,12 @@ private
     unknown_attributes = attribute_names.reject { |name| user_attributes.defined? name }
     raise ApiError::UnknownAttributeNames, { attributes: unknown_attributes } if unknown_attributes.any?
 
-    forbidden_attributes = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
-    if forbidden_attributes.any?
-      needed_level_of_authentication = forbidden_attributes.map { |name| user_attributes.level_of_authentication_for name, permission_level }.max
-      raise ApiError::LevelOfAuthenticationTooLow, { attributes: forbidden_attributes, needed_level_of_authentication: needed_level_of_authentication }
+    if Rails.application.config.feature_flag_enforce_levels_of_authentication
+      forbidden_attributes = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
+      if forbidden_attributes.any?
+        needed_level_of_authentication = forbidden_attributes.map { |name| user_attributes.level_of_authentication_for name, permission_level }.max
+        raise ApiError::LevelOfAuthenticationTooLow, { attributes: forbidden_attributes, needed_level_of_authentication: needed_level_of_authentication }
+      end
     end
 
     local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
