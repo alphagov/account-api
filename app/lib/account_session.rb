@@ -74,6 +74,20 @@ class AccountSession
     }
   end
 
+  def get_local_attributes(local_attributes)
+    user.local_attributes.where(name: local_attributes).map { |attr| [attr.name, attr.value] }.to_h
+  end
+
+  def set_local_attributes(local_attributes)
+    return if local_attributes.empty?
+
+    LocalAttribute.upsert_all(
+      local_attributes.map { |name, value| { oidc_user_id: user.id, name: name, value: value } },
+      unique_by: :index_local_attributes_on_oidc_user_id_and_name,
+      returning: false,
+    )
+  end
+
   def get_remote_attributes(remote_attributes)
     remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }
   end

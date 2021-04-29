@@ -90,6 +90,21 @@ RSpec.describe AccountSession do
     end
   end
 
+  describe "local attributes" do
+    let(:account_session) { described_class.new(session_signing_key: "key", **params) }
+
+    it "handles an empty list of attributes" do
+      expect { account_session.set_local_attributes({}) }.not_to change(LocalAttribute, :count)
+    end
+
+    it "round-trips complex local attributes" do
+      local_attributes = { "foo" => %w[list of words], "bar" => { "some" => { "nested" => ["thing", 1, 2, 3] } } }
+
+      expect { account_session.set_local_attributes(local_attributes) }.to change(LocalAttribute, :count)
+      expect(account_session.get_local_attributes(local_attributes.keys)).to eq(local_attributes)
+    end
+  end
+
   describe "OAuth" do
     before { stub_oidc_discovery }
 
