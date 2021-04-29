@@ -19,6 +19,7 @@ management. This API is not for other government services.
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
 - [API errors](#api-errors)
+  - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
 
 ## Nomenclature
@@ -346,6 +347,7 @@ Retrieves attribute values for the current user.
 #### Response codes
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
+- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -394,6 +396,7 @@ Updates the attributes of the current user.
 #### Response codes
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
+- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -517,6 +520,18 @@ the following format:
 Each error type may define additional response fields.
 
 [RFC 7807]: https://tools.ietf.org/html/rfc7807
+
+### Level of authentication too low
+
+You have tried to access something which the current user is not
+authenticated highly enough to use.  The
+`needed_level_of_authentication` response field gives the required
+level.
+
+#### Debugging steps
+
+This is not an error, the user must be reauthenticated at the higher
+level to access.
 
 ### Unknown attribute names
 

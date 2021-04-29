@@ -1,7 +1,11 @@
 ---
 en:
   errors:
+    level_of_authentication_too_low:
+      type: https://github.com/alphagov/account-api/blob/main/docs/api.md#level-of-authentication-too-low
+      title: Level of authentication too low
+      detail: Attributes %{attributes} require at least %{needed_level_of_authentication}, which is greater level of authentication that you currently have.
     unknown_attribute_names:
       type: https://github.com/alphagov/account-api/blob/main/docs/api.md#unknown-attribute-names
       title: Unknown attribute names
-      detail: Attribute names %{attribute_names} are unknown, have they been added to config/user_attributes.yml?
+      detail: Attribute names %{attributes} are unknown, have they been added to config/user_attributes.yml?

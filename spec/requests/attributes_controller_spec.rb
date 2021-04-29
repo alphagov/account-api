@@ -1,7 +1,13 @@
 RSpec.describe AttributesController do
-  before { stub_oidc_discovery }
+  before do
+    stub_oidc_discovery
 
-  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => placeholder_govuk_account_session } }
+    fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
+    allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
+  end
+
+  let(:session_identifier) { placeholder_govuk_account_session }
+  let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
   # names must be defined in spec/fixtures/user_attributes.yml
   let(:attribute_name1) { "test_attribute_1" }
@@ -56,6 +62,30 @@ RSpec.describe AttributesController do
       it "returns a 401" do
         get attributes_path, headers: { "GOVUK-Account-Session" => "not-a-base64-string" }, params: params
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the user doesn't have a high enough level of authentication" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+
+      it "returns the attribute" do
+        get attributes_path, headers: headers, params: params
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)["values"]).to eq({ attribute_name1 => attribute_value1 })
+      end
+
+      context "when the feature flag is toggled on" do
+        before { allow(Rails.configuration).to receive(:feature_flag_enforce_levels_of_authentication).and_return(true) }
+
+        it "returns a 403 and the required level" do
+          get attributes_path, headers: headers, params: params
+          expect(response).to have_http_status(:forbidden)
+
+          error = JSON.parse(response.body)
+          expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+          expect(error["attributes"]).to eq([attribute_name1])
+          expect(error["needed_level_of_authentication"]).to eq("level0")
+        end
       end
     end
 
@@ -146,6 +176,34 @@ RSpec.describe AttributesController do
       it "returns a 401" do
         patch attributes_path, headers: { "Content-Type" => "application/json" }, params: params.to_json
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the user doesn't have a high enough level of authentication" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+
+      it "calls the attribute service" do
+        stub = stub_request(:post, "http://openid-provider/v1/attributes")
+          .with(body: { attributes: attributes.transform_values(&:to_json) })
+          .to_return(status: 200)
+
+        patch attributes_path, headers: headers, params: params.to_json
+        expect(response).to be_successful
+        expect(stub).to have_been_made
+      end
+
+      context "when the feature flag is toggled on" do
+        before { allow(Rails.configuration).to receive(:feature_flag_enforce_levels_of_authentication).and_return(true) }
+
+        it "returns a 403 and the required level" do
+          patch attributes_path, headers: headers, params: params.to_json
+          expect(response).to have_http_status(:forbidden)
+
+          error = JSON.parse(response.body)
+          expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+          expect(error["attributes"]).to eq([attribute_name1, attribute_name2])
+          expect(error["needed_level_of_authentication"]).to eq("level0")
+        end
       end
     end
   end

@@ -1,11 +1,27 @@
 test_attribute_1:
   is_stored_locally: false
+  permissions:
+    check: 0
+    get: 0
+    set: 0
 
 test_attribute_2:
   is_stored_locally: false
+  permissions:
+    check: 0
+    get: 0
+    set: 0
 
 foo:
   is_stored_locally: false
+  permissions:
+    check: 0
+    get: 0
+    set: 0
 
 bar:
   is_stored_locally: false
+  permissions:
+    check: 0
+    get: 0
+    set: 0
