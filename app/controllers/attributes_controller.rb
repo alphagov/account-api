@@ -2,21 +2,25 @@ class AttributesController < ApplicationController
   include AuthenticatedApiConcern
 
   def show
-    remote_attributes = get_attributes_from_params(
+    local_attributes, remote_attributes = get_attributes_from_params(
       params.fetch(:attributes),
       permission_level: :get,
     )
 
-    render_api_response values: @govuk_account_session.get_remote_attributes(remote_attributes).compact
+    values = @govuk_account_session.get_local_attributes(local_attributes)
+      .merge(@govuk_account_session.get_remote_attributes(remote_attributes))
+
+    render_api_response values: values.compact
   end
 
   def update
-    remote_attributes = get_attributes_from_params(
+    local_attributes, remote_attributes = get_attributes_from_params(
       params.fetch(:attributes).permit!.to_h,
       permission_level: :set,
       is_hash: true,
     )
 
+    @govuk_account_session.set_local_attributes(local_attributes)
     @govuk_account_session.set_remote_attributes(remote_attributes)
 
     render_api_response
@@ -41,9 +45,7 @@ private
     local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
     remote_attributes = attributes.reject { |name| user_attributes.stored_locally? name }
 
-    raise NotImplementedError if local_attributes.any?
-
-    remote_attributes
+    [local_attributes, remote_attributes]
   end
 
   def user_attributes

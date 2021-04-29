@@ -12,6 +12,13 @@ test_attribute_2:
     get: 0
     set: 0
 
+test_local_attribute:
+  is_stored_locally: true
+  permissions:
+    check: 0
+    get: 0
+    set: 0
+
 foo:
   is_stored_locally: false
   permissions:
