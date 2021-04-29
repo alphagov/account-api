@@ -72,6 +72,24 @@ RSpec.describe AccountSession do
     end
   end
 
+  describe "user" do
+    let(:account_session) { described_class.new(session_signing_key: "key", **params) }
+
+    it "returns a user with the same 'sub' as the session" do
+      expect(account_session.user.sub).to eq(account_session.user_id)
+    end
+
+    it "creates a user record if one does not exist" do
+      expect { account_session.user }.to change(OidcUser, :count)
+    end
+
+    it "re-uses a user record if one does exist" do
+      current_user = account_session.user
+      expect { account_session.user }.not_to change(OidcUser, :count)
+      expect(account_session.user.id).to eq(current_user.id)
+    end
+  end
+
   describe "OAuth" do
     before { stub_oidc_discovery }
 
