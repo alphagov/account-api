@@ -15,6 +15,7 @@ Rails.application.configure do
     Bullet.enable = true
     Bullet.bullet_logger = true
     Bullet.rails_logger = true
+    Bullet.raise = true
   end
 
   # Do not eager load code on boot. This avoids loading your whole application
