@@ -14,6 +14,10 @@ Rails.application.routes.draw do
     get "/attributes", to: "attributes#show"
     patch "/attributes", to: "attributes#update"
 
+    namespace :attributes do
+      get "/names", to: "names#show"
+    end
+
     get "/transition-checker-email-subscription", to: "transition_checker_email_subscription#show"
     post "/transition-checker-email-subscription", to: "transition_checker_email_subscription#update"
   end

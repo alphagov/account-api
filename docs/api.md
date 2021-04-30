@@ -16,6 +16,7 @@ management. This API is not for other government services.
   - [`POST /api/oauth2/state`](#post-apioauth2state)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
+  - [`GET /api/attributes/names`](#get-apiattributesnames)
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
 - [API errors](#api-errors)
@@ -418,6 +419,54 @@ Response:
 ```json
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg=="
+}
+```
+
+### `GET /api/attributes/names`
+
+Retrieves attribute names for the current user.
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Query parameters
+
+- `attributes[]` *(one for each attribute)*
+  - a list of attribute names, specified once for each name
+
+#### JSON response fields
+
+- `govuk_account_session` *(optional)*
+  - a new session identifier
+- `values`
+  - a JSON array of attribute names
+
+#### Response codes
+
+- 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
+- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
+- 401 if the session identifier is invalid
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.get_attributes(
+    attributes: %w[name1 name2],
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response:
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "values": ["name1", "name2"]
 }
 ```
 
