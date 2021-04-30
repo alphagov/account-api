@@ -2,35 +2,23 @@ class AttributesController < ApplicationController
   include AuthenticatedApiConcern
 
   def show
-    local_attributes, remote_attributes = get_attributes_from_params(
-      params.fetch(:attributes),
-      permission_level: :get,
-    )
+    attributes = params.fetch(:attributes)
+    validate_attributes!(attributes, :get)
 
-    values = @govuk_account_session.get_local_attributes(local_attributes)
-      .merge(@govuk_account_session.get_remote_attributes(remote_attributes))
-
-    render_api_response values: values.compact
+    render_api_response values: @govuk_account_session.get_attributes(attributes)
   end
 
   def update
-    local_attributes, remote_attributes = get_attributes_from_params(
-      params.fetch(:attributes).permit!.to_h,
-      permission_level: :set,
-      is_hash: true,
-    )
+    attributes = params.fetch(:attributes).permit!.to_h
+    validate_attributes!(attributes.keys, :set)
 
-    @govuk_account_session.set_local_attributes(local_attributes)
-    @govuk_account_session.set_remote_attributes(remote_attributes)
-
+    @govuk_account_session.set_attributes(attributes)
     render_api_response
   end
 
 private
 
-  def get_attributes_from_params(attributes, permission_level:, is_hash: false)
-    attribute_names = is_hash ? attributes.keys : attributes
-
+  def validate_attributes!(attribute_names, permission_level)
     unknown_attributes = attribute_names.reject { |name| user_attributes.defined? name }
     raise ApiError::UnknownAttributeNames, { attributes: unknown_attributes } if unknown_attributes.any?
 
@@ -41,11 +29,6 @@ private
         raise ApiError::LevelOfAuthenticationTooLow, { attributes: forbidden_attributes, needed_level_of_authentication: needed_level_of_authentication }
       end
     end
-
-    local_attributes = attributes.select { |name| user_attributes.stored_locally? name }
-    remote_attributes = attributes.reject { |name| user_attributes.stored_locally? name }
-
-    [local_attributes, remote_attributes]
   end
 
   def user_attributes

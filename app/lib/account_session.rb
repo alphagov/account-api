@@ -74,6 +74,33 @@ class AccountSession
     }
   end
 
+  def get_attributes(attribute_names)
+    local = attribute_names.select { |name| user_attributes.stored_locally? name }
+    remote = attribute_names.reject { |name| user_attributes.stored_locally? name }
+
+    get_local_attributes(local).merge(get_remote_attributes(remote)).compact
+  end
+
+  def set_attributes(attributes)
+    local = attributes.select { |name| user_attributes.stored_locally? name }
+    remote = attributes.reject { |name| user_attributes.stored_locally? name }
+
+    set_local_attributes(local)
+    set_remote_attributes(remote)
+  end
+
+  def has_email_subscription?
+    oidc_do :has_email_subscription
+  end
+
+  def set_email_subscription(slug)
+    oidc_do :update_email_subscription, { slug: slug }
+  end
+
+private
+
+  attr_reader :session_signing_key
+
   def get_local_attributes(local_attributes)
     user.local_attributes.where(name: local_attributes).map { |attr| [attr.name, attr.value] }.to_h
   end
@@ -98,18 +125,6 @@ class AccountSession
     oidc_do :bulk_set_attributes, { attributes: remote_attributes }
   end
 
-  def has_email_subscription?
-    oidc_do :has_email_subscription
-  end
-
-  def set_email_subscription(slug)
-    oidc_do :update_email_subscription, { slug: slug }
-  end
-
-private
-
-  attr_reader :session_signing_key
-
   def oidc_do(method, args = {})
     raise Frozen if @frozen
 
@@ -124,5 +139,9 @@ private
 
   def oidc_client
     @oidc_client ||= OidcClient.new
+  end
+
+  def user_attributes
+    @user_attributes ||= UserAttributes.new
   end
 end
