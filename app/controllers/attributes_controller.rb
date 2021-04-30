@@ -1,5 +1,5 @@
 class AttributesController < ApplicationController
-  before_action :require_govuk_account_session!
+  include AuthenticatedApiConcern
 
   def show
     remote_attributes = get_attributes_from_params(
@@ -7,14 +7,7 @@ class AttributesController < ApplicationController
       permission_level: :get,
     )
 
-    values = @govuk_account_session.get_remote_attributes(remote_attributes)
-
-    render json: {
-      govuk_account_session: @govuk_account_session.serialise,
-      values: values.compact,
-    }
-  rescue OidcClient::OAuthFailure
-    head :unauthorized
+    render_api_response values: @govuk_account_session.get_remote_attributes(remote_attributes).compact
   end
 
   def update
@@ -26,11 +19,7 @@ class AttributesController < ApplicationController
 
     @govuk_account_session.set_remote_attributes(remote_attributes)
 
-    render json: {
-      govuk_account_session: @govuk_account_session.serialise,
-    }
-  rescue OidcClient::OAuthFailure
-    head :unauthorized
+    render_api_response
   end
 
 private
