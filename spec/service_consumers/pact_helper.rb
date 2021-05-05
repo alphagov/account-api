@@ -118,6 +118,12 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  provider_state "there is a valid user session, with an attribute called 'foo' that has no value" do
+    set_up do
+      stub_request(:get, "http://openid-provider/v1/attributes/foo").to_return(status: 404, body: { claim_value: nil }.to_json)
+    end
+  end
+
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
       stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 200, body: { claim_value: { bar: "baz" } }.to_json)
