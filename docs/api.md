@@ -203,6 +203,8 @@ This URL should be served to the user with a 302 response to authenticate the us
 
 #### Query parameters
 
+- `level_of_authentication` *(optional)*
+  - either `level1` (require MFA) or `level0` (do not require MFA, the default)
 - `state_id` *(optional)*
   - an identifier returned from a previous call to `POST /api/oauth2/state`
 - `redirect_path` *(optional)*

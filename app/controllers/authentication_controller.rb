@@ -10,7 +10,7 @@ class AuthenticationController < ApplicationController
     )
 
     render json: {
-      auth_uri: OidcClient.new.auth_uri(auth_request),
+      auth_uri: OidcClient.new.auth_uri(auth_request, params.fetch(:level_of_authentication, LevelOfAuthentication::DEFAULT_FOR_SIGN_IN)),
       state: auth_request.to_oauth_state,
     }
   end
