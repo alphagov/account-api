@@ -20,9 +20,9 @@ class OidcClient
     @secret = secret || ENV.fetch("GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET")
   end
 
-  def auth_uri(auth_request)
+  def auth_uri(auth_request, level_of_authentication)
     client.authorization_uri(
-      scope: DEFAULT_SCOPES,
+      scope: DEFAULT_SCOPES + [level_of_authentication],
       state: auth_request.to_oauth_state,
       nonce: auth_request.oidc_nonce,
     )
