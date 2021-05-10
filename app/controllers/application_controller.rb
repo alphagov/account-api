@@ -1,17 +1,11 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
 
-  before_action :authorise!
-
-  rescue_from ApiError::Base, with: :json_api_error
-
-private
-
-  def authorise!
+  before_action do
     authorise_user!("internal_app")
   end
 
-  def json_api_error(error)
+  rescue_from ApiError::Base do |error|
     render status: error.status_code, json: {
       type: error.type,
       title: error.title,
