@@ -1,10 +1,7 @@
 class Attributes::NamesController < AttributesController
   def show
-    remote_attributes = get_attributes_from_params(
-      params.fetch(:attributes),
-      permission_level: :check,
-    )
+    validate_attributes!(attributes, :check)
 
-    render_api_response values: @govuk_account_session.get_remote_attributes(remote_attributes).compact.keys
+    render_api_response values: @govuk_account_session.get_attributes(attributes).keys
   end
 end

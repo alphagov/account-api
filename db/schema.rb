@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_10_153334) do
+ActiveRecord::Schema.define(version: 2021_04_29_123551) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,23 @@ ActiveRecord::Schema.define(version: 2021_03_10_153334) do
     t.string "redirect_path"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "local_attributes", force: :cascade do |t|
+    t.bigint "oidc_user_id", null: false
+    t.string "name", null: false
+    t.jsonb "value", null: false
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.index ["oidc_user_id", "name"], name: "index_local_attributes_on_oidc_user_id_and_name", unique: true
+    t.index ["oidc_user_id"], name: "index_local_attributes_on_oidc_user_id"
+  end
+
+  create_table "oidc_users", force: :cascade do |t|
+    t.string "sub", null: false
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end
 
   create_table "users", force: :cascade do |t|
