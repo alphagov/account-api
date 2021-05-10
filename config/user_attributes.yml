@@ -3,5 +3,5 @@ transition_checker_state:
   is_stored_locally: false
   permissions:
     check: 0
-    get: 0
+    get: 1
     set: 1
