@@ -2,14 +2,13 @@ class AttributesController < ApplicationController
   include AuthenticatedApiConcern
 
   def show
-    attributes = params.fetch(:attributes)
     validate_attributes!(attributes, :get)
 
     render_api_response values: @govuk_account_session.get_attributes(attributes)
   end
 
   def update
-    attributes = params.fetch(:attributes).permit!.to_h
+    @attributes = attributes.permit!.to_h
     validate_attributes!(attributes.keys, :set)
 
     @govuk_account_session.set_attributes(attributes)
@@ -17,6 +16,10 @@ class AttributesController < ApplicationController
   end
 
 private
+
+  def attributes
+    @attributes ||= params.fetch(:attributes)
+  end
 
   def validate_attributes!(attribute_names, permission_level)
     unknown_attributes = attribute_names.reject { |name| user_attributes.defined? name }
