@@ -24,9 +24,11 @@ management. This API is not for other government services.
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
   - [`GET /api/saved_pages`](#get-apisaved_pages)
+  - [`PUT /api/saved_pages/:page_path`](#put-apisaved_pagespage_path)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
+  - [Page cannot be saved](#page-cannot-be-saved)
 
 ## Nomenclature
 
@@ -611,6 +613,53 @@ Response when a user has saved two pages:
 }
 ```
 
+### `PUT /api/saved_pages/:page_path`
+
+Upsert a saved page in a user's account
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Request parameters
+
+- `page_path`
+  - An escaped URL safe string that identifies the path of a saved page.
+
+#### JSON response fields
+
+- `govuk_account_session` *(optional)*
+  - a new session identifier
+- `saved_page`
+  - an object containing the page path of the successfully saved page
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 422 if the page could not be saved (see [error: page cannot be saved](#page-cannot-be-saved))
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.saved_page_api.save_page(
+    page_path: "/guidance/foo",
+    govuk_account_session: "session-identifier",
+)
+```
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "saved_page": {
+      "page_path": "/guidance/foo"
+    },
+}
+```
+
 ## API errors
 
 API errors are returned as an [RFC 7807][] "Problem Detail" object, in
@@ -650,3 +699,11 @@ The `attributes` response field lists these.
 - check that you don't have a typo in the attribute names
 - check that the attributes are defined in `config/user_attributes.yml`
 - check that you are running the latest version of account-api
+
+### Page cannot be saved
+
+The page you have specified could not be saved. The errors response field lists the problems.
+
+#### Debugging steps
+
+- check the `errors` returned as an extra detail in the response for specific error messages
