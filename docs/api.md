@@ -25,6 +25,7 @@ management. This API is not for other government services.
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
   - [`GET /api/saved_pages`](#get-apisaved_pages)
   - [`PUT /api/saved_pages/:page_path`](#put-apisaved_pagespage_path)
+  - [`DELETE /api/saved_pages/:page_path`](#delete-apisaved_pagespage_path)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -660,6 +661,39 @@ GdsApi.saved_page_api.save_page(
 }
 ```
 
+### `DELETE /api/saved_pages/:page_path`
+
+Remove a saved page from a user's account
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Request parameters
+
+- `page_path`
+  - An escaped URL safe string that identifies the path of a saved page.
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 404 cannot find a page with the provided path
+- 204 successfully deleted
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.saved_page_api.delete_saved_page(
+    page_path: "/guidance/bar",
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response is status code only.
+
 ## API errors
 
 API errors are returned as an [RFC 7807][] "Problem Detail" object, in
@@ -693,12 +727,6 @@ level to access.
 
 One or more of the attribute names you have specified are not known.
 The `attributes` response field lists these.
-
-#### Debugging steps
-
-- check that you don't have a typo in the attribute names
-- check that the attributes are defined in `config/user_attributes.yml`
-- check that you are running the latest version of account-api
 
 ### Page cannot be saved
 

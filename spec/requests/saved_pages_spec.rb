@@ -11,6 +11,12 @@ RSpec.describe "Saved pages" do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "returns unauthorised for DELETE /api/saved_pages/:page_path" do
+      delete saved_page_path({ page_path: "/my-saved-page-path" })
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   context "when receiving an authenticated request" do
@@ -91,6 +97,29 @@ RSpec.describe "Saved pages" do
         expect(error["detail"]).to eq(I18n.t("errors.cannot_save_page.detail", page_path: page_path))
         expect(error["page_path"]).to eq(page_path)
         expect(error["errors"]["page_path"]).to include("must only include URL path")
+      end
+    end
+
+    describe "DELETE /api/saved_pages/:page_path" do
+      it "returns status 204 No Content if a record has been sucessfully deleted" do
+        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
+        delete saved_page_path(page_path: "/page-path/1"), headers: headers
+
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it "decreases the count of saved pages" do
+        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
+
+        expect {
+          delete saved_page_path(page_path: "/page-path/1"), headers: headers
+        }.to change(SavedPage, :count).by(-1)
+      end
+
+      it "returns status 404 Not Found if there is no saved page with the provided path" do
+        delete saved_page_path(page_path: "/page-path/1"), headers: headers
+
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
