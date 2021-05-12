@@ -23,6 +23,7 @@ management. This API is not for other government services.
   - [`GET /api/attributes/names`](#get-apiattributesnames)
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
+  - [`GET /api/saved_pages`](#get-apisaved_pages)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -558,6 +559,57 @@ Response:
 }
 ```
 
+### `GET /api/saved_pages`
+
+Returns all a user's saved pages
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### JSON response fields
+
+- `govuk_account_session` *(optional)*
+  - a new session identifier
+- `saved_pages`
+  - an array of pages the user has saved, identified by their page path
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.saved_page_api.get_saved_pages(
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response when no pages are saved:
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "saved_pages": []
+}
+```
+
+Response when a user has saved two pages:
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "saved_pages": [
+      { "page_path": "/government/organisations/government-digital-service" },
+      { "page_path": "/government/organisations/cabinet-office" },
+  ]
+}
+```
 
 ## API errors
 
