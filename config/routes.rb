@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       get "/names", to: "names#show"
     end
 
+    resources :saved_pages, only: %i[index show update destroy], param: :page_path
+
     get "/transition-checker-email-subscription", to: "transition_checker_email_subscription#show"
     post "/transition-checker-email-subscription", to: "transition_checker_email_subscription#update"
   end
