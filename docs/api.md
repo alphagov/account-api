@@ -26,6 +26,7 @@ management. This API is not for other government services.
   - [`GET /api/saved_pages`](#get-apisaved_pages)
   - [`PUT /api/saved_pages/:page_path`](#put-apisaved_pagespage_path)
   - [`DELETE /api/saved_pages/:page_path`](#delete-apisaved_pagespage_path)
+  - [`GET /api/saved_pages/:page_path`](#get-apisaved_pagespage_path)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -693,6 +694,53 @@ GdsApi.saved_page_api.delete_saved_page(
 ```
 
 Response is status code only.
+
+### `GET /api/saved_pages/:page_path`
+
+Query if a specific path has been saved by the user
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Request parameters
+
+- `page_path`
+  - An escaped URL safe string that identifies the path of a saved page.
+
+#### JSON response fields
+
+- `govuk_account_session` *(optional)*
+  - a new session identifier
+- `saved_page`
+  - an object containing the page path of the successfully queried page
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 404 cannot find a page with the provided path
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.saved_page_api.get_saved_page(
+    page_path: "/guidance/bar",
+    govuk_account_session: "session-identifier",
+)
+```
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "saved_page": {
+      "page_path": "/guidance/bar"
+    },
+}
+```
 
 ## API errors
 

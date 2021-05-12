@@ -1,11 +1,16 @@
 class SavedPagesController < ApplicationController
   include AuthenticatedApiConcern
 
-  before_action :check_saved_page_exists, only: %i[destroy]
+  before_action :check_saved_page_exists, only: %i[destroy show]
 
   # GET /api/saved_pages
   def index
     render_api_response(saved_pages: user.saved_pages.map(&:to_hash))
+  end
+
+  # GET /api/saved_pages/:page_path
+  def show
+    render_api_response(saved_page: saved_page.to_hash)
   end
 
   # PUT /api/saved_pages/:page_path

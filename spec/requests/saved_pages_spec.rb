@@ -17,6 +17,12 @@ RSpec.describe "Saved pages" do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "returns unauthorised for GET /api/saved_pages/:page_path " do
+      get saved_page_path("/my-saved-page-path")
+
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   context "when receiving an authenticated request" do
@@ -118,6 +124,22 @@ RSpec.describe "Saved pages" do
 
       it "returns status 404 Not Found if there is no saved page with the provided path" do
         delete saved_page_path(page_path: "/page-path/1"), headers: headers
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    describe "GET /api/saved_pages/:page_path" do
+      it "returns status 200 and a saved page record if a page exists" do
+        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
+        get saved_page_path(page_path: "/page-path/1"), headers: headers
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => "/page-path/1" })
+      end
+
+      it "returns status 404 Not Found if there is no saved page with the provided path" do
+        get saved_page_path(page_path: "/page-path/1"), headers: headers
 
         expect(response).to have_http_status(:not_found)
       end
