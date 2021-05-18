@@ -5,7 +5,11 @@ up www.gov.uk) to implement personalisation and user session
 management. This API is not for other government services.
 
 - [Nomenclature](#nomenclature)
+  - [Identity provider](#identity-provider)
+  - [Session identifier](#session-identifier)
 - [Requirements for API consumers](#requirements-for-api-consumers)
+  - [Request custom headers](#request-custom-headers)
+  - [Response custom headers](#response-custom-headers)
   - [Update the user's session if a new session identifier is returned](#update-the-users-session-if-a-new-session-identifier-is-returned)
   - [End the user's session if an endpoint returns a `401: Unauthenticated`](#end-the-users-session-if-an-endpoint-returns-a-401-unauthenticated)
   - [Ensure responses are not cached](#ensure-responses-are-not-cached)
