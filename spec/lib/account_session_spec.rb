@@ -148,6 +148,18 @@ RSpec.describe AccountSession do
         expect(stub).to have_been_made
       end
 
+      context "when the local attribute already exists" do
+        it "increases the updated_at time" do
+          attribute = LocalAttribute.create!(
+            oidc_user: OidcUser.find_or_create_by(sub: user_id),
+            name: local_attribute_name,
+            value: local_attribute_value,
+          )
+
+          expect { account_session.set_attributes(local_attributes) }.to(change { attribute.reload.updated_at })
+        end
+      end
+
       context "when there are no local attributes" do
         let(:local_attributes) { {} }
 
