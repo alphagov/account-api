@@ -109,7 +109,7 @@ private
     return if local_attributes.empty?
 
     LocalAttribute.upsert_all(
-      local_attributes.map { |name, value| { oidc_user_id: user.id, name: name, value: value } },
+      local_attributes.map { |name, value| { oidc_user_id: user.id, name: name, value: value, updated_at: Time.zone.now } },
       unique_by: :index_local_attributes_on_oidc_user_id_and_name,
       returning: false,
     )
