@@ -34,6 +34,10 @@ Pact.provider_states_for "GDS API Adapters" do
     ENV["GOVUK_ACCOUNT_OAUTH_CLIENT_ID"] = "client-id"
     ENV["GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET"] = "client-secret"
 
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.allow_remote_database_url = true
+    DatabaseCleaner.start
+
     WebMock.enable!
     WebMock.reset!
 
@@ -79,6 +83,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   tear_down do
     WebMock.disable!
+    DatabaseCleaner.clean
   end
 
   provider_state "there is a valid OAuth response" do
@@ -107,29 +112,17 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 404)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
     end
-
-    tear_down do
-      SavedPage.destroy_all
-    end
   end
 
   provider_state "there is a valid user session, with saved pages" do
     set_up do
       FactoryBot.create_list(:saved_page, 2, oidc_user_id: oidc_user.id)
     end
-
-    tear_down do
-      SavedPage.destroy_all
-    end
   end
 
   provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
     set_up do
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
-    end
-
-    tear_down do
-      SavedPage.destroy_all
     end
   end
 
