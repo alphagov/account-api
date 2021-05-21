@@ -647,6 +647,8 @@ Upsert a saved page in a user's account
 #### Response codes
 
 - 401 if the session identifier is invalid
+- 404 if the page does not exist (not present in the content store)
+- 410 if the page has been removed (the latest edition is in the "gone" or "redirect" state)
 - 422 if the page could not be saved (see [error: page cannot be saved](#page-cannot-be-saved))
 - 200 otherwise
 

@@ -1,4 +1,8 @@
+require "gds_api/test_helpers/content_store"
+
 RSpec.describe "Saved pages" do
+  include GdsApi::TestHelpers::ContentStore
+
   context "when receiving an unauthenticated request" do
     it "returns unauthorised for GET /api/saved_pages" do
       get saved_pages_path
@@ -50,33 +54,89 @@ RSpec.describe "Saved pages" do
     end
 
     describe "PUT /api/saved_pages/:page_path" do
-      it "returns a page path hash if the page persists correctly" do
-        put saved_page_path(page_path: "/page-path/1"), headers: headers
+      context "when the content item exists" do
+        let(:page_path) { "/page-path/1" }
+        let(:content_id) { "92881ac6-2804-4522-bf48-cf8c781c98bf" }
+        let(:title) { "Ministry of Magic" }
+        let(:content_item) { content_item_for_base_path(page_path).merge("content_id" => content_id, "title" => title) }
 
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => "/page-path/1" })
+        before { stub_content_store_has_item(page_path, content_item) }
+
+        it "returns a page path hash if the page persists correctly" do
+          put saved_page_path(page_path: page_path), headers: headers
+
+          expect(response).to have_http_status(:ok)
+          expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => page_path, "content_id" => content_id, "title" => title })
+        end
+
+        it "returns status 200 and upserts the record if the page already exists" do
+          FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: page_path)
+          put saved_page_path(page_path: page_path), headers: headers
+
+          expect(response).to have_http_status(:ok)
+          expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => page_path, "content_id" => content_id, "title" => title })
+        end
+
+        it "increases the count of saved pages if the page does not already exist" do
+          expect {
+            put saved_page_path(page_path: page_path), headers: headers
+          }.to change(SavedPage, :count).by(1)
+        end
+
+        it "does not increase the count of saved pages if the page does already exist" do
+          FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: page_path)
+
+          expect {
+            put saved_page_path(page_path: page_path), headers: headers
+          }.not_to change(SavedPage, :count)
+        end
+
+        context "when the content item is gone" do
+          let(:content_item) { content_item_for_base_path(page_path).merge("document_type" => "gone") }
+
+          it "returns a 410" do
+            put saved_page_path(page_path: page_path), headers: headers
+            expect(response).to have_http_status(:gone)
+          end
+
+          it "does not persist the page" do
+            expect {
+              put saved_page_path(page_path: page_path), headers: headers
+            }.not_to change(SavedPage, :count)
+          end
+        end
+
+        context "when the content item is redirected" do
+          let(:content_item) { content_item_for_base_path(page_path).merge("document_type" => "redirect") }
+
+          it "returns a 410" do
+            put saved_page_path(page_path: page_path), headers: headers
+            expect(response).to have_http_status(:gone)
+          end
+
+          it "does not persist the page" do
+            expect {
+              put saved_page_path(page_path: page_path), headers: headers
+            }.not_to change(SavedPage, :count)
+          end
+        end
       end
 
-      it "returns status 200 and upserts the record if the page already exists" do
-        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
-        put saved_page_path(page_path: "/page-path/1"), headers: headers
+      context "when the content item doesn't exist" do
+        let(:page_path) { "/page-path/1" }
 
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => "/page-path/1" })
-      end
+        before { stub_content_store_does_not_have_item(page_path) }
 
-      it "increases the count of saved pages if the page does not already exist" do
-        expect {
-          put saved_page_path(page_path: "/page-path/1"), headers: headers
-        }.to change(SavedPage, :count).by(1)
-      end
+        it "returns a 404" do
+          put saved_page_path(page_path: page_path), headers: headers
+          expect(response).to have_http_status(:not_found)
+        end
 
-      it "does not increase the count of saved pages if the page does already exist" do
-        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
-
-        expect {
-          put saved_page_path(page_path: "/page-path/1"), headers: headers
-        }.not_to change(SavedPage, :count)
+        it "does not persist the page" do
+          expect {
+            put saved_page_path(page_path: page_path), headers: headers
+          }.not_to change(SavedPage, :count)
+        end
       end
 
       it "returns status 422 Unprocessable Entity with a RFC 7807 'problem detail' object if the page path contains query parameters" do
@@ -131,11 +191,11 @@ RSpec.describe "Saved pages" do
 
     describe "GET /api/saved_pages/:page_path" do
       it "returns status 200 and a saved page record if a page exists" do
-        FactoryBot.create(:saved_page, oidc_user_id: user.id, page_path: "/page-path/1")
-        get saved_page_path(page_path: "/page-path/1"), headers: headers
+        saved_page = FactoryBot.create(:saved_page, oidc_user_id: user.id)
+        get saved_page_path(page_path: saved_page.page_path), headers: headers
 
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => "/page-path/1" })
+        expect(JSON.parse(response.body)["saved_page"]).to eq(saved_page.to_hash)
       end
 
       it "returns status 404 Not Found if there is no saved page with the provided path" do
