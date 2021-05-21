@@ -18,6 +18,7 @@ group :development, :test do
   gem "awesome_print"
   gem "bullet"
   gem "climate_control"
+  gem "database_cleaner-active_record"
   gem "factory_bot_rails"
   gem "govuk_test"
   gem "pact", require: false
