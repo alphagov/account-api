@@ -8,7 +8,9 @@ class SavedPage < ApplicationRecord
   def to_hash
     {
       "page_path" => page_path,
-    }
+      "content_id" => content_id,
+      "title" => title,
+    }.compact
   end
 
 private

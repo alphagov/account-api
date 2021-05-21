@@ -609,8 +609,16 @@ Response when a user has saved two pages:
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_pages": [
-      { "page_path": "/government/organisations/government-digital-service" },
-      { "page_path": "/government/organisations/cabinet-office" },
+      {
+        "page_path": "/government/organisations/government-digital-service",
+        "content_id": "af07d5a5-df63-4ddc-9383-6a666845ebe9",
+        "title": "Government Digital Service"
+      },
+      {
+        "page_path": "/government/organisations/cabinet-office",
+        "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+        "title": "Cabinet Office"
+      },
   ]
 }
 ```
@@ -657,7 +665,9 @@ GdsApi.saved_page_api.save_page(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_page": {
-      "page_path": "/guidance/foo"
+      "page_path": "/guidance/foo",
+      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+      "title": "Guidance for Foo-related Activities"
     },
 }
 ```
@@ -737,7 +747,9 @@ GdsApi.saved_page_api.get_saved_page(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_page": {
-      "page_path": "/guidance/bar"
+      "page_path": "/guidance/bar",
+      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+      "title": "Guidance for Bar-related Activities"
     },
 }
 ```
