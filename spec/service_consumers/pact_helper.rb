@@ -1,6 +1,10 @@
 require "webmock"
 require "pact/provider/rspec"
 
+def oidc_user
+  OidcUser.find_or_create_by(sub: "user-id")
+end
+
 Pact.configure do |config|
   config.reports_dir = "spec/reports/pacts"
   config.include WebMock::API
@@ -47,7 +51,7 @@ Pact.provider_states_for "GDS API Adapters" do
       id_token: instance_double(
         "OpenIDConnect::ResponseObject::IdToken",
         iss: "http://openid-provider",
-        sub: "user-id",
+        sub: oidc_user.sub,
         aud: "oauth-client",
         exp: 300,
         iat: 0,
@@ -61,7 +65,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
     account_session = AccountSession.new(
       session_signing_key: Rails.application.secrets.session_signing_key,
-      user_id: "user-id",
+      user_id: oidc_user.sub,
       access_token: "access-token",
       refresh_token: "refresh-token",
       level_of_authentication: "level1",
@@ -103,6 +107,30 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_request(:get, "http://openid-provider/v1/attributes/foo").to_return(status: 404)
       stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 404)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
+    end
+
+    tear_down do
+      SavedPage.destroy_all
+    end
+  end
+
+  provider_state "there is a valid user session, with saved pages" do
+    set_up do
+      FactoryBot.create_list(:saved_page, 2, oidc_user_id: oidc_user.id)
+    end
+
+    tear_down do
+      SavedPage.destroy_all
+    end
+  end
+
+  provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
+    set_up do
+      FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
+    end
+
+    tear_down do
+      SavedPage.destroy_all
     end
   end
 
