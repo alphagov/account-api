@@ -1,4 +1,4 @@
-RSpec.describe AttributesController do
+RSpec.describe "Attributes" do
   before do
     stub_oidc_discovery
 

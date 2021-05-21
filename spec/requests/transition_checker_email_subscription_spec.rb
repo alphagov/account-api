@@ -1,4 +1,4 @@
-RSpec.describe TransitionCheckerEmailSubscriptionController do
+RSpec.describe "Transition Checker email subscriptions" do
   before do
     stub_oidc_discovery
 
