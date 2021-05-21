@@ -145,6 +145,8 @@ GEM
       unicorn (>= 5.4, < 5.9)
     govuk_message_queue_consumer (3.5.0)
       bunny (~> 2.11)
+    govuk_schemas (4.3.0)
+      json-schema (~> 2.8.0)
     govuk_test (2.2.0)
       brakeman (~> 4.6)
       capybara
@@ -167,6 +169,8 @@ GEM
       activesupport (>= 4.2)
       aes_key_wrap
       bindata
+    json-schema (2.8.1)
+      addressable (>= 2.4)
     jwt (2.2.2)
     kgio (2.11.3)
     link_header (0.0.8)
@@ -455,6 +459,7 @@ DEPENDENCIES
   gds-sso
   govuk_app_config
   govuk_message_queue_consumer
+  govuk_schemas
   govuk_test
   listen
   openid_connect
