@@ -1,4 +1,4 @@
-RSpec.describe AuthenticationController do
+RSpec.describe "Authentication" do
   before do
     stub_oidc_discovery
     stub_token_response
