@@ -1,15 +1,14 @@
 module OidcClientHelper
   def stub_oidc_discovery
-    discovery_response = instance_double(
-      "OpenIDConnect::Discovery::Provider::Config::Response",
+    discovery_response = {
       authorization_endpoint: "http://openid-provider/authorization-endpoint",
       token_endpoint: "http://openid-provider/token-endpoint",
       userinfo_endpoint: "http://openid-provider/userinfo-endpoint",
       end_session_endpoint: "http://openid-provider/end-session-endpoint",
-    )
+    }
 
     # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OidcClient).to receive(:discover).and_return(discovery_response)
+    allow_any_instance_of(OidcClient).to receive(:cached_discover_response).and_return(discovery_response)
     # rubocop:enable RSpec/AnyInstance
   end
 

@@ -227,6 +227,10 @@ protected
   end
 
   def discover
-    @discover ||= OpenIDConnect::Discovery::Provider::Config.discover! provider_uri
+    @discover ||= OpenIDConnect::Discovery::Provider::Config::Response.new cached_discover_response
+  end
+
+  def cached_discover_response
+    Rails.cache.fetch("oidc/discover/#{provider_uri}") { OpenIDConnect::Discovery::Provider::Config.discover!(provider_uri).raw }
   end
 end
