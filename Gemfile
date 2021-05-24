@@ -8,6 +8,7 @@ ruby File.read(".ruby-version").strip
 gem "rails", "6.1.3.2"
 
 gem "bootsnap"
+gem "dalli"
 gem "gds-sso"
 gem "govuk_app_config"
 gem "openid_connect"
