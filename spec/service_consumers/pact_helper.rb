@@ -1,5 +1,8 @@
 require "webmock"
 require "pact/provider/rspec"
+require "gds_api/test_helpers/content_store"
+
+include GdsApi::TestHelpers::ContentStore
 
 def oidc_user
   OidcUser.find_or_create_by(sub: "user-id")
@@ -22,7 +25,7 @@ Pact.service_provider "Account API" do
     else
       base_url = "https://pact-broker.cloudapps.digital"
       path = "pacts/provider/#{url_encode(name)}/consumer/#{url_encode(consumer_name)}"
-      version_modifier = "versions/#{url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'master'))}"
+      version_modifier = "versions/#{url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'branch-master'))}"
 
       pact_uri("#{base_url}/#{path}/#{version_modifier}")
     end
@@ -79,6 +82,11 @@ Pact.provider_states_for "GDS API Adapters" do
     allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
 
     stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
+
+    stub_content_store_has_item(
+      "/guidance/some-govuk-guidance",
+      content_item_for_base_path("/guidance/some-govuk-guidance").merge("content_id" => SecureRandom.uuid),
+    )
   end
 
   tear_down do
