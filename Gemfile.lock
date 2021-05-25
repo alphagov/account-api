@@ -223,7 +223,7 @@ GEM
       diff-lcs (~> 1.4)
       randexp (~> 0.1.7)
       term-ansicolor (~> 1.0)
-    pact_broker-client (1.40.0)
+    pact_broker-client (1.41.0)
       dig_rb (~> 1.0)
       httparty (~> 0.18)
       rake (~> 13.0)
@@ -370,7 +370,7 @@ GEM
     term-ansicolor (1.7.1)
       tins (~> 1.0)
     thor (1.1.0)
-    tins (1.28.0)
+    tins (1.29.1)
       sync
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
