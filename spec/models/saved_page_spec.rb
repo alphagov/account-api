@@ -52,7 +52,13 @@ RSpec.describe SavedPage do
     let(:saved_page) { FactoryBot.build(:saved_page) }
 
     it "returns a hash with stringified keys containing the page path" do
-      expect(saved_page.to_hash).to eq({ "page_path" => saved_page.page_path })
+      expect(saved_page.to_hash).to eq(
+        {
+          "page_path" => saved_page.page_path,
+          "content_id" => saved_page.content_id,
+          "title" => saved_page.title,
+        },
+      )
     end
   end
 end

@@ -15,13 +15,31 @@ class SavedPagesController < ApplicationController
 
   # PUT /api/saved_pages/:page_path
   def update
-    saved_page = SavedPage.find_or_create_by(oidc_user_id: user.id, page_path: params[:page_path])
+    SavedPage.transaction do
+      saved_page = SavedPage
+        .create_with(content_id: "00000000-0000-0000-0000-000000000000")
+        .find_or_create_by(oidc_user_id: user.id, page_path: params[:page_path])
 
-    if saved_page.persisted?
-      render_api_response(saved_page: saved_page.to_hash)
-    else
-      raise ApiError::CannotSavePage, { page_path: params[:page_path], errors: saved_page.errors }
+      if saved_page.persisted?
+        content_item = GdsApi.content_store.content_item(params[:page_path]).to_hash
+
+        if %w[gone redirect].include? content_item["document_type"]
+          raise GdsApi::HTTPGone, 410
+        else
+          saved_page.content_id = content_item.fetch("content_id")
+          saved_page.title = content_item["title"]
+          saved_page.save!
+
+          render_api_response(saved_page: saved_page.to_hash)
+        end
+      else
+        raise ApiError::CannotSavePage, { page_path: params[:page_path], errors: saved_page.errors }
+      end
     end
+  rescue GdsApi::HTTPNotFound
+    head :not_found
+  rescue GdsApi::HTTPGone
+    head :gone
   end
 
   # DELETE /api/saved_pages/:page_path

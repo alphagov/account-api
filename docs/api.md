@@ -609,8 +609,16 @@ Response when a user has saved two pages:
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_pages": [
-      { "page_path": "/government/organisations/government-digital-service" },
-      { "page_path": "/government/organisations/cabinet-office" },
+      {
+        "page_path": "/government/organisations/government-digital-service",
+        "content_id": "af07d5a5-df63-4ddc-9383-6a666845ebe9",
+        "title": "Government Digital Service"
+      },
+      {
+        "page_path": "/government/organisations/cabinet-office",
+        "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+        "title": "Cabinet Office"
+      },
   ]
 }
 ```
@@ -639,6 +647,8 @@ Upsert a saved page in a user's account
 #### Response codes
 
 - 401 if the session identifier is invalid
+- 404 if the page does not exist (not present in the content store)
+- 410 if the page has been removed (the latest edition is in the "gone" or "redirect" state)
 - 422 if the page could not be saved (see [error: page cannot be saved](#page-cannot-be-saved))
 - 200 otherwise
 
@@ -657,7 +667,9 @@ GdsApi.saved_page_api.save_page(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_page": {
-      "page_path": "/guidance/foo"
+      "page_path": "/guidance/foo",
+      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+      "title": "Guidance for Foo-related Activities"
     },
 }
 ```
@@ -737,7 +749,9 @@ GdsApi.saved_page_api.get_saved_page(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "saved_page": {
-      "page_path": "/guidance/bar"
+      "page_path": "/guidance/bar",
+      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+      "title": "Guidance for Bar-related Activities"
     },
 }
 ```
