@@ -12,6 +12,7 @@ gem "dalli"
 gem "gds-api-adapters"
 gem "gds-sso"
 gem "govuk_app_config"
+gem "govuk_message_queue_consumer"
 gem "openid_connect"
 gem "pg"
 
@@ -21,6 +22,7 @@ group :development, :test do
   gem "climate_control"
   gem "database_cleaner-active_record"
   gem "factory_bot_rails"
+  gem "govuk_schemas"
   gem "govuk_test"
   gem "pact", require: false
   gem "pact_broker-client"
