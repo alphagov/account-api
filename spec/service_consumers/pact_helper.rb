@@ -22,7 +22,7 @@ Pact.service_provider "Account API" do
     else
       base_url = "https://pact-broker.cloudapps.digital"
       path = "pacts/provider/#{url_encode(name)}/consumer/#{url_encode(consumer_name)}"
-      version_modifier = "versions/#{url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'master'))}"
+      version_modifier = "versions/#{url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'branch-master'))}"
 
       pact_uri("#{base_url}/#{path}/#{version_modifier}")
     end
