@@ -2,20 +2,23 @@ require "webmock"
 require "pact/provider/rspec"
 require "gds_api/test_helpers/content_store"
 
-include GdsApi::TestHelpers::ContentStore
+Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
 def oidc_user
   OidcUser.find_or_create_by(sub: "user-id")
 end
 
-Pact.configure do |config|
-  config.reports_dir = "spec/reports/pacts"
-  config.include WebMock::API
-  config.include WebMock::Matchers
-end
-
 def url_encode(str)
   ERB::Util.url_encode(str)
+end
+
+Pact.configure do |config|
+  config.reports_dir = "spec/reports/pacts"
+  config.include GdsApi::TestHelpers::ContentStore
+  config.include GovukAccountSessionHelper
+  config.include OidcClientHelper
+  config.include WebMock::API
+  config.include WebMock::Matchers
 end
 
 Pact.service_provider "Account API" do
@@ -44,36 +47,11 @@ Pact.provider_states_for "GDS API Adapters" do
     WebMock.enable!
     WebMock.reset!
 
-    discovery_response = {
-      authorization_endpoint: "http://openid-provider/authorization-endpoint",
-      token_endpoint: "http://openid-provider/token-endpoint",
-      userinfo_endpoint: "http://openid-provider/userinfo-endpoint",
-      end_session_endpoint: "http://openid-provider/end-session-endpoint",
-    }
+    stub_oidc_discovery
+    stub_token_response
 
-    token_response = {
-      access_token: "access-token",
-      refresh_token: "refresh-token",
-      id_token: instance_double(
-        "OpenIDConnect::ResponseObject::IdToken",
-        iss: "http://openid-provider",
-        sub: oidc_user.sub,
-        aud: "oauth-client",
-        exp: 300,
-        iat: 0,
-      ),
-    }
-
-    # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OidcClient).to receive(:cached_discover_response).and_return(discovery_response)
-    allow_any_instance_of(OidcClient).to receive(:tokens!).and_return(token_response)
-    # rubocop:enable RSpec/AnyInstance
-
-    account_session = AccountSession.new(
-      session_signing_key: Rails.application.secrets.session_signing_key,
+    account_session = placeholder_govuk_account_session_object(
       user_id: oidc_user.sub,
-      access_token: "access-token",
-      refresh_token: "refresh-token",
       level_of_authentication: "level1",
     )
     allow(AccountSession).to receive(:deserialise).and_return(account_session)
