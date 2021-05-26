@@ -1,5 +1,6 @@
 test_attribute_1:
   is_stored_locally: false
+  is_cached_locally: false
   permissions:
     check: 0
     get: 0
@@ -7,6 +8,15 @@ test_attribute_1:
 
 test_attribute_2:
   is_stored_locally: false
+  is_cached_locally: false
+  permissions:
+    check: 0
+    get: 0
+    set: 0
+
+test_attribute_cache:
+  is_stored_locally: false
+  is_cached_locally: true
   permissions:
     check: 0
     get: 0
@@ -14,6 +24,7 @@ test_attribute_2:
 
 test_local_attribute:
   is_stored_locally: true
+  is_cached_locally: false
   permissions:
     check: 0
     get: 0
@@ -21,6 +32,7 @@ test_local_attribute:
 
 foo:
   is_stored_locally: false
+  is_cached_locally: false
   permissions:
     check: 0
     get: 0
@@ -28,6 +40,7 @@ foo:
 
 bar:
   is_stored_locally: false
+  is_cached_locally: false
   permissions:
     check: 0
     get: 0

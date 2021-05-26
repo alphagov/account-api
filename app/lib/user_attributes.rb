@@ -1,5 +1,5 @@
 class UserAttributes
-  CONFIG_KEYS = %w[is_stored_locally permissions].freeze
+  CONFIG_KEYS = %w[is_stored_locally is_cached_locally permissions].freeze
   PERMISSION_KEYS = %w[check get set].freeze
 
   attr_reader :attributes
@@ -14,6 +14,10 @@ class UserAttributes
 
   def stored_locally?(name)
     attributes.fetch(name)[:is_stored_locally]
+  end
+
+  def cached_locally?(name)
+    attributes.fetch(name)[:is_cached_locally]
   end
 
   def has_permission_for?(name, permission_level, user_session)
@@ -36,8 +40,12 @@ class UserAttributes
       unknown_keys = config.keys - CONFIG_KEYS
 
       invalid_keys = []
-      unless config["is_stored_locally"].in?([nil, false, true])
-        invalid_keys << "is_stored_locally"
+      %w[is_stored_locally is_cached_locally].each do |key|
+        invalid_keys << key unless config[key].in?([nil, false, true])
+      end
+
+      if config["is_stored_locally"] == true && config["is_cached_locally"] == true
+        invalid_keys << "is_cached_locally"
       end
 
       permissions = config["permissions"]

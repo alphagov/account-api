@@ -135,6 +135,15 @@ RSpec.describe AccountSession do
           expect(account_session.get_attributes([attribute_name1, attribute_name2])).to eq({ attribute_name2 => attribute_value2 })
         end
       end
+
+      context "when an attribute is cached_locally" do
+        let(:attribute_name1) { "test_attribute_cache" }
+
+        it "fetches the attribute and stores it locally" do
+          expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count)
+          expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
+        end
+      end
     end
 
     describe "set_attributes" do
@@ -177,6 +186,18 @@ RSpec.describe AccountSession do
           stub = stub_set_remote_attributes
           account_session.set_attributes(attributes)
           expect(stub).not_to have_been_made
+        end
+      end
+
+      context "when an attribute is cached_locally" do
+        let(:attribute_name1) { "test_attribute_cache" }
+        let(:remote_attributes) { { attribute_name1 => attribute_value1 } }
+        let(:local_attributes) { {} }
+
+        it "sets the attribute both locally and remotely" do
+          stub = stub_set_remote_attributes
+          expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count)
+          expect(stub).to have_been_made
         end
       end
 
