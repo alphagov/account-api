@@ -40,6 +40,7 @@ RSpec.describe MessageQueueProcessor do
         "content_id" => content_item["content_id"],
         "page_path" => content_item["base_path"],
         "title" => content_item["title"],
+        "public_updated_at" => JSON.parse(Time.zone.parse(content_item["public_updated_at"]).to_json),
       }
     end
 

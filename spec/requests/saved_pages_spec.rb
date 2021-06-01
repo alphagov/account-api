@@ -56,9 +56,7 @@ RSpec.describe "Saved pages" do
     describe "PUT /api/saved_pages/:page_path" do
       context "when the content item exists" do
         let(:page_path) { "/page-path/1" }
-        let(:content_id) { "92881ac6-2804-4522-bf48-cf8c781c98bf" }
-        let(:title) { "Ministry of Magic" }
-        let(:content_item) { content_item_for_base_path(page_path).merge("content_id" => content_id, "title" => title) }
+        let(:content_item) { content_item_for_base_path(page_path).merge("content_id" => SecureRandom.uuid) }
 
         before { stub_content_store_has_item(page_path, content_item) }
 
@@ -66,7 +64,14 @@ RSpec.describe "Saved pages" do
           put saved_page_path(page_path: page_path), headers: headers
 
           expect(response).to have_http_status(:ok)
-          expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => page_path, "content_id" => content_id, "title" => title })
+          expect(JSON.parse(response.body)["saved_page"]).to eq(
+            {
+              "page_path" => page_path,
+              "content_id" => content_item["content_id"],
+              "title" => content_item["title"],
+              "public_updated_at" => JSON.parse(Time.zone.parse(content_item["public_updated_at"]).to_json),
+            },
+          )
         end
 
         it "returns status 200 and upserts the record if the page already exists" do
@@ -74,7 +79,14 @@ RSpec.describe "Saved pages" do
           put saved_page_path(page_path: page_path), headers: headers
 
           expect(response).to have_http_status(:ok)
-          expect(JSON.parse(response.body)["saved_page"]).to eq({ "page_path" => page_path, "content_id" => content_id, "title" => title })
+          expect(JSON.parse(response.body)["saved_page"]).to eq(
+            {
+              "page_path" => page_path,
+              "content_id" => content_item["content_id"],
+              "title" => content_item["title"],
+              "public_updated_at" => JSON.parse(Time.zone.parse(content_item["public_updated_at"]).to_json),
+            },
+          )
         end
 
         it "increases the count of saved pages if the page does not already exist" do
