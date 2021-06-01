@@ -73,6 +73,8 @@ class MessageQueueProcessor
     else
       destroy_saved_pages(saved_pages)
     end
+  rescue GdsApi::ContentStore::ItemNotFound
+    destroy_saved_pages(saved_pages)
   end
 
   def destroy_saved_pages(saved_pages)
