@@ -43,7 +43,7 @@ RSpec.describe OidcClient do
 
   describe "get_ephemeral_state" do
     it "returns {} if there is no JSON" do
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(body: "")
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(body: "")
 
       expect(client.get_ephemeral_state(access_token: "access-token", refresh_token: "refresh-token")).to eq({ access_token: "access-token", refresh_token: "refresh-token", result: {} })
     end
@@ -51,7 +51,7 @@ RSpec.describe OidcClient do
 
   describe "submit_jwt" do
     it "raises an error if there is no JSON" do
-      stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt").to_return(body: "")
+      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt").to_return(body: "")
 
       expect { client.submit_jwt(jwt: "foo", access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
     end
@@ -62,13 +62,13 @@ RSpec.describe OidcClient do
       stub = stub_oidc_client(client)
       allow_token_refresh(stub)
 
-      @stub_fail = stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt")
+      @stub_fail = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
         .with(headers: { Authorization: "Bearer access-token" })
         .to_return(status: 401)
     end
 
     it "refreshes the token and retries" do
-      stub_success = stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt")
+      stub_success = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
         .with(headers: { Authorization: "Bearer new-access-token" })
         .to_return(status: 200, body: { id: "foo" }.to_json)
 
@@ -88,7 +88,7 @@ RSpec.describe OidcClient do
 
     context "but the refreshed access token fails" do
       it "fails" do
-        stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt")
+        stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
           .with(headers: { Authorization: "Bearer new-access-token" })
           .to_return(status: 401)
 

@@ -59,7 +59,7 @@ Pact.provider_states_for "GDS API Adapters" do
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
     allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
 
-    stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
+    stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
 
     stub_content_store_has_item(
       "/guidance/some-govuk-guidance",
@@ -77,7 +77,7 @@ Pact.provider_states_for "GDS API Adapters" do
       auth_request = AuthRequest.generate!
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
 
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end
 
@@ -86,14 +86,14 @@ Pact.provider_states_for "GDS API Adapters" do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
 
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end
 
   provider_state "there is a valid user session" do
     set_up do
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: 404)
-      stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: 200)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 404)
+      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 200)
       stub_request(:get, "http://openid-provider/v1/attributes/foo").to_return(status: 404)
       stub_request(:get, "http://openid-provider/v1/attributes/test_attribute_1").to_return(status: 404)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
@@ -114,7 +114,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session, with a transition checker email subscription" do
     set_up do
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: 204)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 204)
     end
   end
 

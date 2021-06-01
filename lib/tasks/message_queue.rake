@@ -1,4 +1,4 @@
-require_relative "../message_queue_processor.rb"
+require_relative "../message_queue_processor"
 
 namespace :message_queue do
   desc "Run worker to consume messages from RabbitMQ"
