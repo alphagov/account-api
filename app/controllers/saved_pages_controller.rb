@@ -26,9 +26,7 @@ class SavedPagesController < ApplicationController
         if %w[gone redirect].include? content_item["document_type"]
           raise GdsApi::HTTPGone, 410
         else
-          saved_page.content_id = content_item.fetch("content_id")
-          saved_page.title = content_item["title"]
-          saved_page.save!
+          saved_page.update!(**SavedPage.updates_from_content_item(content_item))
 
           render_api_response(saved_page: saved_page.to_hash)
         end

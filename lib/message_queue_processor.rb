@@ -58,10 +58,10 @@ class MessageQueueProcessor
       destroyed_count = 0
       saved_pages.each do |page|
         page.update!(
-          content_id: target_content_item.fetch("content_id"),
-          title: target_content_item["title"],
-          page_path: alternative_path,
-          updated_at: Time.zone.now,
+          **SavedPage.updates_from_content_item(target_content_item).merge(
+            page_path: alternative_path,
+            updated_at: Time.zone.now,
+          ),
         )
         redirected_count += 1
       rescue ActiveRecord::RecordInvalid
@@ -85,8 +85,9 @@ class MessageQueueProcessor
 
   def update_saved_pages(saved_pages, payload)
     saved_pages.update_all(
-      title: payload["title"],
-      updated_at: Time.zone.now,
+      **SavedPage.updates_from_content_item(payload).merge(
+        updated_at: Time.zone.now,
+      ),
     )
 
     "updated"

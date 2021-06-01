@@ -13,6 +13,13 @@ class SavedPage < ApplicationRecord
     }.compact
   end
 
+  def self.updates_from_content_item(content_item)
+    {
+      content_id: content_item.fetch("content_id"),
+      title: content_item["title"],
+    }
+  end
+
 private
 
   def page_path_is_valid_path

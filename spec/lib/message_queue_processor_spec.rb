@@ -9,7 +9,8 @@ RSpec.describe MessageQueueProcessor do
   it_behaves_like "a message queue processor"
 
   it "acks incoming messages" do
-    message = GovukMessageQueueConsumer::MockMessage.new
+    payload = GovukSchemas::RandomExample.for_schema(notification_schema: "guide")
+    message = GovukMessageQueueConsumer::MockMessage.new(payload)
     described_class.new.process(message)
     expect(message).to be_acked
   end
