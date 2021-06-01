@@ -12,7 +12,7 @@ RSpec.describe "Transition Checker email subscriptions" do
 
   describe "GET" do
     before do
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: status)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status)
     end
 
     let(:status) { 500 }
@@ -93,7 +93,7 @@ RSpec.describe "Transition Checker email subscriptions" do
 
   describe "POST" do
     it "calls the account manager" do
-      stub = stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription")
+      stub = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
         .with(body: hash_including(topic_slug: "slug"))
         .to_return(status: 200)
 
@@ -106,7 +106,7 @@ RSpec.describe "Transition Checker email subscriptions" do
       before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
 
       it "returns a 401" do
-        stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription")
+        stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
           .with(body: hash_including(topic_slug: "slug"))
           .to_return(status: 401)
 
@@ -126,7 +126,7 @@ RSpec.describe "Transition Checker email subscriptions" do
       let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
 
       it "calls the account manager" do
-        stub = stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription")
+        stub = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
           .with(body: hash_including(topic_slug: "slug"))
           .to_return(status: 200)
 

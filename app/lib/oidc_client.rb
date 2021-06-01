@@ -182,7 +182,7 @@ protected
 
   def redirect_uri
     host = Rails.env.production? ? ENV["GOVUK_WEBSITE_ROOT"] : Plek.find("frontend")
-    host + "/sign-in/callback"
+    "#{host}/sign-in/callback"
   end
 
   def ephemeral_state_uri

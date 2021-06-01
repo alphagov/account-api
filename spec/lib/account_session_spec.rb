@@ -78,7 +78,7 @@ RSpec.describe AccountSession do
 
       it "returns nil if there are the wrong number of fragments" do
         expect(described_class.deserialise_legacy_base64_session(encoded_session: Base64.urlsafe_encode64("1"), session_signing_key: "secret")).to be_nil
-        expect(described_class.deserialise_legacy_base64_session(encoded_session: Base64.urlsafe_encode64("1") + "." + Base64.urlsafe_encode64("2") + "." + Base64.urlsafe_encode64("3"), session_signing_key: "secret")).to be_nil
+        expect(described_class.deserialise_legacy_base64_session(encoded_session: "#{Base64.urlsafe_encode64('1')}.#{Base64.urlsafe_encode64('2')}.#{Base64.urlsafe_encode64('3')}", session_signing_key: "secret")).to be_nil
       end
     end
   end
@@ -212,7 +212,7 @@ RSpec.describe AccountSession do
   describe "email subscriptions" do
     describe "has_email_subscription?" do
       before do
-        stub_request(:get, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription").to_return(status: status)
+        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status)
       end
 
       let(:status) { 204 }
@@ -242,7 +242,7 @@ RSpec.describe AccountSession do
       let(:slug) { "email-topic-slug" }
 
       it "calls the account manager" do
-        stub = stub_request(:post, Plek.find("account-manager") + "/api/v1/transition-checker/email-subscription")
+        stub = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
           .with(body: hash_including(topic_slug: slug))
           .to_return(status: 200)
 

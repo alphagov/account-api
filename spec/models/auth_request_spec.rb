@@ -3,7 +3,7 @@ RSpec.describe AuthRequest do
     request1 = described_class.create!(
       oauth_state: SecureRandom.alphanumeric(10),
       oidc_nonce: SecureRandom.alphanumeric(10),
-      redirect_path: "/" + SecureRandom.alphanumeric(10),
+      redirect_path: "/#{SecureRandom.alphanumeric(10)}",
     )
     request2 = described_class.create!(
       oauth_state: request1.oauth_state,

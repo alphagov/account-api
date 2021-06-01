@@ -42,7 +42,7 @@ RSpec.describe "Authentication" do
     let!(:auth_request) { AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path") }
 
     it "fetches the tokens & ephemeral state" do
-      stub_request(:get, Plek.find("account-manager") + "/api/v1/ephemeral-state")
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state")
         .with(headers: { "Authorization" => "Bearer access-token" })
         .to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level42" }.to_json)
 
@@ -68,7 +68,7 @@ RSpec.describe "Authentication" do
 
   describe "/state" do
     it "submits a JWT to the account manager" do
-      stub_request(:post, Plek.find("account-manager") + "/api/v1/jwt")
+      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
         .with(headers: { "Authorization" => "Bearer access-token" })
         .to_return(status: 200, body: { id: "jwt-id" }.to_json)
 
