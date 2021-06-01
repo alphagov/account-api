@@ -3,6 +3,7 @@ module ApiError
     attr_reader :page_path, :errors
 
     def initialize(page_path:, errors:)
+      super
       @page_path = page_path
       @errors = errors
     end

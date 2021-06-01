@@ -1,6 +1,7 @@
 module ApiError
   class UnknownAttributeNames < ApiError::Base
     def initialize(attributes:)
+      super
       @attributes = attributes
     end
 
