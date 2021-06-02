@@ -1,7 +1,6 @@
 ---
 transition_checker_state:
-  is_stored_locally: false
-  is_cached_locally: true
+  type: cached
   permissions:
     check: 0
     get: 1

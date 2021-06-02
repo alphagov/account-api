@@ -1,46 +1,40 @@
 test_attribute_1:
-  is_stored_locally: false
-  is_cached_locally: false
+  type: remote
   permissions:
     check: 0
     get: 0
     set: 0
 
 test_attribute_2:
-  is_stored_locally: false
-  is_cached_locally: false
+  type: remote
   permissions:
     check: 0
     get: 0
     set: 0
 
 test_attribute_cache:
-  is_stored_locally: false
-  is_cached_locally: true
+  type: cached
   permissions:
     check: 0
     get: 0
     set: 0
 
 test_local_attribute:
-  is_stored_locally: true
-  is_cached_locally: false
+  type: local
   permissions:
     check: 0
     get: 0
     set: 0
 
 foo:
-  is_stored_locally: false
-  is_cached_locally: false
+  type: remote
   permissions:
     check: 0
     get: 0
     set: 0
 
 bar:
-  is_stored_locally: false
-  is_cached_locally: false
+  type: remote
   permissions:
     check: 0
     get: 0
