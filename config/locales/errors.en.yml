@@ -9,6 +9,10 @@ en:
       type: https://github.com/alphagov/account-api/blob/main/docs/api.md#unknown-attribute-names
       title: Unknown attribute names
       detail: Attribute names %{attributes} are unknown, have they been added to config/user_attributes.yml?
+    unwritable_attributes:
+      type: https://github.com/alphagov/account-api/blob/main/docs/api.md#unwritable-attributes
+      title: Unwritable attributes
+      detail: Attributes %{attributes} cannot be updated through the account-api.
     cannot_save_page:
       type: https://github.com/alphagov/account-api/blob/main/docs/api.md#cannot-save-page
       title: Cannot save page

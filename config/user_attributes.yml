@@ -1,7 +1,20 @@
 ---
+email:
+  type: remote
+  writable: false
+  permissions:
+    check: 0
+    get: 0
+
+email_verified:
+  type: remote
+  writable: false
+  permissions:
+    check: 0
+    get: 0
+
 transition_checker_state:
-  is_stored_locally: false
-  is_cached_locally: true
+  type: cached
   permissions:
     check: 0
     get: 1

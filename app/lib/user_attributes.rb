@@ -1,23 +1,27 @@
 class UserAttributes
-  CONFIG_KEYS = %w[is_stored_locally is_cached_locally permissions].freeze
+  CONFIG_KEYS = %w[type writable permissions].freeze
   PERMISSION_KEYS = %w[check get set].freeze
 
   attr_reader :attributes
 
   def initialize(attributes = nil)
-    @attributes = attributes || UserAttributes.load_config_file
+    @attributes = (attributes || UserAttributes.load_config_file).transform_values do |config|
+      config ||= {}
+      config["writable"] = true unless config.key? "writable"
+      config
+    end
   end
 
   def defined?(name)
     attributes.key? name
   end
 
-  def stored_locally?(name)
-    attributes.fetch(name)[:is_stored_locally]
+  def type(name)
+    attributes.fetch(name)[:type]
   end
 
-  def cached_locally?(name)
-    attributes.fetch(name)[:is_cached_locally]
+  def is_writable?(name)
+    attributes.fetch(name)[:writable]
   end
 
   def has_permission_for?(name, permission_level, user_session)
@@ -34,24 +38,18 @@ class UserAttributes
 
   def errors
     attributes.each_with_object({}) do |(name, config), errors|
-      config ||= {}
-
       missing_keys = CONFIG_KEYS - config.keys
       unknown_keys = config.keys - CONFIG_KEYS
-
       invalid_keys = []
-      %w[is_stored_locally is_cached_locally].each do |key|
-        invalid_keys << key unless config[key].in?([nil, false, true])
-      end
 
-      if config["is_stored_locally"] == true && config["is_cached_locally"] == true
-        invalid_keys << "is_cached_locally"
-      end
+      invalid_keys << "type" if config["type"] && !config["type"].in?(%w[local remote cached])
 
       permissions = config["permissions"]
       if permissions
-        missing_keys.concat((PERMISSION_KEYS - permissions.keys).map { |key| "permissions.#{key}" })
-        unknown_keys.concat((permissions.keys - PERMISSION_KEYS).map { |key| "permissions.#{key}" })
+        permissions_keys = config["writable"] ? PERMISSION_KEYS : PERMISSION_KEYS - %w[set]
+
+        missing_keys.concat((permissions_keys - permissions.keys).map { |key| "permissions.#{key}" })
+        unknown_keys.concat((permissions.keys - permissions_keys).map { |key| "permissions.#{key}" })
 
         non_integer_values = permissions.keys.reject { |key| permissions[key].is_a? Integer }.map { |key| "permissions.#{key}" }
         if non_integer_values.any?

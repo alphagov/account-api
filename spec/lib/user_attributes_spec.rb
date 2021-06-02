@@ -5,9 +5,9 @@ RSpec.describe UserAttributes do
 
   describe "validation" do
     let(:attributes) { { "foo" => foo_properties, "bar" => bar_properties } }
-    let(:foo_properties) { { "is_stored_locally" => true, "is_cached_locally" => false, "permissions" => foo_permissions } }
+    let(:foo_properties) { { "type" => "local", "permissions" => foo_permissions } }
     let(:foo_permissions) { { "check" => 0, "get" => 0, "set" => 1 } }
-    let(:bar_properties) { { "is_stored_locally" => false, "is_cached_locally" => false, "permissions" => bar_permissions } }
+    let(:bar_properties) { { "type" => "remote", "permissions" => bar_permissions } }
     let(:bar_permissions) { { "check" => 1, "get" => 1, "set" => 1 } }
 
     let(:errors) { described_class.validate(attributes) }
@@ -21,31 +21,23 @@ RSpec.describe UserAttributes do
         let(:foo_properties) { {} }
 
         it "rejects" do
-          expect(errors).to eq({ "foo" => { missing_keys: %w[is_stored_locally is_cached_locally permissions] } })
+          expect(errors).to eq({ "foo" => { missing_keys: %w[type permissions] } })
         end
       end
 
       context "when an unexpected top-level key is present" do
-        let(:bar_properties) { { "is_stored_loally" => true, "is_cached_locally" => false, "permissions" => bar_permissions } }
+        let(:bar_properties) { { "tye" => "local", "permissions" => bar_permissions } }
 
         it "rejects" do
-          expect(errors).to eq({ "bar" => { missing_keys: %w[is_stored_locally], unknown_keys: %w[is_stored_loally] } })
+          expect(errors).to eq({ "bar" => { missing_keys: %w[type], unknown_keys: %w[tye] } })
         end
       end
 
       context "when a key has an unexpected value" do
-        let(:foo_properties) { { "is_stored_locally" => "banana", "is_cached_locally" => true, "permissions" => foo_permissions } }
+        let(:foo_properties) { { "type" => "banana", "permissions" => foo_permissions } }
 
         it "rejects" do
-          expect(errors).to eq({ "foo" => { invalid_keys: %w[is_stored_locally] } })
-        end
-      end
-
-      context "when a key is both stored and cached locally" do
-        let(:foo_properties) { { "is_stored_locally" => true, "is_cached_locally" => true, "permissions" => foo_permissions } }
-
-        it "rejects" do
-          expect(errors).to eq({ "foo" => { invalid_keys: %w[is_cached_locally] } })
+          expect(errors).to eq({ "foo" => { invalid_keys: %w[type] } })
         end
       end
     end
@@ -72,6 +64,14 @@ RSpec.describe UserAttributes do
 
         it "rejects" do
           expect(errors).to eq({ "foo" => { invalid_keys: %w[permissions.check] } })
+        end
+      end
+
+      context "when the attribute is not writable, but there is a set permission" do
+        let(:foo_properties) { { "type" => "local", "writable" => false, "permissions" => foo_permissions } }
+
+        it "rejects" do
+          expect(errors).to eq({ "foo" => { unknown_keys: %w[permissions.set] } })
         end
       end
 

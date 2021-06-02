@@ -75,9 +75,9 @@ class AccountSession
   end
 
   def get_attributes(attribute_names)
-    local = attribute_names.select { |name| user_attributes.stored_locally? name }
-    remote = attribute_names.select { |name| !user_attributes.stored_locally?(name) && !user_attributes.cached_locally?(name) }
-    cached = attribute_names.select { |name| user_attributes.cached_locally? name }
+    local = attribute_names.select { |name| user_attributes.type(name) == "local" }
+    remote = attribute_names.select { |name| user_attributes.type(name) == "remote" }
+    cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
       values_already_cached = get_local_attributes(cached)
@@ -92,9 +92,9 @@ class AccountSession
   end
 
   def set_attributes(attributes)
-    local = attributes.select { |name| user_attributes.stored_locally? name }
-    remote = attributes.select { |name| !user_attributes.stored_locally?(name) && !user_attributes.cached_locally?(name) }
-    cached = attributes.select { |name| user_attributes.cached_locally? name }
+    local = attributes.select { |name| user_attributes.type(name) == "local" }
+    remote = attributes.select { |name| user_attributes.type(name) == "remote" }
+    cached = attributes.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
       set_local_attributes(cached)

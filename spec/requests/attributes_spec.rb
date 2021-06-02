@@ -13,6 +13,7 @@ RSpec.describe "Attributes" do
   let(:attribute_name1) { "test_attribute_1" }
   let(:attribute_name2) { "test_attribute_2" }
   let(:local_attribute_name) { "test_local_attribute" }
+  let(:unwritable_attribute_name) { "test_unwritable_attribute" }
   let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
   let(:attribute_value2) { [1, 2, 3, 4, 5] }
   let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
@@ -224,6 +225,19 @@ RSpec.describe "Attributes" do
       it "returns a 401" do
         patch attributes_path, headers: { "Content-Type" => "application/json" }, params: params.to_json
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the attribute is unwritable" do
+      let(:attributes) { { unwritable_attribute_name => attribute_value1 } }
+
+      it "returns a 403" do
+        patch attributes_path, headers: headers, params: params.to_json
+        expect(response).to have_http_status(:forbidden)
+
+        error = JSON.parse(response.body)
+        expect(error["type"]).to eq(I18n.t("errors.unwritable_attributes.type"))
+        expect(error["attributes"]).to eq([unwritable_attribute_name])
       end
     end
 
