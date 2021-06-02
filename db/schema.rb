@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_21_080408) do
+ActiveRecord::Schema.define(version: 2021_06_01_152044) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,7 @@ ActiveRecord::Schema.define(version: 2021_05_21_080408) do
     t.datetime "updated_at", precision: 6, null: false
     t.uuid "content_id", null: false
     t.string "title"
+    t.datetime "public_updated_at"
     t.index ["oidc_user_id", "page_path"], name: "index_saved_pages_on_oidc_user_id_and_page_path", unique: true
     t.index ["oidc_user_id"], name: "index_saved_pages_on_oidc_user_id"
   end
