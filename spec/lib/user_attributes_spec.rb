@@ -67,6 +67,14 @@ RSpec.describe UserAttributes do
         end
       end
 
+      context "when the attribute is not writable, but there is a set permission" do
+        let(:foo_properties) { { "type" => "local", "writable" => false, "permissions" => foo_permissions } }
+
+        it "rejects" do
+          expect(errors).to eq({ "foo" => { unknown_keys: %w[permissions.set] } })
+        end
+      end
+
       context "when check requires a higher permission than get" do
         let(:foo_permissions) { { "check" => 1, "get" => 0, "set" => 0 } }
 

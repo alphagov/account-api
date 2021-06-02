@@ -26,6 +26,13 @@ test_local_attribute:
     get: 0
     set: 0
 
+test_unwritable_attribute:
+  type: local
+  writable: false
+  permissions:
+    check: 0
+    get: 0
+
 foo:
   type: remote
   permissions:

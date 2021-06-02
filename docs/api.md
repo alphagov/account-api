@@ -30,6 +30,7 @@ management. This API is not for other government services.
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
+  - [Unwritable attributes](#unwritable-attributes)
   - [Page cannot be saved](#page-cannot-be-saved)
 
 ## Nomenclature
@@ -408,6 +409,7 @@ Updates the attributes of the current user.
 #### Response codes
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
+- 403 if any attributes are unwritable (see [error: unwritable attributes](#unwritable-attributes))
 - 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
 - 401 if the session identifier is invalid
 - 200 otherwise
@@ -789,6 +791,13 @@ level to access.
 
 One or more of the attribute names you have specified are not known.
 The `attributes` response field lists these.
+
+### Unwritable attributes
+
+One or more of the attributes you have specified cannot be updated
+through account-api.  The `attributes` response field lists these.
+
+Do not just reauthenticate the user and try again.
 
 ### Page cannot be saved
 

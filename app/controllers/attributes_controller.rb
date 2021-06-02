@@ -25,6 +25,11 @@ private
     unknown_attributes = attribute_names.reject { |name| user_attributes.defined? name }
     raise ApiError::UnknownAttributeNames, { attributes: unknown_attributes } if unknown_attributes.any?
 
+    if permission_level == :set
+      unwritable_attributes = attribute_names.reject { |name| user_attributes.is_writable? name }
+      raise ApiError::UnwritableAttributes, { attributes: unwritable_attributes } if unwritable_attributes.any?
+    end
+
     if Rails.application.config.feature_flag_enforce_levels_of_authentication
       forbidden_attributes = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
       if forbidden_attributes.any?
