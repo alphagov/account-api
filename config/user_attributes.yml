@@ -1,4 +1,18 @@
 ---
+email:
+  type: remote
+  writable: false
+  permissions:
+    check: 0
+    get: 0
+
+email_verified:
+  type: remote
+  writable: false
+  permissions:
+    check: 0
+    get: 0
+
 transition_checker_state:
   type: cached
   permissions:
