@@ -1,56 +1,41 @@
 RSpec.describe SavedPage do
+  subject(:saved_page) { FactoryBot.build(:saved_page) }
+
+  describe "associations" do
+    it { is_expected.to belong_to(:oidc_user) }
+  end
+
   describe "validations" do
-    let(:saved_page) { FactoryBot.build(:saved_page) }
+    it { is_expected.to validate_presence_of(:page_path) }
 
-    it "rejects duplicate saved pages, scoped to a user" do
-      saved_page.save!
-      duplicate = saved_page.dup
-      expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:page_path]).to include("has already been taken")
-    end
+    it { is_expected.to validate_uniqueness_of(:page_path).scoped_to(:oidc_user_id) }
 
-    it "allows duplicate saved pages, between different users" do
-      saved_page.save!
-      not_a_duplicate = FactoryBot.build(:saved_page, page_path: saved_page.page_path)
-      expect(not_a_duplicate).to be_valid
-    end
-
-    it "rejects blank values as page paths" do
-      [nil, ""].each do |blank_value|
-        saved_page.page_path = blank_value
-        expect(saved_page).not_to be_valid
-        expect(saved_page.errors[:page_path]).to include("can't be blank")
-      end
-    end
-
-    it "rejects paths that do not start with /" do
+    it "validates that page_path starts with /" do
       saved_page.page_path = "foo"
       expect(saved_page).not_to be_valid
       expect(saved_page.errors[:page_path]).to include("must only include URL path")
     end
 
-    it "rejects paths that contain spaces" do
+    it "validates that page_path does not contain spaces" do
       saved_page.page_path = "/foo bar"
       expect(saved_page).not_to be_valid
       expect(saved_page.errors[:page_path]).to include("must only include URL path")
     end
 
-    it "rejects page paths with parameters" do
+    it "validates that page_path does not have parameters" do
       saved_page.page_path = "/foo/bar?i_am_tracking_identifier=abc123"
       expect(saved_page).not_to be_valid
       expect(saved_page.errors[:page_path]).to include("must only include URL path")
     end
 
-    it "rejects pages with fragment identifiers" do
+    it "validates that page_path does not have fragment identifiers" do
       saved_page.page_path = "/guidance/about-the-thing#heading1"
       expect(saved_page).not_to be_valid
       expect(saved_page.errors[:page_path]).to include("must only include URL path")
     end
   end
 
-  describe "to_hash" do
-    let(:saved_page) { FactoryBot.build(:saved_page) }
-
+  describe "#to_hash" do
     it "returns a hash with stringified keys containing the page path" do
       expect(saved_page.to_hash).to eq(
         {
@@ -59,6 +44,29 @@ RSpec.describe SavedPage do
           "title" => saved_page.title,
         },
       )
+    end
+  end
+
+  describe ".updates_from_content_item" do
+    context "when the content_item has a public_updated_at" do
+      let(:public_updated_at) { "2020-08-31 07:24" }
+      let(:content_item) { { "content_id" => :foo, "title" => :bar, "public_updated_at" => public_updated_at } }
+
+      it "returns a hash with relevant content_item information with public_updated_at" do
+        expect(described_class.updates_from_content_item(content_item)).to eq(
+          { content_id: :foo, title: :bar, public_updated_at: Time.zone.parse(public_updated_at) },
+        )
+      end
+    end
+
+    context "when the content_item does not have a public_updated_at" do
+      let(:content_item) { { "content_id" => :foo, "title" => :bar } }
+
+      it "returns a hash with relevant content_item information without public_updated_at" do
+        expect(described_class.updates_from_content_item(content_item)).to eq(
+          { content_id: :foo, title: :bar, public_updated_at: nil },
+        )
+      end
     end
   end
 end
