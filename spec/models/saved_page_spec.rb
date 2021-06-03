@@ -46,4 +46,27 @@ RSpec.describe SavedPage do
       )
     end
   end
+
+  describe ".updates_from_content_item" do
+    context "when the content_item has a public_updated_at" do
+      let(:public_updated_at) { "2020-08-31 07:24" }
+      let(:content_item) { { "content_id" => :foo, "title" => :bar, "public_updated_at" => public_updated_at } }
+
+      it "returns a hash with relevant content_item information with public_updated_at" do
+        expect(described_class.updates_from_content_item(content_item)).to eq(
+          { content_id: :foo, title: :bar, public_updated_at: Time.zone.parse(public_updated_at) },
+        )
+      end
+    end
+
+    context "when the content_item does not have a public_updated_at" do
+      let(:content_item) { { "content_id" => :foo, "title" => :bar } }
+
+      it "returns a hash with relevant content_item information without public_updated_at" do
+        expect(described_class.updates_from_content_item(content_item)).to eq(
+          { content_id: :foo, title: :bar, public_updated_at: nil },
+        )
+      end
+    end
+  end
 end
