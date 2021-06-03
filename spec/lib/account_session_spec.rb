@@ -52,13 +52,6 @@ RSpec.describe AccountSession do
         expect(described_class.new(session_signing_key: "secret", **params).to_hash).to eq(params.merge(user_id: user_id_from_userinfo))
       end
 
-      it "accepts a legacy unsigned session header, and queries userinfo for the user ID" do
-        encoded = "#{Base64.urlsafe_encode64(access_token)}.#{Base64.urlsafe_encode64(refresh_token)}"
-        decoded = described_class.deserialise(encoded_session: encoded, session_signing_key: "secret").to_hash
-
-        expect(decoded).to eq(params.merge(user_id: user_id_from_userinfo))
-      end
-
       context "when the userinfo request fails" do
         let(:userinfo_status) { 401 }
 
@@ -68,17 +61,6 @@ RSpec.describe AccountSession do
           encoded = "#{Base64.urlsafe_encode64(access_token)}.#{Base64.urlsafe_encode64(refresh_token)}"
           expect(described_class.deserialise(encoded_session: encoded, session_signing_key: "secret")).to be_nil
         end
-      end
-    end
-
-    describe "deserialise_legacy_base64_session" do
-      it "returns nil on invalid base64" do
-        expect(described_class.deserialise_legacy_base64_session(encoded_session: "?.?", session_signing_key: "secret")).to be_nil
-      end
-
-      it "returns nil if there are the wrong number of fragments" do
-        expect(described_class.deserialise_legacy_base64_session(encoded_session: Base64.urlsafe_encode64("1"), session_signing_key: "secret")).to be_nil
-        expect(described_class.deserialise_legacy_base64_session(encoded_session: "#{Base64.urlsafe_encode64('1')}.#{Base64.urlsafe_encode64('2')}.#{Base64.urlsafe_encode64('3')}", session_signing_key: "secret")).to be_nil
       end
     end
   end
