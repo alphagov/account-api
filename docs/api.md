@@ -499,6 +499,7 @@ Checks if the user has an active Transition Checker email subscription.
 
 #### Response codes
 
+- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -543,6 +544,7 @@ Updates the user's Transition Checker email subscription, cancelling any previou
 
 #### Response codes
 
+- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
 - 401 if the session identifier is invalid
 - 200 otherwise
 

@@ -30,12 +30,10 @@ private
       raise ApiError::UnwritableAttributes, { attributes: unwritable_attributes } if unwritable_attributes.any?
     end
 
-    if Rails.application.config.feature_flag_enforce_levels_of_authentication
-      forbidden_attributes = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
-      if forbidden_attributes.any?
-        needed_level_of_authentication = forbidden_attributes.map { |name| user_attributes.level_of_authentication_for name, permission_level }.max
-        raise ApiError::LevelOfAuthenticationTooLow, { attributes: forbidden_attributes, needed_level_of_authentication: needed_level_of_authentication }
-      end
+    forbidden_attributes = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
+    if forbidden_attributes.any?
+      needed_level_of_authentication = forbidden_attributes.map { |name| user_attributes.level_of_authentication_for name, permission_level }.max
+      raise ApiError::LevelOfAuthenticationTooLow, { attributes: forbidden_attributes, needed_level_of_authentication: needed_level_of_authentication }
     end
   end
 

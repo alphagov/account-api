@@ -28,27 +28,8 @@ class AccountSession
           level_of_authentication: LOWEST_LEVEL_OF_AUTHENTICATION,
         }.merge(JSON.parse(serialised_session).symbolize_keys),
       )
-    else
-      deserialise_legacy_base64_session(
-        encoded_session: encoded_session,
-        session_signing_key: session_signing_key,
-      )
     end
   rescue OidcClient::OAuthFailure
-    nil
-  end
-
-  def self.deserialise_legacy_base64_session(encoded_session:, session_signing_key:)
-    bits = (encoded_session || "").split(".")
-    if bits.length == 2
-      new(
-        session_signing_key: session_signing_key,
-        access_token: Base64.urlsafe_decode64(bits[0]),
-        refresh_token: Base64.urlsafe_decode64(bits[1]),
-        level_of_authentication: LOWEST_LEVEL_OF_AUTHENTICATION,
-      )
-    end
-  rescue ArgumentError
     nil
   end
 
