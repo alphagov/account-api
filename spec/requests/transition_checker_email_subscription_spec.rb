@@ -8,7 +8,7 @@ RSpec.describe "Transition Checker email subscriptions" do
   end
 
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
-  let(:session_identifier) { placeholder_govuk_account_session }
+  let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level1") }
 
   describe "GET" do
     before do
@@ -66,27 +66,16 @@ RSpec.describe "Transition Checker email subscriptions" do
     end
 
     context "when the user doesn't have a high enough level of authentication" do
-      let(:status) { 204 }
       let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
 
-      it "checks if there is a subscription" do
+      it "returns a 403 and the required level" do
         get transition_checker_email_subscription_path, headers: headers
-        expect(response).to be_successful
-        expect(JSON.parse(response.body)["has_subscription"]).to be(true)
-      end
+        expect(response).to have_http_status(:forbidden)
 
-      context "when the feature flag is toggled on" do
-        before { allow(Rails.configuration).to receive(:feature_flag_enforce_levels_of_authentication).and_return(true) }
-
-        it "returns a 403 and the required level" do
-          get transition_checker_email_subscription_path, headers: headers
-          expect(response).to have_http_status(:forbidden)
-
-          error = JSON.parse(response.body)
-          expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
-          expect(error["attributes"]).to eq(%w[transition_checker_state])
-          expect(error["needed_level_of_authentication"]).to eq("level0")
-        end
+        error = JSON.parse(response.body)
+        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["attributes"]).to eq(%w[transition_checker_state])
+        expect(error["needed_level_of_authentication"]).to eq("level0")
       end
     end
   end
@@ -125,28 +114,14 @@ RSpec.describe "Transition Checker email subscriptions" do
     context "when the user doesn't have a high enough level of authentication" do
       let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
 
-      it "calls the account manager" do
-        stub = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
-          .with(body: hash_including(topic_slug: "slug"))
-          .to_return(status: 200)
-
+      it "returns a 403 and the required level" do
         post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }.to_json
-        expect(response).to be_successful
-        expect(stub).to have_been_made
-      end
+        expect(response).to have_http_status(:forbidden)
 
-      context "when the feature flag is toggled on" do
-        before { allow(Rails.configuration).to receive(:feature_flag_enforce_levels_of_authentication).and_return(true) }
-
-        it "returns a 403 and the required level" do
-          post transition_checker_email_subscription_path, headers: headers, params: { slug: "slug" }.to_json
-          expect(response).to have_http_status(:forbidden)
-
-          error = JSON.parse(response.body)
-          expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
-          expect(error["attributes"]).to eq(%w[transition_checker_state])
-          expect(error["needed_level_of_authentication"]).to eq("level1")
-        end
+        error = JSON.parse(response.body)
+        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["attributes"]).to eq(%w[transition_checker_state])
+        expect(error["needed_level_of_authentication"]).to eq("level1")
       end
     end
   end

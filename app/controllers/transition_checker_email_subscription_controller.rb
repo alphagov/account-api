@@ -17,12 +17,10 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
 private
 
   def check_permission!(permission_level)
-    return unless Rails.application.config.feature_flag_enforce_levels_of_authentication
+    return if user_attributes.has_permission_for? "transition_checker_state", permission_level, @govuk_account_session
 
-    unless user_attributes.has_permission_for? "transition_checker_state", permission_level, @govuk_account_session
-      needed_level_of_authentication = user_attributes.level_of_authentication_for "transition_checker_state", permission_level
-      raise ApiError::LevelOfAuthenticationTooLow, { attributes: %w[transition_checker_state], needed_level_of_authentication: needed_level_of_authentication }
-    end
+    needed_level_of_authentication = user_attributes.level_of_authentication_for "transition_checker_state", permission_level
+    raise ApiError::LevelOfAuthenticationTooLow, { attributes: %w[transition_checker_state], needed_level_of_authentication: needed_level_of_authentication }
   end
 
   def user_attributes
