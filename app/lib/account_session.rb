@@ -132,7 +132,7 @@ private
   end
 
   def get_remote_attributes(remote_attributes)
-    remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }
+    remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }.compact
   end
 
   def set_remote_attributes(remote_attributes)

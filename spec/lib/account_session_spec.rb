@@ -143,6 +143,15 @@ RSpec.describe AccountSession do
           expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count)
           expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
         end
+
+        context "when the attribute is unset" do
+          let(:attribute_value1) { nil }
+
+          it "does not try to cache locally" do
+            expect { account_session.get_attributes([attribute_name1]) }.not_to change(LocalAttribute, :count)
+            expect(account_session.get_attributes([attribute_name1])).to eq({})
+          end
+        end
       end
     end
 
