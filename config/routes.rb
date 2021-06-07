@@ -12,6 +12,8 @@ Rails.application.routes.draw do
       post "/state", to: "authentication#create_state"
     end
 
+    get "/user", to: "user#show"
+
     get "/attributes", to: "attributes#show"
     patch "/attributes", to: "attributes#update"
 

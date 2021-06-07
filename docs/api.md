@@ -18,6 +18,7 @@ management. This API is not for other government services.
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`POST /api/oauth2/state`](#post-apioauth2state)
+  - [`GET /api/user`](#get-apiuser)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/attributes/names`](#get-apiattributesnames)
@@ -333,6 +334,59 @@ Response:
 ```json
 {
     "state_id": "5821a9f9-3ba7-4385-a864-80cdb374550a"
+}
+```
+
+### `GET /api/user`
+
+Retrieves the information needed to render the `/account/home` page.
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### JSON response fields
+
+- `level_of_authentication`
+  - the user's current level of authentication (`level0` or `level1`)
+- `email`
+  - the user's current email address
+- `email_verified`
+  - whether the user has confirmed their email address or not
+- `services`
+  - object of known services, keys are service names and values are one of:
+    - `yes`: the user has used the service and can use it now
+    - `yes_but_must_reauthenticate`: the user has used the service but must reauthenticate at a higher level to use it now
+    - `no`: the user has not used the service
+    - `unknown`: the user is not authenticated at a high enough level to check whether they have used the service or not
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.get_user(
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response:
+
+```json
+{
+    "level_of_authentication": "level0",
+    "email": "email@example.com",
+    "email_verified": false,
+    "services": {
+        "transition_checker": "yes_but_must_reauthenticate",
+        "saved_pages": "yes"
+    }
 }
 ```
 
