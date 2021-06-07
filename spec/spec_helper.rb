@@ -28,12 +28,6 @@ RSpec.configure do |config|
 
   config.before { Rails.application.load_seed }
 
-  config.around do |example|
-    ClimateControl.modify(GOVUK_ACCOUNT_OAUTH_CLIENT_ID: "client-id", GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET: "client-secret") do
-      example.run
-    end
-  end
-
   config.expose_dsl_globally = false
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!

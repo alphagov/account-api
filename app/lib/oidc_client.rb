@@ -14,10 +14,10 @@ class OidcClient
            :end_session_endpoint,
            to: :discover
 
-  def initialize(provider_uri: nil, client_id: nil, secret: nil)
-    @provider_uri = provider_uri || Plek.find("account-manager")
-    @client_id = client_id || ENV.fetch("GOVUK_ACCOUNT_OAUTH_CLIENT_ID")
-    @secret = secret || ENV.fetch("GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET")
+  def initialize
+    @provider_uri = Plek.find("account-manager")
+    @client_id = Rails.application.secrets.oauth_client_id
+    @secret = Rails.application.secrets.oauth_client_secret
   end
 
   def auth_uri(auth_request, level_of_authentication)
@@ -146,7 +146,7 @@ class OidcClient
     )
   end
 
-protected
+private
 
   OK_STATUSES = [200, 204, 404, 410].freeze
 
