@@ -37,9 +37,6 @@ end
 
 Pact.provider_states_for "GDS API Adapters" do
   set_up do
-    ENV["GOVUK_ACCOUNT_OAUTH_CLIENT_ID"] = "client-id"
-    ENV["GOVUK_ACCOUNT_OAUTH_CLIENT_SECRET"] = "client-secret"
-
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.allow_remote_database_url = true
     DatabaseCleaner.start
