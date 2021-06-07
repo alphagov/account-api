@@ -2,7 +2,7 @@ class AuthRequest < ApplicationRecord
   EXPIRATION_AGE = 2.hours
   scope :expired, -> { where("created_at < ?", EXPIRATION_AGE.ago) }
 
-  validate :redirect_path_is_safe
+  validates :redirect_path, absolute_path: true
 
   def self.generate!(options = {})
     create!(
@@ -23,20 +23,5 @@ class AuthRequest < ApplicationRecord
     return nil unless bits.length == 2
 
     find_by(id: bits[1], oauth_state: bits[0])
-  end
-
-  def redirect_path_is_safe
-    return if redirect_path.nil?
-    return if redirect_path.empty?
-
-    if redirect_path.starts_with? "//"
-      errors.add(:redirect_path, "can't be protocol-relative")
-      return
-    end
-
-    return if redirect_path.starts_with? "/"
-    return if redirect_path.starts_with?("http://") && Rails.env.development?
-
-    errors.add(:redirect_path, "can't be absolute")
   end
 end
