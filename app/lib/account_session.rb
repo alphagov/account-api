@@ -34,7 +34,7 @@ class AccountSession
   end
 
   def user
-    OidcUser.find_or_create_by!(sub: user_id)
+    @user ||= OidcUser.find_or_create_by!(sub: user_id)
   end
 
   def level_of_authentication_as_integer
