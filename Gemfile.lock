@@ -120,7 +120,7 @@ GEM
     ffi (1.15.0)
     filelock (1.1.1)
     find_a_port (1.0.1)
-    gds-api-adapters (71.2.0)
+    gds-api-adapters (71.3.0)
       addressable
       link_header
       null_logger
@@ -155,7 +155,7 @@ GEM
     hashdiff (1.0.1)
     hashie (4.1.0)
     http-accept (1.7.0)
-    http-cookie (1.0.3)
+    http-cookie (1.0.4)
       domain_name (~> 0.5)
     httparty (0.18.1)
       mime-types (~> 3.0)
