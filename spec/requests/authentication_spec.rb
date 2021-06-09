@@ -27,8 +27,8 @@ RSpec.describe "Authentication" do
     end
 
     it "uses a provided redirect_path" do
-      get sign_in_path, params: { redirect_path: "/hello-world" }
-      expect(AuthRequest.last.redirect_path).to eq("/hello-world")
+      get sign_in_path, params: { redirect_path: "/transition-check/results?c[]=import-wombats&c[]=practice-wizardry" }
+      expect(AuthRequest.last.redirect_path).to eq("/transition-check/results?c[]=import-wombats&c[]=practice-wizardry")
     end
 
     it "deletes old expired AuthRequests" do

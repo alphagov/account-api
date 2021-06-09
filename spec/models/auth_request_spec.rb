@@ -24,6 +24,10 @@ RSpec.describe AuthRequest do
     expect(described_class.new(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/good-page")).to be_valid
   end
 
+  it "allows querystrings" do
+    expect(described_class.new(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/page/with/a?query=string")).to be_valid
+  end
+
   it "forbids protocol-relative redirects" do
     expect(described_class.new(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "//malicious-site.com")).not_to be_valid
   end
