@@ -61,15 +61,15 @@ class AccountSession
     cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
-      values_already_cached = get_local_attributes(cached)
+      values_already_cached = user.get_local_attributes(cached)
       values_to_cache = get_remote_attributes(cached.reject { |name| values_already_cached.key? name })
-      set_local_attributes(values_to_cache)
+      user.set_local_attributes(values_to_cache)
       values = values_already_cached.merge(values_to_cache)
     else
       values = {}
     end
 
-    values.merge(get_local_attributes(local).merge(get_remote_attributes(remote))).compact
+    values.merge(user.get_local_attributes(local).merge(get_remote_attributes(remote))).compact
   end
 
   def set_attributes(attributes)
@@ -78,11 +78,11 @@ class AccountSession
     cached = attributes.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
-      set_local_attributes(cached)
+      user.set_local_attributes(cached)
       set_remote_attributes(cached)
     end
 
-    set_local_attributes(local)
+    user.set_local_attributes(local)
     set_remote_attributes(remote)
   end
 
@@ -97,20 +97,6 @@ class AccountSession
 private
 
   attr_reader :session_signing_key
-
-  def get_local_attributes(local_attributes)
-    user.local_attributes.where(name: local_attributes).map { |attr| [attr.name, attr.value] }.to_h
-  end
-
-  def set_local_attributes(local_attributes)
-    return if local_attributes.empty?
-
-    LocalAttribute.upsert_all(
-      local_attributes.map { |name, value| { oidc_user_id: user.id, name: name, value: value, updated_at: Time.zone.now } },
-      unique_by: :index_local_attributes_on_oidc_user_id_and_name,
-      returning: false,
-    )
-  end
 
   def get_remote_attributes(remote_attributes)
     remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }.compact
