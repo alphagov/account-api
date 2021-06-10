@@ -8,7 +8,7 @@ RSpec.describe "Authentication" do
 
   describe "/sign-in" do
     it "creates an AuthRequest to persist the attributes" do
-      expect { get sign_in_path }.to change(AuthRequest, :count)
+      expect { get sign_in_path }.to change(AuthRequest, :count).by(1)
       expect(response).to be_successful
 
       auth_request = AuthRequest.last

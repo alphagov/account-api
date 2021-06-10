@@ -7,7 +7,7 @@ RSpec.describe "OIDC Users endpoint" do
 
   describe "PUT" do
     it "creates the user if they do not exist" do
-      expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count)
+      expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count).by(1)
       expect(response).to be_successful
     end
 

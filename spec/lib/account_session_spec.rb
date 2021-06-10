@@ -71,7 +71,7 @@ RSpec.describe AccountSession do
     end
 
     it "creates a user record if one does not exist" do
-      expect { account_session.user }.to change(OidcUser, :count)
+      expect { account_session.user }.to change(OidcUser, :count).by(1)
     end
 
     it "re-uses a user record if one does exist" do
@@ -122,7 +122,7 @@ RSpec.describe AccountSession do
         let(:attribute_name1) { "test_attribute_cache" }
 
         it "fetches the attribute and stores it locally" do
-          expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count)
+          expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
           expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
         end
 
@@ -144,7 +144,7 @@ RSpec.describe AccountSession do
 
       it "calls the attribute service for remote attributes, calls the database for local attributes" do
         stub = stub_set_remote_attributes
-        expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count)
+        expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count).by(1)
         expect(stub).to have_been_made
       end
 
@@ -187,7 +187,7 @@ RSpec.describe AccountSession do
 
         it "sets the attribute both locally and remotely" do
           stub = stub_set_remote_attributes
-          expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count)
+          expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count).by(1)
           expect(stub).to have_been_made
         end
       end
