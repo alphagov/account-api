@@ -10,6 +10,6 @@ RSpec.describe LocalAttribute do
 
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:oidc_user_id) }
 
-    it { is_expected.to validate_presence_of(:value) }
+    it { is_expected.to validate_exclusion_of(:value).in_array([nil]) }
   end
 end
