@@ -19,9 +19,9 @@ management. This API is not for other government services.
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
   - [`GET /api/saved_pages`](#get-apisaved_pages)
+  - [`GET /api/saved_pages/:page_path`](#get-apisaved_pagespage_path)
   - [`PUT /api/saved_pages/:page_path`](#put-apisaved_pagespage_path)
   - [`DELETE /api/saved_pages/:page_path`](#delete-apisaved_pagespage_path)
-  - [`GET /api/saved_pages/:page_path`](#get-apisaved_pagespage_path)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -550,6 +550,55 @@ Response when a user has saved two pages:
 }
 ```
 
+### `GET /api/saved_pages/:page_path`
+
+Query if a specific path has been saved by the user
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Request parameters
+
+- `page_path`
+  - the path on GOV.UK to save
+
+#### JSON response fields
+
+- `govuk_account_session` *(optional)*
+  - a new session identifier
+- `saved_page`
+  - an object containing the page path of the successfully queried page
+
+#### Response codes
+
+- 404 cannot find a page with the provided path
+- 401 if the session identifier is invalid
+- 200 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.saved_page_api.get_saved_page(
+    page_path: "/guidance/bar",
+    govuk_account_session: "session-identifier",
+)
+```
+
+```json
+{
+    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
+    "saved_page": {
+      "page_path": "/guidance/bar",
+      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
+      "title": "Guidance for Bar-related Activities"
+    },
+}
+```
+
 ### `PUT /api/saved_pages/:page_path`
 
 Upsert a saved page in a user's account
@@ -573,10 +622,10 @@ Upsert a saved page in a user's account
 
 #### Response codes
 
-- 401 if the session identifier is invalid
-- 404 if the page does not exist (not present in the content store)
-- 410 if the page has been removed (the latest edition is in the "gone" or "redirect" state)
 - 422 if the page could not be saved (see [error: page cannot be saved](#page-cannot-be-saved))
+- 410 if the page has been removed (the latest edition is in the "gone" or "redirect" state)
+- 404 if the page does not exist (not present in the content store)
+- 401 if the session identifier is invalid
 - 200 otherwise
 
 #### Example request / response
@@ -613,12 +662,12 @@ Remove a saved page from a user's account
 #### Request parameters
 
 - `page_path`
-  - An escaped URL safe string that identifies the path of a saved page.
+  - the path on GOV.UK to save
 
 #### Response codes
 
-- 401 if the session identifier is invalid
 - 404 cannot find a page with the provided path
+- 401 if the session identifier is invalid
 - 204 successfully deleted
 
 #### Example request / response
@@ -633,55 +682,6 @@ GdsApi.saved_page_api.delete_saved_page(
 ```
 
 Response is status code only.
-
-### `GET /api/saved_pages/:page_path`
-
-Query if a specific path has been saved by the user
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### Request parameters
-
-- `page_path`
-  - An escaped URL safe string that identifies the path of a saved page.
-
-#### JSON response fields
-
-- `govuk_account_session` *(optional)*
-  - a new session identifier
-- `saved_page`
-  - an object containing the page path of the successfully queried page
-
-#### Response codes
-
-- 401 if the session identifier is invalid
-- 404 cannot find a page with the provided path
-- 200 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.saved_page_api.get_saved_page(
-    page_path: "/guidance/bar",
-    govuk_account_session: "session-identifier",
-)
-```
-
-```json
-{
-    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
-    "saved_page": {
-      "page_path": "/guidance/bar",
-      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
-      "title": "Guidance for Bar-related Activities"
-    },
-}
-```
 
 ## API errors
 
