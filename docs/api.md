@@ -18,10 +18,10 @@ management. This API is not for other government services.
   - [`GET /api/attributes/names`](#get-apiattributesnames)
   - [`GET /api/transition-checker-email-subscription`](#get-apitransition-checker-email-subscription)
   - [`POST /api/transition-checker-email-subscription`](#post-apitransition-checker-email-subscription)
-  - [`GET /api/saved_pages`](#get-apisaved_pages)
-  - [`GET /api/saved_pages/:page_path`](#get-apisaved_pagespage_path)
-  - [`PUT /api/saved_pages/:page_path`](#put-apisaved_pagespage_path)
-  - [`DELETE /api/saved_pages/:page_path`](#delete-apisaved_pagespage_path)
+  - [`GET /api/saved-pages`](#get-apisaved-pages)
+  - [`GET /api/saved-pages/:page_path`](#get-apisaved-pagespage_path)
+  - [`PUT /api/saved-pages/:page_path`](#put-apisaved-pagespage_path)
+  - [`DELETE /api/saved-pages/:page_path`](#delete-apisaved-pagespage_path)
 - [API errors](#api-errors)
   - [Level of authentication too low](#level-of-authentication-too-low)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -490,7 +490,7 @@ Response:
 }
 ```
 
-### `GET /api/saved_pages`
+### `GET /api/saved-pages`
 
 Returns all a user's saved pages
 
@@ -550,7 +550,7 @@ Response when a user has saved two pages:
 }
 ```
 
-### `GET /api/saved_pages/:page_path`
+### `GET /api/saved-pages/:page_path`
 
 Query if a specific path has been saved by the user
 
@@ -599,7 +599,7 @@ GdsApi.saved_page_api.get_saved_page(
 }
 ```
 
-### `PUT /api/saved_pages/:page_path`
+### `PUT /api/saved-pages/:page_path`
 
 Upsert a saved page in a user's account
 
@@ -650,7 +650,7 @@ GdsApi.saved_page_api.save_page(
 }
 ```
 
-### `DELETE /api/saved_pages/:page_path`
+### `DELETE /api/saved-pages/:page_path`
 
 Remove a saved page from a user's account
 
