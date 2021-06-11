@@ -1,13 +1,13 @@
 ---
 email:
-  type: remote
+  type: cached
   writable: false
   permissions:
     check: 0
     get: 0
 
 email_verified:
-  type: remote
+  type: cached
   writable: false
   permissions:
     check: 0
