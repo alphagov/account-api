@@ -1,4 +1,8 @@
+require "gds_api/test_helpers/email_alert_api"
+
 RSpec.describe "OIDC Users endpoint" do
+  include GdsApi::TestHelpers::EmailAlertApi
+
   let(:headers) { { "Content-Type" => "application/json" } }
   let(:params) { { email: email, email_verified: email_verified }.compact.to_json }
   let(:email) { "email@example.com" }
@@ -36,6 +40,28 @@ RSpec.describe "OIDC Users endpoint" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
 
         expect(user.get_local_attributes(%i[email email_verified])).to eq({ "email" => email, "email_verified" => email_verified })
+      end
+
+      context "when the user has email subscriptions" do
+        before { EmailSubscription.create!(oidc_user: user, name: "name", topic_slug: "slug", email_alert_api_subscription_id: "prior-subscription-id") }
+
+        it "reactivates them" do
+          stub_cancel_old = stub_email_alert_api_unsubscribes_a_subscription("prior-subscription-id")
+          stub_fetch_topic = stub_email_alert_api_has_subscriber_list_by_slug(slug: "slug", returned_attributes: { id: "list-id" })
+          stub_create_new = stub_email_alert_api_creates_a_subscription(
+            subscriber_list_id: "list-id",
+            address: email,
+            frequency: "daily",
+            returned_subscription_id: "new-subscription-id",
+            skip_confirmation_email: true,
+          )
+
+          put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+
+          expect(stub_cancel_old).to have_been_made
+          expect(stub_fetch_topic).to have_been_made
+          expect(stub_create_new).to have_been_made
+        end
       end
     end
   end
