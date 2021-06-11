@@ -23,6 +23,8 @@ Rails.application.routes.draw do
       get "/names", to: "names#show"
     end
 
+    resources :email_subscriptions, only: %i[show update destroy], param: :subscription_name, path: "email-subscriptions"
+
     resources :saved_pages, only: %i[index show update destroy], param: :page_path, path: "saved-pages"
 
     # delete when gds-api-adapters has been updated
