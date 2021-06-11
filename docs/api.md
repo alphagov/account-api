@@ -7,13 +7,7 @@ management. This API is not for other government services.
 - [Nomenclature](#nomenclature)
   - [Identity provider](#identity-provider)
   - [Session identifier](#session-identifier)
-- [Requirements for API consumers](#requirements-for-api-consumers)
-  - [Request custom headers](#request-custom-headers)
-  - [Response custom headers](#response-custom-headers)
-  - [Update the user's session if a new session identifier is returned](#update-the-users-session-if-a-new-session-identifier-is-returned)
-  - [End the user's session if an endpoint returns a `401: Unauthenticated`](#end-the-users-session-if-an-endpoint-returns-a-401-unauthenticated)
-  - [Ensure responses are not cached](#ensure-responses-are-not-cached)
-- [Example API usage](#example-api-usage)
+- [Using this API](#using-this-api)
 - [API endpoints](#api-endpoints)
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
@@ -46,164 +40,39 @@ An opaque token which identifies a user and provides access to their attributes.
 
 [GOV.UK account manager prototype]: https://github.com/alphagov/govuk-account-manager-prototype/
 
-## Requirements for API consumers
+## Using this API
 
-We manage user sessions in frontend apps by using custom headers, which tie into logic in our Content Delivery Network (CDN). This section describes what you have to do to manage those custom headers correctly.
-
-### Request custom headers
-
-The request custom header is `GOVUK-Account-Session`.
-
-This custom header is set by our CDN to the value of the user's session cookie. This is the user's session identifier.
-
-See the [`govuk-cdn-config` VCL](https://github.com/alphagov/govuk-cdn-config/blob/2ade45759be947a28b1225aee085311430bcbecf/vcl_templates/www.vcl.erb#L339-L340) for more information.
-
-### Response custom headers
-
-The response custom headers are:
-
-- `GOVUK-Account-Session`
-- `GOVUK-Account-End-Session`
-
-`GOVUK-Account-Session` is sent to our CDN to update the user's session cookie.
-
-`GOVUK-Account-End-Session` is sent to our CDN to delete the user's session cookie.
-
-See the [`govuk-cdn-config` VCL](https://github.com/alphagov/govuk-cdn-config/blob/2ade45759be947a28b1225aee085311430bcbecf/vcl_templates/www.vcl.erb#L442-L455) for more information.
-
-We do not have a CDN when developing locally. To enable local development with Accounts, we store the session identifier
-in a cookie called `govuk_account_session`, with `domain: dev.gov.uk`, when running in development mode.
-
-We may later provide a gem implementing this behaviour.
-
-### Update the user's session if a new session identifier is returned
-
-Some of these endpoints return a session identifier in the `govuk_account_session` JSON response field. If this happens, you must update the user's session identifier.
-
-1. Set the `GOVUK-Account-Session` response custom header:
-
-    ```ruby
-    response.headers["GOVUK-Account-Session"] = "<govuk_account_session value>"
-    ```
-
-1. Update the development cookie when running locally:
-
-    ```ruby
-    if Rails.env.development?
-      cookies["govuk_account_session"] = {
-        value: "<govuk_account_session value>",
-        domain: "dev.gov.uk",
-      }
-    end
-    ```
-
-### End the user's session if an endpoint returns a `401: Unauthenticated`
-
-If an endpoint returns a `401: Unauthenticated` response, then the user must no longer be considered logged in.
-
-1. Set the `GOVUK-Account-End-Session` response header:
-
-    ```ruby
-    response.headers["GOVUK-Account-End-Session"] = "1"
-    ```
-
-1. Expire the development cookie when running locally:
-
-    ```ruby
-    if Rails.env.development?
-      cookies["govuk_account_session"] = {
-        value: "",
-        domain: "dev.gov.uk",
-        expires: 1.second.ago,
-      }
-    end
-    ```
-
-### Ensure responses are not cached
-
-Any user-visible response which involves calling this API must return appropriate response headers to either forbid caching, or specific that the response depends on the user.
-
-To forbid caching:
+You should use this API in combination with the [govuk_personalisation][] gem, like so:
 
 ```ruby
-response.headers["Cache-Control"] = "no-store"
-```
+class YourRailsController < ApplicationController
+  # include the concern in your controller
+  include GovukPersonalisation::AccountConcern
 
-To specify that the response depends on the user:
+  def show
+    # call the API with gds-api-adapters, the @govuk_account_session is provided by the concern
+    result = GdsApi.account_api.get_attributes(
+      attributes: %w[some user attributes],
+      govuk_account_session: @govuk_account_session,
+    )
 
-```ruby
-response.headers["Vary"] = [response.headers["Vary"], "GOVUK-Account-Session"].compact.join(", ")
-```
+    # set up the response header and update @govuk_account_session
+    set_account_session_header(result["govuk_account_session"])
 
-## Example API usage
-
-This is an example of updating an attribute for the current user.
-
-The `update` method is the controller action.  The `disable_cache`,
-`fetch_session_identifier`, `set_session_identifier`, and `logout!`
-methods would be re-used by other actions which call this API.
-
-```ruby
-before_action :disable_cache, only: %i[update]
-before_action :fetch_session_identifier, only: %i[update]
-
-def update
-  head :unauthorised and return unless @session_identifier
-
-  api_response = GdsApi.account_api.set_attributes(
-    govuk_account_session: @session_identifier,
-    attributes: { example_attribute: params[:attribute_value] },
-  ).to_h
-
-  set_session_identifier api_response["govuk_account_session"]
-rescue GdsApi::HTTPUnauthorized
-  logout!
-  render plain: "you have been logged out"
-end
-
-private
-
-def disable_cache
-  response.headers["Cache-Control"] = "no-store"
-end
-
-def fetch_session_identifier
-  @session_identifier =
-    if request.headers["HTTP_GOVUK_ACCOUNT_SESSION"]
-      request.headers["HTTP_GOVUK_ACCOUNT_SESSION"]
-    elsif Rails.env.development?
-      cookies["govuk_account_session"]
-    end
-end
-
-def set_session_identifier(session_identifier)
-  return unless session_identifier
-
-  response.headers["GOVUK-Account-Session"] = @session_identifier
-
-  if Rails.env.development?
-    cookies["govuk_account_session"] = {
-      value: @session_identifier,
-      domain: "dev.gov.uk",
-    }
-  end
-end
-
-def logout!
-  @session_identifier = nil
-
-  response.headers["GOVUK-Account-End-Session"] = "1"
-
-  if Rails.env.development?
-    cookies["govuk_account_session"] = {
-      value: "",
-      domain: "dev.gov.uk",
-      expires: 1.second.ago,
-    }
+    # do something in your view with the result
+    @attributes = result["values"]
+  rescue GdsApi::HTTPUnauthorized
+    # the user's session is invalid
+    logout!
+  rescue GdsApi::HTTPForbidden
+    # the user needs to reauthenticate, the required level of authentication is in the response body
   end
 end
 ```
 
+The [govuk_personalisation][] gem handles setting the `GOVUK-Account-Session` and `Vary` response headers for your app, ensuring that responses are not cached.  In local development there is a cookie instead of a custom header, which the gem also handles for you.
+
+[govuk_personalisation]: https://github.com/alphagov/govuk_personalisation
 
 ## API endpoints
 
