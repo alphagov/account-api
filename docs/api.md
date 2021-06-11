@@ -516,7 +516,7 @@ Returns all a user's saved pages
 Request (with gds-api-adapters):
 
 ```ruby
-GdsApi.saved_page_api.get_saved_pages(
+GdsApi.account_api.get_saved_pages(
     govuk_account_session: "session-identifier",
 )
 ```
@@ -582,7 +582,7 @@ Query if a specific path has been saved by the user
 Request (with gds-api-adapters):
 
 ```ruby
-GdsApi.saved_page_api.get_saved_page(
+GdsApi.account_api.get_saved_page(
     page_path: "/guidance/bar",
     govuk_account_session: "session-identifier",
 )
@@ -633,7 +633,7 @@ Upsert a saved page in a user's account
 Request (with gds-api-adapters):
 
 ```ruby
-GdsApi.saved_page_api.save_page(
+GdsApi.account_api.save_page(
     page_path: "/guidance/foo",
     govuk_account_session: "session-identifier",
 )
@@ -675,7 +675,7 @@ Remove a saved page from a user's account
 Request (with gds-api-adapters):
 
 ```ruby
-GdsApi.saved_page_api.delete_saved_page(
+GdsApi.account_api.delete_saved_page(
     page_path: "/guidance/bar",
     govuk_account_session: "session-identifier",
 )
