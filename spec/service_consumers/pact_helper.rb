@@ -1,8 +1,36 @@
 require "webmock"
 require "pact/provider/rspec"
+require "plek"
 require "gds_api/test_helpers/content_store"
+require "gds_api/test_helpers/email_alert_api"
 
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
+
+module PactStubHelpers
+  EMAIL_ADDRESS = "user@example.com".freeze
+
+  def stub_email_attribute_requests(email_verified: true)
+    stub_remote_attribute_requests(
+      email: EMAIL_ADDRESS,
+      email_verified: email_verified,
+    )
+  end
+
+  def stub_will_create_email_subscription(topic_slug, subscriber_list_id: "list-id")
+    stub_email_alert_api_has_subscriber_list_by_slug(
+      slug: topic_slug,
+      returned_attributes: { id: subscriber_list_id },
+    )
+
+    stub_email_alert_api_creates_a_subscription(
+      subscriber_list_id: subscriber_list_id,
+      address: EMAIL_ADDRESS,
+      frequency: "daily",
+      returned_subscription_id: "subscription-id",
+      skip_confirmation_email: true,
+    )
+  end
+end
 
 def oidc_user
   OidcUser.find_or_create_by(sub: "user-id")
@@ -14,7 +42,9 @@ end
 
 Pact.configure do |config|
   config.reports_dir = "spec/reports/pacts"
+  config.include PactStubHelpers
   config.include GdsApi::TestHelpers::ContentStore
+  config.include GdsApi::TestHelpers::EmailAlertApi
   config.include GovukAccountSessionHelper
   config.include OidcClientHelper
   config.include WebMock::API
@@ -90,16 +120,24 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session" do
     set_up do
+      stub_email_attribute_requests
+      stub_will_create_email_subscription "wizard-news-topic-slug"
       stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 404)
       stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 200)
       stub_remote_attribute_requests(
-        email: "user@example.com",
-        email_verified: true,
         transition_checker_state: nil,
         foo: nil,
         test_attribute_1: nil,
       )
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
+    end
+  end
+
+  provider_state "there is a valid user session, with a 'wizard-news' email subscription" do
+    set_up do
+      stub_email_attribute_requests
+      stub_will_create_email_subscription "wizard-news-topic-slug"
+      FactoryBot.create(:email_subscription, name: "wizard-news", oidc_user_id: oidc_user.id)
     end
   end
 
@@ -109,13 +147,19 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  # TODO: remove when gds-api-adapters PR is merged
   provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
     set_up do
-      stub_remote_attribute_requests(
-        email: "user@example.com",
-        email_verified: true,
-        transition_checker_state: nil,
-      )
+      stub_email_attribute_requests
+      stub_remote_attribute_request(name: :transition_checker_state)
+      FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
+    end
+  end
+
+  provider_state "there is a valid user session, with '/guidance/some-govuk-guidance' saved" do
+    set_up do
+      stub_email_attribute_requests
+      stub_remote_attribute_request(name: :transition_checker_state)
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
     end
   end
@@ -126,6 +170,7 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  # TODO: remove when gds-api-adapters PR is merged
   provider_state "there is a valid user session, with an attribute called 'foo'" do
     set_up do
       stub_remote_attribute_request(name: "foo", value: { bar: "baz" })
