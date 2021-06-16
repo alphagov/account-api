@@ -30,30 +30,6 @@ module OidcClientHelper
     allow_any_instance_of(OidcClient).to receive(:tokens!).and_return(token_response)
     # rubocop:enable RSpec/AnyInstance
   end
-
-  def stub_oidc_client(client = nil)
-    oidc_client = instance_double("OpenIDConnect::Client")
-
-    if client
-      allow(client).to receive(:client).and_return(oidc_client)
-    else
-      # rubocop:disable RSpec/AnyInstance
-      allow_any_instance_of(OidcClient).to receive(:client).and_return(oidc_client)
-      # rubocop:enable RSpec/AnyInstance
-    end
-
-    oidc_client
-  end
-
-  def allow_token_refresh(client)
-    new_access_token = Rack::OAuth2::AccessToken::Bearer.new(
-      access_token: "new-access-token",
-      refresh_token: "new-refresh-token",
-    )
-
-    allow(client).to receive(:"refresh_token=").with("refresh-token")
-    allow(client).to receive(:access_token!).and_return(new_access_token)
-  end
 end
 
 RSpec.configuration.send :include, OidcClientHelper

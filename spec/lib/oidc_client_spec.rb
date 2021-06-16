@@ -59,8 +59,15 @@ RSpec.describe OidcClient do
 
   describe "the access token has expired" do
     before do
-      stub = stub_oidc_client(client)
-      allow_token_refresh(stub)
+      client_stub = stub_oidc_client(client)
+
+      new_access_token = Rack::OAuth2::AccessToken::Bearer.new(
+        access_token: "new-access-token",
+        refresh_token: "new-refresh-token",
+      )
+
+      allow(client_stub).to receive(:"refresh_token=").with("refresh-token")
+      allow(client_stub).to receive(:access_token!).and_return(new_access_token)
 
       @stub_fail = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
         .with(headers: { Authorization: "Bearer access-token" })
@@ -95,5 +102,19 @@ RSpec.describe OidcClient do
         expect { client.submit_jwt(jwt: "", access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
       end
     end
+  end
+
+  def stub_oidc_client(client = nil)
+    oidc_client = instance_double("OpenIDConnect::Client")
+
+    if client
+      allow(client).to receive(:client).and_return(oidc_client)
+    else
+      # rubocop:disable RSpec/AnyInstance
+      allow_any_instance_of(OidcClient).to receive(:client).and_return(oidc_client)
+      # rubocop:enable RSpec/AnyInstance
+    end
+
+    oidc_client
   end
 end
