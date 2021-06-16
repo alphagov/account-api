@@ -2,6 +2,8 @@ class AuthRequest < ApplicationRecord
   EXPIRATION_AGE = 2.hours
   scope :expired, -> { where("created_at < ?", EXPIRATION_AGE.ago) }
 
+  validates :oauth_state, presence: true
+  validates :oidc_nonce, presence: true
   validates :redirect_path, absolute_path_with_query_string: true
 
   def self.generate!(options = {})

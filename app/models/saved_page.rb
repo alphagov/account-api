@@ -1,6 +1,7 @@
 class SavedPage < ApplicationRecord
   belongs_to :oidc_user
 
+  validates :content_id, presence: true
   validates :page_path, uniqueness: { scope: :oidc_user_id }, presence: true, absolute_path: true
 
   def to_hash

@@ -6,6 +6,8 @@ RSpec.describe SavedPage do
   end
 
   describe "validations" do
+    it { is_expected.to validate_presence_of(:content_id) }
+
     it { is_expected.to validate_presence_of(:page_path) }
 
     it { is_expected.to validate_uniqueness_of(:page_path).scoped_to(:oidc_user_id) }
