@@ -20,8 +20,7 @@ RSpec.describe "Attributes" do
 
   describe "GET" do
     before do
-      stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
-        .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
+      stub_remote_attribute_request(name: attribute_name1, value: attribute_value1, status: status)
     end
 
     let(:params) { { attributes: [attribute_name1] } }
@@ -84,8 +83,7 @@ RSpec.describe "Attributes" do
 
     context "when multiple attributes are requested" do
       before do
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
-          .to_return(status: 200, body: { claim_value: attribute_value2 }.compact.to_json)
+        stub_remote_attribute_request(name: attribute_name2, value: attribute_value2)
 
         LocalAttribute.create!(
           oidc_user: OidcUser.find_or_create_by(sub: "user-id"),
