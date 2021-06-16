@@ -20,15 +20,12 @@ RSpec.describe "Attribute names" do
   let(:attribute_value2) { "some_value2" }
   let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
 
-  let(:status) { 200 }
   let(:response_body) { JSON.parse(response.body) }
 
   describe "GET #show" do
     context "when a single attribute is requested" do
       before do
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
-          .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
-
+        stub_remote_attribute_request(name: attribute_name1, value: attribute_value1)
         get attributes_names_path, headers: headers, params: params
       end
 
@@ -65,11 +62,8 @@ RSpec.describe "Attribute names" do
 
     context "when multiple attributes are requested" do
       before do
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
-          .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
-
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
-          .to_return(status: 200, body: { claim_value: attribute_value2 }.compact.to_json)
+        stub_remote_attribute_request(name: attribute_name1, value: attribute_value1)
+        stub_remote_attribute_request(name: attribute_name2, value: attribute_value2)
 
         LocalAttribute.create!(
           oidc_user: OidcUser.find_or_create_by(sub: "user-id"),
