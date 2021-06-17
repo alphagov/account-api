@@ -14,7 +14,7 @@ email_verified:
     get: 0
 
 has_unconfirmed_email:
-  type: remote
+  type: cached
   writable: false
   permissions:
     check: 0
