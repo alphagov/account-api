@@ -5,7 +5,7 @@ RSpec.describe "User information endpoint" do
 
   before do
     stub_oidc_discovery
-    stub_requests_for_attributes(attributes)
+    stub_remote_attribute_requests(attributes)
   end
 
   let(:session_identifier) { placeholder_govuk_account_session_object(level_of_authentication: level_of_authentication) }
@@ -91,16 +91,6 @@ RSpec.describe "User information endpoint" do
     it "returns a 401" do
       get "/api/user", headers: headers
       expect(response).to have_http_status(:unauthorized)
-    end
-  end
-
-  def stub_requests_for_attributes(attributes)
-    attributes.each do |name, value|
-      if value.nil?
-        stub_request(:get, "http://openid-provider/v1/attributes/#{name}").to_return(status: 404)
-      else
-        stub_request(:get, "http://openid-provider/v1/attributes/#{name}").to_return(body: { claim_value: value }.to_json)
-      end
     end
   end
 

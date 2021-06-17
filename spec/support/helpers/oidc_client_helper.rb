@@ -31,28 +31,16 @@ module OidcClientHelper
     # rubocop:enable RSpec/AnyInstance
   end
 
-  def stub_oidc_client(client = nil)
-    oidc_client = instance_double("OpenIDConnect::Client")
-
-    if client
-      allow(client).to receive(:client).and_return(oidc_client)
-    else
-      # rubocop:disable RSpec/AnyInstance
-      allow_any_instance_of(OidcClient).to receive(:client).and_return(oidc_client)
-      # rubocop:enable RSpec/AnyInstance
-    end
-
-    oidc_client
+  def stub_remote_attribute_request(name:, value: nil, status: nil)
+    status ||= value.nil? ? 404 : 200
+    stub_request(:get, "http://openid-provider/v1/attributes/#{name}")
+      .to_return(status: status, body: { claim_value: value }.compact.to_json)
   end
 
-  def allow_token_refresh(client)
-    new_access_token = Rack::OAuth2::AccessToken::Bearer.new(
-      access_token: "new-access-token",
-      refresh_token: "new-refresh-token",
-    )
-
-    allow(client).to receive(:"refresh_token=").with("refresh-token")
-    allow(client).to receive(:access_token!).and_return(new_access_token)
+  def stub_remote_attribute_requests(names_and_values = {})
+    names_and_values.each do |name, value|
+      stub_remote_attribute_request(name: name, value: value)
+    end
   end
 end
 
