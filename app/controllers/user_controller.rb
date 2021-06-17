@@ -1,14 +1,18 @@
 class UserController < ApplicationController
   include AuthenticatedApiConcern
 
-  HOMEPAGE_ATTRIBUTES = %i[email email_verified transition_checker_state].freeze
+  HOMEPAGE_ATTRIBUTES = %i[email email_verified has_unconfirmed_email transition_checker_state].freeze
 
   def show
+    has_unconfirmed_email = attributes.dig(:has_unconfirmed_email, :value)
+    has_unconfirmed_email = false if has_unconfirmed_email.nil?
+
     render_api_response(
       {
         level_of_authentication: @govuk_account_session.level_of_authentication,
         email: attributes.dig(:email, :value),
         email_verified: attributes.dig(:email_verified, :value),
+        has_unconfirmed_email: has_unconfirmed_email,
         services: {
           transition_checker: attribute_service(:transition_checker_state),
           saved_pages: saved_pages_service,

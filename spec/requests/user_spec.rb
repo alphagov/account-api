@@ -16,6 +16,7 @@ RSpec.describe "User information endpoint" do
     {
       email: "email@example.com",
       email_verified: true,
+      has_unconfirmed_email: false,
       transition_checker_state: transition_checker_state,
     }
   end
