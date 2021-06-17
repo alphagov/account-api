@@ -2,6 +2,8 @@ class OidcUser < ApplicationRecord
   has_many :local_attributes, dependent: :destroy
   has_many :saved_pages, dependent: :destroy
 
+  validates :sub, presence: true
+
   def get_local_attributes(names = [])
     local_attributes
       .where(name: names)
