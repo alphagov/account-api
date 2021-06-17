@@ -4,9 +4,10 @@ RSpec.describe "OIDC Users endpoint" do
   include GdsApi::TestHelpers::EmailAlertApi
 
   let(:headers) { { "Content-Type" => "application/json" } }
-  let(:params) { { email: email, email_verified: email_verified }.compact.to_json }
+  let(:params) { { email: email, email_verified: email_verified, has_unconfirmed_email: has_unconfirmed_email }.compact.to_json }
   let(:email) { "email@example.com" }
   let(:email_verified) { true }
+  let(:has_unconfirmed_email) { false }
   let(:subject_identifier) { "subject-identifier" }
 
   describe "PUT" do
@@ -24,6 +25,7 @@ RSpec.describe "OIDC Users endpoint" do
       put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
+      expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
     end
 
     context "when the user already exists" do
@@ -39,7 +41,7 @@ RSpec.describe "OIDC Users endpoint" do
 
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
 
-        expect(user.get_local_attributes(%i[email email_verified])).to eq({ "email" => email, "email_verified" => email_verified })
+        expect(user.get_local_attributes(%i[email email_verified has_unconfirmed_email])).to eq({ "email" => email, "email_verified" => email_verified, "has_unconfirmed_email" => has_unconfirmed_email })
       end
 
       context "when the user has email subscriptions" do
