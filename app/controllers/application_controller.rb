@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
 
+  before_action :nope
   before_action :authorise_sso_user!
 
   rescue_from ApiError::Base do |error|
@@ -12,6 +13,10 @@ class ApplicationController < ActionController::API
   end
 
 private
+
+  def nope
+    raise StandardError
+  end
 
   def authorise_sso_user!
     authorise_user!("internal_app")
