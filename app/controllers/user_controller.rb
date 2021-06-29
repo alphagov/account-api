@@ -9,6 +9,7 @@ class UserController < ApplicationController
 
     render_api_response(
       {
+        id: @govuk_account_session.user.id,
         level_of_authentication: @govuk_account_session.level_of_authentication,
         email: attributes.dig(:email, :value),
         email_verified: attributes.dig(:email_verified, :value),
