@@ -32,7 +32,7 @@ RSpec.describe "User information endpoint" do
 
   it "returns the user's ID" do
     get "/api/user", headers: headers
-    expect(response_body["id"]).to eq(session_identifier.user.id)
+    expect(response_body["id"]).to eq(session_identifier.user.id.to_s)
   end
 
   it "returns the user's level of authentication" do
