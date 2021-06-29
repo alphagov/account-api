@@ -220,6 +220,8 @@ Retrieves the information needed to render the `/account/home` page.
 
 #### JSON response fields
 
+- `id`
+  - the user identifier
 - `level_of_authentication`
   - the user's current level of authentication (`level0` or `level1`)
 - `email`
