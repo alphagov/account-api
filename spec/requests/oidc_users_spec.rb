@@ -11,6 +11,11 @@ RSpec.describe "OIDC Users endpoint" do
   let(:subject_identifier) { "subject-identifier" }
 
   describe "PUT" do
+    before do
+      next_oidc_user_id = ActiveRecord::Base.connection.execute("select last_value from oidc_users_id_seq").first["last_value"] + 1
+      stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(next_oidc_user_id)
+    end
+
     it "creates the user if they do not exist" do
       expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count).by(1)
       expect(response).to be_successful
@@ -42,6 +47,21 @@ RSpec.describe "OIDC Users endpoint" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
 
         expect(user.get_local_attributes(%i[email email_verified has_unconfirmed_email])).to eq({ "email" => email, "email_verified" => email_verified, "has_unconfirmed_email" => has_unconfirmed_email })
+      end
+
+      context "when the user has linked their notifications account" do
+        before do
+          stub_email_alert_api_find_subscriber_by_govuk_account(user.id, subscriber_id, "old-address@example.com")
+        end
+
+        let(:subscriber_id) { "subscriber-id" }
+
+        it "updates the subscriber" do
+          stub = stub_email_alert_api_has_updated_subscriber(subscriber_id, email, govuk_account_id: user.id)
+          put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+          expect(response).to be_successful
+          expect(stub).to have_been_made
+        end
       end
 
       context "when the user has email subscriptions" do
