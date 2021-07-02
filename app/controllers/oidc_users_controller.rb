@@ -18,6 +18,7 @@ class OidcUsersController < ApplicationController
         GdsApi.email_alert_api.change_subscriber(
           id: subscriber_id,
           new_address: attributes["email"],
+          on_conflict: "merge",
         )
       rescue GdsApi::HTTPNotFound
         # but for users who haven't linked their notifications account
