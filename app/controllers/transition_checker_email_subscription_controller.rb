@@ -4,13 +4,15 @@ class TransitionCheckerEmailSubscriptionController < ApplicationController
   def show
     check_permission! :check
 
-    render_api_response has_subscription: @govuk_account_session.has_email_subscription?
+    subscription = @govuk_account_session.get_transition_checker_email_subscription
+
+    render_api_response has_subscription: subscription.present?
   end
 
   def update
     check_permission! :set
 
-    @govuk_account_session.set_email_subscription(params.require(:slug))
+    @govuk_account_session.set_transition_checker_email_subscription(params.require(:slug))
     render_api_response
   end
 

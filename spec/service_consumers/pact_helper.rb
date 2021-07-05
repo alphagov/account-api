@@ -167,7 +167,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session, with a transition checker email subscription" do
     set_up do
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 204)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 200, body: { topic_slug: "slug" }.to_json)
     end
   end
 

@@ -125,24 +125,45 @@ class OidcClient
     end
   end
 
-  def has_email_subscription(access_token:, refresh_token: nil)
+  def get_transition_checker_email_subscription(access_token:, refresh_token: nil)
     response = oauth_request(
       access_token: access_token,
       refresh_token: refresh_token,
       method: :get,
-      uri: email_subscription_uri,
+      uri: transition_checker_email_subscription_uri,
     )
 
-    response.merge(result: (200..299).include?(response[:result].status))
+    body = response[:result].body
+    if response[:result].status != 200 || body.empty?
+      response.merge(result: nil)
+    else
+      response.merge(result: JSON.parse(body))
+    end
   end
 
-  def update_email_subscription(slug:, access_token:, refresh_token: nil)
-    oauth_request(
+  def set_transition_checker_email_subscription(slug:, access_token:, refresh_token: nil)
+    response = oauth_request(
       access_token: access_token,
       refresh_token: refresh_token,
       method: :post,
-      uri: email_subscription_uri,
+      uri: transition_checker_email_subscription_uri,
       arg: { topic_slug: slug },
+    )
+
+    body = response[:result].body
+    if response[:result].status != 200 || body.empty?
+      response.merge(result: nil)
+    else
+      response.merge(result: JSON.parse(body))
+    end
+  end
+
+  def migrate_transition_checker_email_subscription(access_token:, refresh_token: nil)
+    oauth_request(
+      access_token: access_token,
+      refresh_token: refresh_token,
+      method: :delete,
+      uri: transition_checker_email_subscription_uri,
     )
   end
 
@@ -209,7 +230,7 @@ private
     end
   end
 
-  def email_subscription_uri
+  def transition_checker_email_subscription_uri
     URI.parse(provider_uri).tap do |u|
       u.path = "/api/v1/transition-checker/email-subscription"
     end

@@ -86,12 +86,16 @@ class AccountSession
     set_remote_attributes(remote)
   end
 
-  def has_email_subscription?
-    oidc_do :has_email_subscription
+  def get_transition_checker_email_subscription
+    oidc_do :get_transition_checker_email_subscription
   end
 
-  def set_email_subscription(slug)
-    oidc_do :update_email_subscription, { slug: slug }
+  def set_transition_checker_email_subscription(slug)
+    oidc_do :set_transition_checker_email_subscription, { slug: slug }
+  end
+
+  def migrate_transition_checker_email_subscription
+    oidc_do :migrate_transition_checker_email_subscription
   end
 
 private

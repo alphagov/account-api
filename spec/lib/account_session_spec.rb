@@ -201,22 +201,23 @@ RSpec.describe AccountSession do
   end
 
   describe "email subscriptions" do
-    describe "has_email_subscription?" do
+    describe "get_transition_checker_email_subscription?" do
       before do
-        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status)
+        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status, body: body)
       end
 
-      let(:status) { 204 }
+      let(:status) { 200 }
+      let(:body) { { topic_slug: "topic" }.to_json }
 
       it "returns 'true'" do
-        expect(account_session.has_email_subscription?).to be(true)
+        expect(account_session.get_transition_checker_email_subscription).to eq({ "topic_slug" => "topic" })
       end
 
       context "when the user has a deactivated email subscription" do
         let(:status) { 410 }
 
         it "returns 'false'" do
-          expect(account_session.has_email_subscription?).to be(false)
+          expect(account_session.get_transition_checker_email_subscription).to be_nil
         end
       end
 
@@ -224,12 +225,12 @@ RSpec.describe AccountSession do
         let(:status) { 404 }
 
         it "returns 'false'" do
-          expect(account_session.has_email_subscription?).to be(false)
+          expect(account_session.get_transition_checker_email_subscription).to be_nil
         end
       end
     end
 
-    describe "set_email_subscription" do
+    describe "set_transition_checker_email_subscription" do
       let(:slug) { "email-topic-slug" }
 
       it "calls the account manager" do
@@ -237,7 +238,17 @@ RSpec.describe AccountSession do
           .with(body: hash_including(topic_slug: slug))
           .to_return(status: 200)
 
-        account_session.set_email_subscription slug
+        account_session.set_transition_checker_email_subscription slug
+        expect(stub).to have_been_made
+      end
+    end
+
+    describe "migrate_transition_checker_email_subscription" do
+      it "calls the account manager" do
+        stub = stub_request(:delete, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: 204)
+
+        account_session.migrate_transition_checker_email_subscription
         expect(stub).to have_been_made
       end
     end

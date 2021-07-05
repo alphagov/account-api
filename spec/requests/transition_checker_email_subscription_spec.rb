@@ -12,13 +12,15 @@ RSpec.describe "Transition Checker email subscriptions" do
 
   describe "GET" do
     before do
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: status, body: body)
     end
 
     let(:status) { 500 }
+    let(:body) { nil }
 
     context "when the user has an email subscription" do
-      let(:status) { 204 }
+      let(:status) { 200 }
+      let(:body) { { topic_slug: "topic", subscription_id: "id" }.to_json }
 
       it "returns 'true'" do
         get transition_checker_email_subscription_path, headers: headers

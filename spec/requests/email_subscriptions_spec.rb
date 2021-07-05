@@ -43,6 +43,70 @@ RSpec.describe "Email subscriptions" do
         end
       end
     end
+
+    context "when it's the transition checker subscription" do
+      before do
+        stub_oidc_discovery
+
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
+        # rubocop:enable RSpec/AnyInstance
+      end
+
+      let(:status) { 200 }
+      let(:slug) { "slug" }
+      let(:subscription_id) { "id" }
+
+      it "calls the account manager" do
+        stub = stub_account_manager
+        get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+        expect(stub).to have_been_made
+      end
+
+      it "returns the subscription details" do
+        stub_account_manager
+        get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)["email_subscription"]).to eq({ "name" => "transition-checker-results", "topic_slug" => slug, "email_alert_api_subscription_id" => subscription_id })
+      end
+
+      context "when the user has a deactivated email subscription" do
+        let(:status) { 410 }
+
+        it "returns a 404" do
+          stub_account_manager
+          get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+
+      context "when the user does not have an email subscription" do
+        let(:status) { 404 }
+
+        it "returns a 404" do
+          stub_account_manager
+          get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+
+      context "when the tokens are rejected" do
+        before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
+
+        let(:status) { 401 }
+
+        it "returns a 401" do
+          stub_account_manager
+          get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+          expect(response).to have_http_status(:unauthorized)
+        end
+      end
+
+      def stub_account_manager
+        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: status, body: { topic_slug: slug, subscription_id: subscription_id }.to_json)
+      end
+    end
   end
 
   describe "PUT /api/email-subscriptions/:subscription_name" do
@@ -118,6 +182,53 @@ RSpec.describe "Email subscriptions" do
             expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
           end
         end
+      end
+    end
+
+    context "when it's the transition checker subscription" do
+      before do
+        stub_oidc_discovery
+
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
+        # rubocop:enable RSpec/AnyInstance
+      end
+
+      let(:status) { 200 }
+      let(:body) { nil }
+      let(:slug) { "slug" }
+      let(:subscription_id) { "id" }
+
+      it "calls the account manager" do
+        stub = stub_account_manager
+        put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+        expect(stub).to have_been_made
+      end
+
+      it "returns the subscription details" do
+        stub_account_manager
+        put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)["email_subscription"]).to eq({ "name" => "transition-checker-results", "topic_slug" => slug, "email_alert_api_subscription_id" => subscription_id })
+      end
+
+      context "when the tokens are rejected" do
+        before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
+
+        let(:status) { 401 }
+
+        it "returns a 401" do
+          stub_account_manager
+
+          put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+          expect(response).to have_http_status(:unauthorized)
+        end
+      end
+
+      def stub_account_manager
+        stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .with(body: hash_including(topic_slug: slug))
+          .to_return(status: status, body: { topic_slug: slug, subscription_id: subscription_id }.to_json)
       end
     end
 
