@@ -146,6 +146,8 @@ On a `401: Unauthorized` response, the identity provider has rejected the authen
   - the `redirect_path` which was previously passed to `GET /api/oauth2/sign-in`, if given
 - `ga_client_id` *(optional)*
   - the Google Analytics client ID which the identity provider used for analytics
+- `cookie_consent` *(optional)*
+  - whether the user saved a "usage" cookie consent
 
 #### Response codes
 
@@ -169,7 +171,8 @@ Response:
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "redirect_path": "/guidance/keeping-a-pet-pig-or-micropig",
-    "ga_client_id": "ga-123-userid"
+    "ga_client_id": "ga-123-userid",
+    "cookie_consent": false,
 }
 ```
 
