@@ -38,6 +38,7 @@ class AuthenticationController < ApplicationController
       ).serialise,
       redirect_path: redirect_path,
       ga_client_id: oauth_response.fetch(:result)["_ga"],
+      cookie_consent: oauth_response.fetch(:result)["cookie_consent"],
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
