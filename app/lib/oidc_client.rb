@@ -118,25 +118,6 @@ class OidcClient
     end
   end
 
-  def submit_jwt(jwt:, access_token:, refresh_token: nil)
-    response = time_and_return "submit_jwt" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :post,
-        uri: jwt_uri,
-        arg: { jwt: jwt },
-      )
-    end
-
-    body = response[:result].body
-    if body.empty?
-      raise OAuthFailure
-    else
-      response.merge(result: JSON.parse(body))
-    end
-  end
-
   def get_transition_checker_email_subscription(access_token:, refresh_token: nil)
     response = time_and_return "get_transition_checker_email_subscription" do
       oauth_request(
@@ -239,12 +220,6 @@ private
   def bulk_attribute_uri
     URI.parse(userinfo_endpoint).tap do |u|
       u.path = "/v1/attributes"
-    end
-  end
-
-  def jwt_uri
-    URI.parse(provider_uri).tap do |u|
-      u.path = "/api/v1/jwt"
     end
   end
 

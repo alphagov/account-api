@@ -2,10 +2,7 @@ class AuthenticationController < ApplicationController
   def sign_in
     AuthRequest.expired.delete_all
 
-    auth_request = AuthRequest.generate!(
-      oauth_state: params[:state_id],
-      redirect_path: params[:redirect_path],
-    )
+    auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
     render json: {
       auth_uri: OidcClient.new.auth_uri(auth_request, params.fetch(:level_of_authentication, LevelOfAuthentication::DEFAULT_FOR_SIGN_IN)),
@@ -42,23 +39,5 @@ class AuthenticationController < ApplicationController
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
-  end
-
-  def create_state
-    payload = {
-      attributes: params[:attributes].permit!.to_h,
-    }.compact
-
-    client = OidcClient.new
-    tokens = client.tokens!
-    oauth_response = client.submit_jwt(
-      jwt: JWT.encode(payload, nil, "none"),
-      access_token: tokens[:access_token],
-      refresh_token: tokens[:refresh_token],
-    )
-
-    render json: {
-      state_id: oauth_response[:result]["id"],
-    }
   end
 end
