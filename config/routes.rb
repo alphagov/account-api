@@ -32,9 +32,5 @@ Rails.application.routes.draw do
     get "/saved_pages/:page_path", to: "saved_pages#show"
     put "/saved_pages/:page_path", to: "saved_pages#update"
     delete "/saved_pages/:page_path", to: "saved_pages#destroy"
-
-    # delete (+ controller) when gds-api-adapters has been updated
-    get "/transition-checker-email-subscription", to: "transition_checker_email_subscription#show"
-    post "/transition-checker-email-subscription", to: "transition_checker_email_subscription#update"
   end
 end
