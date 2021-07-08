@@ -17,11 +17,8 @@ RSpec.describe "User information endpoint" do
       email: "email@example.com",
       email_verified: true,
       has_unconfirmed_email: false,
-      transition_checker_state: transition_checker_state,
     }
   end
-
-  let(:transition_checker_state) { nil }
 
   let(:response_body) { JSON.parse(response.body) }
 
@@ -55,7 +52,7 @@ RSpec.describe "User information endpoint" do
     end
 
     context "when the user has used the checker" do
-      let(:transition_checker_state) { "state" }
+      before { FactoryBot.create(:local_attribute, oidc_user: session_identifier.user, name: "transition_checker_state", value: "state") }
 
       it "returns 'yes_but_must_reauthenticate'" do
         get "/api/user", headers: headers

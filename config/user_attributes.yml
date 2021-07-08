@@ -21,7 +21,7 @@ has_unconfirmed_email:
     get: 0
 
 transition_checker_state:
-  type: cached
+  type: local
   permissions:
     check: 0
     get: 1
