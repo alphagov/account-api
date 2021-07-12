@@ -11,7 +11,6 @@ management. This API is not for other government services.
 - [API endpoints](#api-endpoints)
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
-  - [`POST /api/oauth2/state`](#post-apioauth2state)
   - [`GET /api/user`](#get-apiuser)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
@@ -89,8 +88,6 @@ This URL should be served to the user with a 302 response to authenticate the us
 
 - `level_of_authentication` *(optional)*
   - either `level1` (require MFA) or `level0` (do not require MFA, the default)
-- `state_id` *(optional)*
-  - an identifier returned from a previous call to `POST /api/oauth2/state`
 - `redirect_path` *(optional)*
   - a path on GOV.UK to send the user to after authenticating
 
@@ -112,7 +109,6 @@ Request (with gds-api-adapters):
 ```ruby
 GdsApi.account_api.get_sign_in_url(
     redirect_path: "/guidance/keeping-a-pet-pig-or-micropig",
-    state_id: "12345",
 )
 ```
 
@@ -173,42 +169,6 @@ Response:
     "redirect_path": "/guidance/keeping-a-pet-pig-or-micropig",
     "ga_client_id": "ga-123-userid",
     "cookie_consent": false,
-}
-```
-
-### `POST /api/oauth2/state`
-
-Stores some initial attributes which will be persisted if a user creates an account rather than logging in.
-
-#### JSON request parameters
-
-- `attributes`
-  - a JSON object where keys are attribute names and values are attribute values
-
-#### JSON response fields
-
-- `state_id`
-  - an identifier to pass to `GET /api/oauth2/sign-in`
-
-#### Response codes
-
-- 200
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.create_registration_state(
-    attributes: { name1: "value1", name2: "value2" },
-)
-```
-
-Response:
-
-```json
-{
-    "state_id": "5821a9f9-3ba7-4385-a864-80cdb374550a"
 }
 ```
 

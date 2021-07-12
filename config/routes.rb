@@ -9,7 +9,6 @@ Rails.application.routes.draw do
     scope :oauth2 do
       get "/sign-in", to: "authentication#sign_in"
       post "/callback", to: "authentication#callback"
-      post "/state", to: "authentication#create_state"
     end
 
     get "/user", to: "user#show"

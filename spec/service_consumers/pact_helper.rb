@@ -88,8 +88,6 @@ Pact.provider_states_for "GDS API Adapters" do
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
     allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
 
-    stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt").to_return(status: 200, body: { id: "jwt-id" }.to_json)
-
     stub_content_store_has_item(
       "/guidance/some-govuk-guidance",
       content_item_for_base_path("/guidance/some-govuk-guidance").merge("content_id" => SecureRandom.uuid),

@@ -21,11 +21,6 @@ RSpec.describe "Authentication" do
       expect(auth_uri).to include("state=#{auth_request.to_oauth_state.sub(':', '%3A')}")
     end
 
-    it "uses a provided state_id" do
-      get sign_in_path, params: { state_id: "hello-world" }
-      expect(AuthRequest.last.oauth_state).to eq("hello-world")
-    end
-
     it "uses a provided redirect_path" do
       get sign_in_path, params: { redirect_path: "/transition-check/results?c[]=import-wombats&c[]=practice-wizardry" }
       expect(AuthRequest.last.redirect_path).to eq("/transition-check/results?c[]=import-wombats&c[]=practice-wizardry")
@@ -63,18 +58,6 @@ RSpec.describe "Authentication" do
 
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to have_http_status(:unauthorized)
-    end
-  end
-
-  describe "/state" do
-    it "submits a JWT to the account manager" do
-      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
-        .with(headers: { "Authorization" => "Bearer access-token" })
-        .to_return(status: 200, body: { id: "jwt-id" }.to_json)
-
-      post state_path, headers: headers, params: { attributes: { key: "value" } }.to_json
-      expect(response).to be_successful
-      expect(JSON.parse(response.body)).to include("state_id" => "jwt-id")
     end
   end
 end

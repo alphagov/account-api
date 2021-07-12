@@ -6,16 +6,14 @@ class AuthRequest < ApplicationRecord
   validates :oidc_nonce, presence: true
   validates :redirect_path, absolute_path_with_query_string: true
 
-  def self.generate!(options = {})
+  def self.generate!(redirect_path: nil)
     create!(
-      oauth_state: options[:oauth_state] || SecureRandom.hex(16),
+      oauth_state: SecureRandom.hex(16),
       oidc_nonce: SecureRandom.hex(16),
-      redirect_path: options[:redirect_path],
+      redirect_path: redirect_path,
     )
   end
 
-  # This has to be something which the account manager can use to retrieve a JWT, if there is one:
-  # https://github.com/alphagov/govuk-account-manager-prototype/blob/6a68e02055fe3c70083b3899b474b10cc944ffa5/config/initializers/doorkeeper.rb#L14
   def to_oauth_state
     "#{oauth_state}:#{id}"
   end

@@ -49,14 +49,6 @@ RSpec.describe OidcClient do
     end
   end
 
-  describe "submit_jwt" do
-    it "raises an error if there is no JSON" do
-      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt").to_return(body: "")
-
-      expect { client.submit_jwt(jwt: "foo", access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
-    end
-  end
-
   describe "the access token has expired" do
     before do
       client_stub = stub_oidc_client(client)
@@ -69,17 +61,17 @@ RSpec.describe OidcClient do
       allow(client_stub).to receive(:"refresh_token=").with("refresh-token")
       allow(client_stub).to receive(:access_token!).and_return(new_access_token)
 
-      @stub_fail = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
+      @stub_fail = stub_request(:get, "http://openid-provider/userinfo-endpoint")
         .with(headers: { Authorization: "Bearer access-token" })
         .to_return(status: 401)
     end
 
     it "refreshes the token and retries" do
-      stub_success = stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
+      stub_success = stub_request(:get, "http://openid-provider/userinfo-endpoint")
         .with(headers: { Authorization: "Bearer new-access-token" })
         .to_return(status: 200, body: { id: "foo" }.to_json)
 
-      client.submit_jwt(jwt: "", access_token: "access-token", refresh_token: "refresh-token")
+      client.userinfo(access_token: "access-token", refresh_token: "refresh-token")
 
       # rubocop:disable RSpec/InstanceVariable
       expect(@stub_fail).to have_been_made
@@ -89,17 +81,17 @@ RSpec.describe OidcClient do
 
     context "but there is no refresh token" do
       it "fails" do
-        expect { client.submit_jwt(jwt: "", access_token: "access-token", refresh_token: nil) }.to raise_error(OidcClient::OAuthFailure)
+        expect { client.userinfo(access_token: "access-token", refresh_token: nil) }.to raise_error(OidcClient::OAuthFailure)
       end
     end
 
     context "but the refreshed access token fails" do
       it "fails" do
-        stub_request(:post, "#{Plek.find('account-manager')}/api/v1/jwt")
+        stub_request(:get, "http://openid-provider/userinfo-endpoint")
           .with(headers: { Authorization: "Bearer new-access-token" })
           .to_return(status: 401)
 
-        expect { client.submit_jwt(jwt: "", access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
+        expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
       end
     end
   end
