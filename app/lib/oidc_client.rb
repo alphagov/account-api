@@ -31,7 +31,9 @@ class OidcClient
   def callback(auth_request, code)
     client.authorization_code = code
 
-    tokens!(oidc_nonce: auth_request.oidc_nonce)
+    time_and_return "tokens" do
+      tokens!(oidc_nonce: auth_request.oidc_nonce)
+    end
   end
 
   def tokens!(oidc_nonce: nil)
@@ -53,12 +55,14 @@ class OidcClient
   end
 
   def userinfo(access_token:, refresh_token:)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :get,
-      uri: userinfo_endpoint,
-    )
+    response = time_and_return "userinfo" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :get,
+        uri: userinfo_endpoint,
+      )
+    end
 
     begin
       response.merge(result: JSON.parse(response[:result].body))
@@ -68,12 +72,14 @@ class OidcClient
   end
 
   def get_ephemeral_state(access_token:, refresh_token:)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :get,
-      uri: ephemeral_state_uri,
-    )
+    response = time_and_return "get_ephemeral_state" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :get,
+        uri: ephemeral_state_uri,
+      )
+    end
 
     begin
       response.merge(result: JSON.parse(response[:result].body))
@@ -83,12 +89,14 @@ class OidcClient
   end
 
   def get_attribute(attribute:, access_token:, refresh_token: nil)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :get,
-      uri: attribute_uri(attribute),
-    )
+    response = time_and_return "get_attribute" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :get,
+        uri: attribute_uri(attribute),
+      )
+    end
 
     body = response[:result].body
     if response[:result].status != 200 || body.empty?
@@ -99,23 +107,27 @@ class OidcClient
   end
 
   def bulk_set_attributes(attributes:, access_token:, refresh_token: nil)
-    oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :post,
-      uri: bulk_attribute_uri,
-      arg: attributes.transform_keys { |key| "attributes[#{key}]" }.transform_values(&:to_json),
-    )
+    time_and_return "bulk_set_attributes" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :post,
+        uri: bulk_attribute_uri,
+        arg: attributes.transform_keys { |key| "attributes[#{key}]" }.transform_values(&:to_json),
+      )
+    end
   end
 
   def submit_jwt(jwt:, access_token:, refresh_token: nil)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :post,
-      uri: jwt_uri,
-      arg: { jwt: jwt },
-    )
+    response = time_and_return "submit_jwt" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :post,
+        uri: jwt_uri,
+        arg: { jwt: jwt },
+      )
+    end
 
     body = response[:result].body
     if body.empty?
@@ -126,12 +138,14 @@ class OidcClient
   end
 
   def get_transition_checker_email_subscription(access_token:, refresh_token: nil)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :get,
-      uri: transition_checker_email_subscription_uri,
-    )
+    response = time_and_return "get_transition_checker_email_subscription" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :get,
+        uri: transition_checker_email_subscription_uri,
+      )
+    end
 
     body = response[:result].body
     if response[:result].status != 200 || body.empty?
@@ -142,13 +156,15 @@ class OidcClient
   end
 
   def set_transition_checker_email_subscription(slug:, access_token:, refresh_token: nil)
-    response = oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :post,
-      uri: transition_checker_email_subscription_uri,
-      arg: { topic_slug: slug },
-    )
+    response = time_and_return "set_transition_checker_email_subscription" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :post,
+        uri: transition_checker_email_subscription_uri,
+        arg: { topic_slug: slug },
+      )
+    end
 
     body = response[:result].body
     if response[:result].status != 200 || body.empty?
@@ -159,12 +175,14 @@ class OidcClient
   end
 
   def migrate_transition_checker_email_subscription(access_token:, refresh_token: nil)
-    oauth_request(
-      access_token: access_token,
-      refresh_token: refresh_token,
-      method: :delete,
-      uri: transition_checker_email_subscription_uri,
-    )
+    time_and_return "migrate_transition_checker_email_subscription" do
+      oauth_request(
+        access_token: access_token,
+        refresh_token: refresh_token,
+        method: :delete,
+        uri: transition_checker_email_subscription_uri,
+      )
+    end
   end
 
 private
@@ -252,6 +270,14 @@ private
   end
 
   def cached_discover_response
-    Rails.cache.fetch("oidc/discover/#{provider_uri}") { OpenIDConnect::Discovery::Provider::Config.discover!(provider_uri).raw }
+    Rails.cache.fetch "oidc/discover/#{provider_uri}" do
+      time_and_return "discover" do
+        OpenIDConnect::Discovery::Provider::Config.discover!(provider_uri).raw
+      end
+    end
+  end
+
+  def time_and_return(name, &block)
+    GovukStatsd.time("oidc_client.#{name}", &block)
   end
 end
