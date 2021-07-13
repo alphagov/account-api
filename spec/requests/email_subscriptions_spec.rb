@@ -51,23 +51,42 @@ RSpec.describe "Email subscriptions" do
         # rubocop:disable RSpec/AnyInstance
         allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
         # rubocop:enable RSpec/AnyInstance
+
+        stub_email_alert_api_has_subscription(subscription_id, "daily")
       end
 
       let(:status) { 200 }
       let(:slug) { "slug" }
       let(:subscription_id) { "id" }
 
-      it "calls the account manager" do
-        stub = stub_account_manager
+      it "calls the account manager and migrates the subscription" do
+        stubs = stub_account_manager
         get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
-        expect(stub).to have_been_made
+        expect(stubs[:get]).to have_been_made
+        expect(stubs[:delete]).to have_been_made
       end
 
       it "returns the subscription details" do
         stub_account_manager
         get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
         expect(response).to be_successful
-        expect(JSON.parse(response.body)["email_subscription"]).to eq({ "name" => "transition-checker-results", "topic_slug" => slug, "email_alert_api_subscription_id" => subscription_id })
+
+        response_subscription_details = JSON.parse(response.body)["email_subscription"]
+        database_subscription_details = EmailSubscription.where(name: "transition-checker-results").last.to_hash
+        expect(response_subscription_details).to eq(database_subscription_details)
+      end
+
+      context "when the subscription has already been migrated" do
+        before do
+          FactoryBot.create(:email_subscription, oidc_user: session_identifier.user, name: "transition-checker-results", topic_slug: "slug")
+        end
+
+        it "does not re-migrate it" do
+          stubs = stub_account_manager
+          get email_subscription_path(subscription_name: "transition-checker-results"), headers: headers
+          expect(stubs[:get]).not_to have_been_made
+          expect(stubs[:delete]).not_to have_been_made
+        end
       end
 
       context "when the user has a deactivated email subscription" do
@@ -103,8 +122,12 @@ RSpec.describe "Email subscriptions" do
       end
 
       def stub_account_manager
-        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+        stub_get = stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
           .to_return(status: status, body: { topic_slug: slug, subscription_id: subscription_id }.to_json)
+        stub_delete = stub_request(:delete, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: 204)
+
+        { get: stub_get, delete: stub_delete }
       end
     end
   end
@@ -192,6 +215,9 @@ RSpec.describe "Email subscriptions" do
         # rubocop:disable RSpec/AnyInstance
         allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
         # rubocop:enable RSpec/AnyInstance
+
+        stub_local_attributes
+        stub_email_alert_api_unsubscribes_a_subscription(subscription_id)
       end
 
       let(:status) { 200 }
@@ -199,17 +225,34 @@ RSpec.describe "Email subscriptions" do
       let(:slug) { "slug" }
       let(:subscription_id) { "id" }
 
-      it "calls the account manager" do
-        stub = stub_account_manager
+      it "calls the account manager and migrates the subscription" do
+        stubs = stub_account_manager
         put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
-        expect(stub).to have_been_made
+        expect(stubs[:get]).to have_been_made
+        expect(stubs[:delete]).to have_been_made
       end
 
       it "returns the subscription details" do
         stub_account_manager
         put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
         expect(response).to be_successful
-        expect(JSON.parse(response.body)["email_subscription"]).to eq({ "name" => "transition-checker-results", "topic_slug" => slug, "email_alert_api_subscription_id" => subscription_id })
+
+        response_subscription_details = JSON.parse(response.body)["email_subscription"]
+        database_subscription_details = EmailSubscription.where(name: "transition-checker-results").last.to_hash
+        expect(response_subscription_details).to eq(database_subscription_details)
+      end
+
+      context "when the subscription has already been migrated" do
+        before do
+          FactoryBot.create(:email_subscription, oidc_user: session_identifier.user, name: "transition-checker-results", topic_slug: "slug")
+        end
+
+        it "does not re-migrate it" do
+          stubs = stub_account_manager
+          put email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+          expect(stubs[:get]).not_to have_been_made
+          expect(stubs[:delete]).not_to have_been_made
+        end
       end
 
       context "when the tokens are rejected" do
@@ -226,9 +269,12 @@ RSpec.describe "Email subscriptions" do
       end
 
       def stub_account_manager
-        stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
-          .with(body: hash_including(topic_slug: slug))
+        stub_get = stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
           .to_return(status: status, body: { topic_slug: slug, subscription_id: subscription_id }.to_json)
+        stub_delete = stub_request(:delete, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: 204)
+
+        { get: stub_get, delete: stub_delete }
       end
     end
 
@@ -276,6 +322,65 @@ RSpec.describe "Email subscriptions" do
 
         expect(response).to have_http_status(:no_content)
         expect(stub_cancel_old).to have_been_made
+      end
+    end
+
+    context "when it's the transition checker subscription" do
+      before do
+        stub_oidc_discovery
+
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(OidcClient).to receive(:tokens!).and_return({ access_token: "access-token", refresh_token: "refresh-token" })
+        # rubocop:enable RSpec/AnyInstance
+      end
+
+      let(:status) { 200 }
+      let(:body) { nil }
+      let(:slug) { "slug" }
+      let(:subscription_id) { "id" }
+
+      it "calls the account manager and migrates the subscription" do
+        stubs = stub_account_manager
+        stub_email_alert_api_unsubscribes_a_subscription(subscription_id)
+        delete email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+        expect(stubs[:get]).to have_been_made
+        expect(stubs[:delete]).to have_been_made
+      end
+
+      context "when the subscription has already been migrated" do
+        before do
+          FactoryBot.create(:email_subscription, oidc_user: session_identifier.user, name: "transition-checker-results", topic_slug: "slug")
+        end
+
+        it "does not re-migrate it" do
+          stubs = stub_account_manager
+          stub_email_alert_api_unsubscribes_a_subscription(subscription_id)
+          delete email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+          expect(stubs[:get]).not_to have_been_made
+          expect(stubs[:delete]).not_to have_been_made
+        end
+      end
+
+      context "when the tokens are rejected" do
+        before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
+
+        let(:status) { 401 }
+
+        it "returns a 401" do
+          stub_account_manager
+
+          delete email_subscription_path(subscription_name: "transition-checker-results"), headers: headers, params: { topic_slug: slug }.to_json
+          expect(response).to have_http_status(:unauthorized)
+        end
+      end
+
+      def stub_account_manager
+        stub_get = stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: status, body: { topic_slug: slug, subscription_id: subscription_id }.to_json)
+        stub_delete = stub_request(:delete, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription")
+          .to_return(status: 204)
+
+        { get: stub_get, delete: stub_delete }
       end
     end
   end
