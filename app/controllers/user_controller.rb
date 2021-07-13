@@ -1,7 +1,7 @@
 class UserController < ApplicationController
   include AuthenticatedApiConcern
 
-  HOMEPAGE_ATTRIBUTES = %i[email email_verified has_unconfirmed_email transition_checker_state].freeze
+  HOMEPAGE_ATTRIBUTES = %w[email email_verified has_unconfirmed_email transition_checker_state].freeze
 
   def show
     has_unconfirmed_email = attributes.dig(:has_unconfirmed_email, :value)
@@ -11,11 +11,11 @@ class UserController < ApplicationController
       {
         id: @govuk_account_session.user.id.to_s,
         level_of_authentication: @govuk_account_session.level_of_authentication,
-        email: attributes.dig(:email, :value),
-        email_verified: attributes.dig(:email_verified, :value),
+        email: attributes.dig("email", :value),
+        email_verified: attributes.dig("email_verified", :value),
         has_unconfirmed_email: has_unconfirmed_email,
         services: {
-          transition_checker: attribute_service(:transition_checker_state),
+          transition_checker: attribute_service("transition_checker_state"),
           saved_pages: saved_pages_service,
         }.compact,
       },
@@ -39,7 +39,7 @@ private
   def attributes
     @attributes ||=
       begin
-        attribute_values = @govuk_account_session.get_attributes(HOMEPAGE_ATTRIBUTES.select { |name| has_permission_for name, :check }).symbolize_keys
+        attribute_values = @govuk_account_session.get_attributes(HOMEPAGE_ATTRIBUTES.select { |name| has_permission_for name, :check })
 
         HOMEPAGE_ATTRIBUTES.index_with do |name|
           if attribute_values.key? name
