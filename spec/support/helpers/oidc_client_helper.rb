@@ -31,6 +31,11 @@ module OidcClientHelper
     # rubocop:enable RSpec/AnyInstance
   end
 
+  def stub_userinfo(attributes = {})
+    stub_request(:get, "http://openid-provider/userinfo-endpoint")
+      .to_return(status: 200, body: attributes.to_json)
+  end
+
   def stub_remote_attribute_request(name:, value: nil, status: nil)
     status ||= value.nil? ? 404 : 200
     stub_request(:get, "http://openid-provider/v1/attributes/#{name}")

@@ -5,6 +5,7 @@ RSpec.describe "User information endpoint" do
 
   before do
     stub_oidc_discovery
+    stub_userinfo
     stub_remote_attribute_requests(attributes)
   end
 

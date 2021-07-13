@@ -14,7 +14,7 @@ class AccountSession
     @level_of_authentication = level_of_authentication
     @frozen = false
 
-    @user_id = user_id || oidc_do(:userinfo)["sub"]
+    @user_id = user_id || userinfo["sub"]
   end
 
   def self.deserialise(encoded_session:, session_signing_key:)
@@ -103,7 +103,15 @@ private
   attr_reader :session_signing_key
 
   def get_remote_attributes(remote_attributes)
-    remote_attributes.index_with { |name| oidc_do :get_attribute, { attribute: name } }.compact
+    values = remote_attributes.index_with do |name|
+      if userinfo.key? name
+        userinfo[name]
+      else
+        oidc_do :get_attribute, { attribute: name }
+      end
+    end
+
+    values.compact
   end
 
   def set_remote_attributes(remote_attributes)
@@ -122,6 +130,10 @@ private
     @access_token = oauth_response[:access_token]
     @refresh_token = oauth_response[:refresh_token]
     oauth_response[:result]
+  end
+
+  def userinfo
+    @userinfo ||= oidc_do :userinfo
   end
 
   def oidc_client

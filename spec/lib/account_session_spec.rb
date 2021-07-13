@@ -91,6 +91,7 @@ RSpec.describe AccountSession do
 
     describe "get_attributes" do
       before do
+        stub_userinfo
         stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
           .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
         stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
@@ -108,6 +109,18 @@ RSpec.describe AccountSession do
 
         values = account_session.get_attributes([attribute_name1, attribute_name2, local_attribute_name])
         expect(values).to eq({ attribute_name1 => attribute_value1, attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
+      end
+
+      context "when the attribute value is in the userinfo response" do
+        before do
+          stub_userinfo(attribute_name1 => value_from_userinfo)
+        end
+
+        let(:value_from_userinfo) { "value-from-userinfo" }
+
+        it "uses the value from the userinfo response" do
+          expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => value_from_userinfo })
+        end
       end
 
       context "when some attributes are not found" do

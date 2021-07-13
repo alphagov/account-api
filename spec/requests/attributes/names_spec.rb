@@ -1,6 +1,7 @@
 RSpec.describe "Attribute names" do
   before do
     stub_oidc_discovery
+    stub_userinfo
 
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
     allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)

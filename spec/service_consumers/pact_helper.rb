@@ -77,6 +77,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
     stub_oidc_discovery
     stub_token_response
+    stub_userinfo
 
     account_session = placeholder_govuk_account_session_object(
       user_id: oidc_user.sub,
