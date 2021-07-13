@@ -5,8 +5,7 @@ RSpec.describe "User information endpoint" do
 
   before do
     stub_oidc_discovery
-    stub_userinfo
-    stub_remote_attribute_requests(attributes)
+    stub_userinfo(attributes)
   end
 
   let(:session_identifier) { placeholder_govuk_account_session_object(level_of_authentication: level_of_authentication) }
