@@ -148,16 +148,14 @@ RSpec.describe "Email subscriptions" do
 
     it "fetches the email & email_verified attributes if they aren't cached locally" do
       stub_oidc_discovery
-      stub_email = stub_request(:get, "http://openid-provider/v1/attributes/email").to_return(body: { claim_value: "email@example.com" }.to_json)
-      stub_email_verified = stub_request(:get, "http://openid-provider/v1/attributes/email_verified").to_return(body: { claim_value: false }.to_json)
+      stub = stub_userinfo(email: "email@example.com", email_verified: false)
 
       expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
 
       expect(response).to be_successful
       expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
 
-      expect(stub_email).to have_been_made
-      expect(stub_email_verified).to have_been_made
+      expect(stub).to have_been_made
     end
 
     context "when the user has verified their email address" do
