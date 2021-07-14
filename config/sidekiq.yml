@@ -3,3 +3,8 @@
 
 :queues:
   - default
+
+:schedule:
+  expired_auth_request_worker:
+    every: '1h'
+    class: ExpiredAuthRequestWorker
