@@ -13,9 +13,11 @@ gem "gds-api-adapters"
 gem "gds-sso"
 gem "govuk_app_config"
 gem "govuk_message_queue_consumer"
+gem "govuk_sidekiq"
 gem "httparty"
 gem "openid_connect"
 gem "pg"
+gem "sidekiq-scheduler"
 
 group :development, :test do
   gem "awesome_print"
