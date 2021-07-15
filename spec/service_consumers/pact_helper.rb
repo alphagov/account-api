@@ -131,8 +131,6 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       stub_email_attribute_requests
       stub_will_create_email_subscription "wizard-news-topic-slug"
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 404)
-      stub_request(:post, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 200)
       stub_remote_attribute_requests(
         transition_checker_state: nil,
         foo: nil,
@@ -170,12 +168,6 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_email_attribute_requests
       stub_remote_attribute_request(name: :transition_checker_state)
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
-    end
-  end
-
-  provider_state "there is a valid user session, with a transition checker email subscription" do
-    set_up do
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/transition-checker/email-subscription").to_return(status: 200, body: { topic_slug: "slug" }.to_json)
     end
   end
 

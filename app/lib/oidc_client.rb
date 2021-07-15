@@ -118,54 +118,6 @@ class OidcClient
     end
   end
 
-  def get_transition_checker_email_subscription(access_token:, refresh_token: nil)
-    response = time_and_return "get_transition_checker_email_subscription" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :get,
-        uri: transition_checker_email_subscription_uri,
-      )
-    end
-
-    body = response[:result].body
-    if response[:result].status != 200 || body.empty?
-      response.merge(result: nil)
-    else
-      response.merge(result: JSON.parse(body))
-    end
-  end
-
-  def set_transition_checker_email_subscription(slug:, access_token:, refresh_token: nil)
-    response = time_and_return "set_transition_checker_email_subscription" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :post,
-        uri: transition_checker_email_subscription_uri,
-        arg: { topic_slug: slug },
-      )
-    end
-
-    body = response[:result].body
-    if response[:result].status != 200 || body.empty?
-      response.merge(result: nil)
-    else
-      response.merge(result: JSON.parse(body))
-    end
-  end
-
-  def migrate_transition_checker_email_subscription(access_token:, refresh_token: nil)
-    time_and_return "migrate_transition_checker_email_subscription" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :delete,
-        uri: transition_checker_email_subscription_uri,
-      )
-    end
-  end
-
 private
 
   OK_STATUSES = [200, 204, 404, 410].freeze
@@ -220,12 +172,6 @@ private
   def bulk_attribute_uri
     URI.parse(userinfo_endpoint).tap do |u|
       u.path = "/v1/attributes"
-    end
-  end
-
-  def transition_checker_email_subscription_uri
-    URI.parse(provider_uri).tap do |u|
-      u.path = "/api/v1/transition-checker/email-subscription"
     end
   end
 

@@ -1,9 +1,6 @@
 class EmailSubscriptionsController < ApplicationController
   include AuthenticatedApiConcern
 
-  TRANSITION_CHECKER_SUBSCRIPTION_NAME = "transition-checker-results".freeze
-
-  before_action :migrate_transition_checker_subscription
   before_action :check_subscription_exists, only: %i[show destroy]
 
   def show
@@ -49,24 +46,6 @@ class EmailSubscriptionsController < ApplicationController
   end
 
 private
-
-  # remove this after we've done a bulk import of older subscriptions
-  def migrate_transition_checker_subscription
-    return unless params.fetch(:subscription_name) == TRANSITION_CHECKER_SUBSCRIPTION_NAME
-    return if email_subscription
-
-    legacy_subscription = @govuk_account_session.get_transition_checker_email_subscription
-    return unless legacy_subscription
-
-    @email_subscription = EmailSubscription.create!(
-      oidc_user: @govuk_account_session.user,
-      name: TRANSITION_CHECKER_SUBSCRIPTION_NAME,
-      topic_slug: legacy_subscription["topic_slug"],
-      email_alert_api_subscription_id: legacy_subscription["subscription_id"],
-    )
-
-    @govuk_account_session.migrate_transition_checker_email_subscription
-  end
 
   def email_subscription
     @email_subscription ||= EmailSubscription.find_by(
