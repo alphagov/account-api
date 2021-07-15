@@ -3,7 +3,7 @@ require "openid_connect"
 class OidcClient
   class OAuthFailure < RuntimeError; end
 
-  DEFAULT_SCOPES = %i[email transition_checker openid].freeze
+  DEFAULT_SCOPES = %i[email openid].freeze
 
   attr_reader :client_id,
               :provider_uri

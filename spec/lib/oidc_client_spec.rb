@@ -5,7 +5,7 @@ RSpec.describe OidcClient do
 
   describe "auth_uri" do
     it "includes the requested level of authentication in the scopes" do
-      expect(client.auth_uri(AuthRequest.generate!, "level1234567890")).to include("scope=email%20transition_checker%20openid%20level1234567890")
+      expect(client.auth_uri(AuthRequest.generate!, "level1234567890")).to include("scope=email%20openid%20level1234567890")
     end
   end
 

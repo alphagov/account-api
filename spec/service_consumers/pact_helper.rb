@@ -131,11 +131,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       stub_email_attribute_requests
       stub_will_create_email_subscription "wizard-news-topic-slug"
-      stub_remote_attribute_requests(
-        transition_checker_state: nil,
-        foo: nil,
-        test_attribute_1: nil,
-      )
+      stub_remote_attribute_requests(test_attribute_1: nil)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
     end
   end
@@ -158,7 +154,6 @@ Pact.provider_states_for "GDS API Adapters" do
   provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
     set_up do
       stub_email_attribute_requests
-      stub_remote_attribute_request(name: :transition_checker_state)
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
     end
   end
@@ -166,7 +161,6 @@ Pact.provider_states_for "GDS API Adapters" do
   provider_state "there is a valid user session, with '/guidance/some-govuk-guidance' saved" do
     set_up do
       stub_email_attribute_requests
-      stub_remote_attribute_request(name: :transition_checker_state)
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
     end
   end
