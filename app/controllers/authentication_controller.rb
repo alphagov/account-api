@@ -1,7 +1,5 @@
 class AuthenticationController < ApplicationController
   def sign_in
-    AuthRequest.expired.delete_all
-
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
     render json: {
