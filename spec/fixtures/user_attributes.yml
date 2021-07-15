@@ -1,3 +1,11 @@
+# overwrite this to be writable
+has_unverified_email:
+  type: cached
+  permissions:
+    check: 0
+    get: 0
+    set: 0
+
 test_attribute_1:
   type: remote
   permissions:
@@ -11,27 +19,6 @@ test_attribute_2:
     check: 0
     get: 0
     set: 0
-
-test_attribute_cache:
-  type: cached
-  permissions:
-    check: 0
-    get: 0
-    set: 0
-
-test_local_attribute:
-  type: local
-  permissions:
-    check: 0
-    get: 0
-    set: 0
-
-test_unwritable_attribute:
-  type: local
-  writable: false
-  permissions:
-    check: 0
-    get: 0
 
 foo:
   type: remote

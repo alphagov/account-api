@@ -3,8 +3,9 @@ RSpec.describe "Attribute names" do
     stub_oidc_discovery
     stub_userinfo
 
+    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
+    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
   end
 
   let(:session_identifier) { placeholder_govuk_account_session }
@@ -13,7 +14,7 @@ RSpec.describe "Attribute names" do
   # names must be defined in spec/fixtures/user_attributes.yml
   let(:attribute_name1) { "test_attribute_1" }
   let(:attribute_name2) { "test_attribute_2" }
-  let(:local_attribute_name) { "test_local_attribute" }
+  let(:local_attribute_name) { "transition_checker_state" }
   let(:unknown_attribute_name1) { "this_does_not_exist1" }
   let(:unknown_attribute_name2) { "this_does_not_exist2" }
 
