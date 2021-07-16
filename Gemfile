@@ -17,7 +17,9 @@ gem "govuk_sidekiq"
 gem "httparty"
 gem "openid_connect"
 gem "pg"
-gem "sidekiq-scheduler"
+
+# https://github.com/moove-it/sidekiq-scheduler/issues/345
+gem "sidekiq-scheduler", "3.0.1"
 
 group :development, :test do
   gem "awesome_print"
