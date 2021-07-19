@@ -510,7 +510,6 @@ DEPENDENCIES
   govuk_schemas
   govuk_sidekiq
   govuk_test
-  httparty
   listen
   openid_connect
   pact

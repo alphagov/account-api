@@ -14,7 +14,6 @@ gem "gds-sso"
 gem "govuk_app_config"
 gem "govuk_message_queue_consumer"
 gem "govuk_sidekiq"
-gem "httparty"
 gem "openid_connect"
 gem "pg"
 

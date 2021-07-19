@@ -86,18 +86,6 @@ class AccountSession
     set_remote_attributes(remote)
   end
 
-  def get_transition_checker_email_subscription
-    oidc_do :get_transition_checker_email_subscription
-  end
-
-  def set_transition_checker_email_subscription(slug)
-    oidc_do :set_transition_checker_email_subscription, { slug: slug }
-  end
-
-  def migrate_transition_checker_email_subscription
-    oidc_do :migrate_transition_checker_email_subscription
-  end
-
 private
 
   attr_reader :session_signing_key
