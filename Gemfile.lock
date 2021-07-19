@@ -416,7 +416,7 @@ GEM
       redis (>= 3.3.5, < 4.2)
     sidekiq-logging-json (0.0.19)
       sidekiq (>= 3)
-    sidekiq-scheduler (3.0.1)
+    sidekiq-scheduler (3.1.0)
       e2mmap
       redis (>= 3, < 5)
       rufus-scheduler (~> 3.2)
@@ -522,7 +522,7 @@ DEPENDENCIES
   rspec-rails
   rubocop-govuk
   shoulda-matchers
-  sidekiq-scheduler (= 3.0.1)
+  sidekiq-scheduler (= 3.1.0)
   simplecov
   webmock
 
