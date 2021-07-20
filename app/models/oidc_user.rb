@@ -6,10 +6,9 @@ class OidcUser < ApplicationRecord
   validates :sub, presence: true
 
   def get_local_attributes(names = [])
-    local_attributes
-      .where(name: names)
-      .map { |attr| [attr.name, attr.value] }
-      .to_h
+    local_attributes.where(name: names).each_with_object({}) do |attr, hash|
+      hash[attr.name] = attr.value
+    end
   end
 
   def set_local_attributes(values = {})
