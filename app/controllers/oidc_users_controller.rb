@@ -42,6 +42,14 @@ class OidcUsersController < ApplicationController
     render json: attributes.merge(sub: user.sub)
   end
 
+  def destroy
+    user = OidcUser.find_by!(sub: params.fetch(:subject_identifier))
+    user.destroy!
+    head :no_content and return
+  rescue ActiveRecord::RecordNotFound
+    head :not_found and return
+  end
+
 private
 
   def authorise_sso_user!
