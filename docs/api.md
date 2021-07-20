@@ -12,6 +12,7 @@ management. This API is not for other government services.
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`GET /api/user`](#get-apiuser)
+  - [`DELETE /api/user`](#delete-apiuser)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/attributes/names`](#get-apiattributesnames)
@@ -224,6 +225,33 @@ Response:
     }
 }
 ```
+
+### `DELETE /api/user`
+
+Removes a user's account.
+
+#### Request headers
+
+- `GOVUK-Account-Session`
+  - the user's session identifier
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 404 if the user cannot be found
+- 204 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.delete_user(
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response is status code only.
 
 ### `GET /api/attributes`
 
