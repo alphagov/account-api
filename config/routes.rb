@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
     get "/user", to: "user#show"
 
-    resources :oidc_users, only: %i[update], param: :subject_identifier, path: "oidc-users"
+    resources :oidc_users, only: %i[update destroy], param: :subject_identifier, path: "oidc-users"
 
     get "/attributes", to: "attributes#show"
     patch "/attributes", to: "attributes#update"
