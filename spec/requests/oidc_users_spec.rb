@@ -100,7 +100,9 @@ RSpec.describe "OIDC Users endpoint" do
 
     context "when a user does not exist" do
       it "does not change the count of users and returns not found" do
-        expect { delete oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
+        without_detailed_exceptions do
+          expect { delete oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
+        end
         expect(response).to be_not_found
       end
     end
