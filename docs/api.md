@@ -12,13 +12,13 @@ management. This API is not for other government services.
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`GET /api/user`](#get-apiuser)
-  - [`DELETE /api/user`](#delete-apiuser)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/attributes/names`](#get-apiattributesnames)
   - [`GET /api/email-subscriptions/:subscription_name`](#get-apiemail-subscriptionssubscription_name)
   - [`PUT /api/email-subscriptions/:subscription_name`](#put-apiemail-subscriptionssubscription_name)
   - [`DELETE /api/email-subscriptions/:subscription_name`](#delete-apiemail-subscriptionssubscription_name)
+  - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
   - [`GET /api/saved-pages`](#get-apisaved-pages)
   - [`GET /api/saved-pages/:page_path`](#get-apisaved-pagespage_path)
   - [`PUT /api/saved-pages/:page_path`](#put-apisaved-pagespage_path)
@@ -225,33 +225,6 @@ Response:
     }
 }
 ```
-
-### `DELETE /api/user`
-
-Removes a user's account.
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### Response codes
-
-- 401 if the session identifier is invalid
-- 404 if the user cannot be found
-- 204 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.delete_user(
-    govuk_account_session: "session-identifier",
-)
-```
-
-Response is status code only.
 
 ### `GET /api/attributes`
 
@@ -530,6 +503,33 @@ Request (with gds-api-adapters):
 GdsApi.account_api.delete_email_subscription(
     name: "transition-checker",
     govuk_account_session: "session-identifier",
+)
+```
+
+Response is status code only.
+
+### `DELETE /api/oidc-users/:subject_identifier`
+
+Delete an account by subject identifier.  This endpoint requires the
+`update_protected_attributes` scope.
+
+#### Request parameters
+
+- `subject_identifier`
+  - the subject identifier of the user to delete
+
+#### Response codes
+
+- 404 if the user cannot be found
+- 204 otherwise
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.delete_user_by_subject_identifier(
+    subject_identifier: "subject-identifier",
 )
 ```
 
