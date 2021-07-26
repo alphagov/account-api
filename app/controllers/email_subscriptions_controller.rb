@@ -4,17 +4,9 @@ class EmailSubscriptionsController < ApplicationController
   before_action :check_subscription_exists, only: %i[show destroy]
 
   def show
-    if email_subscription.email_alert_api_subscription_id
-      begin
-        state = GdsApi.email_alert_api.get_subscription(email_subscription.email_alert_api_subscription_id)
-        if state.to_hash.dig("subscription", "ended_reason")
-          email_subscription.destroy!
-          head :not_found and return
-        end
-      rescue GdsApi::HTTPGone, GdsApi::HTTPNotFound
-        email_subscription.destroy!
-        head :not_found and return
-      end
+    if email_subscription.activated? && !email_subscription.check_if_still_active!
+      email_subscription.destroy!
+      head :not_found and return
     end
 
     render_api_response(email_subscription: email_subscription.to_hash)

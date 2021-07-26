@@ -14,6 +14,20 @@ class EmailSubscription < ApplicationRecord
     }.compact
   end
 
+  def activated?
+    email_alert_api_subscription_id.present?
+  end
+
+  def check_if_still_active!
+    GdsApi
+      .email_alert_api.get_subscription(email_alert_api_subscription_id)
+      .to_hash
+      .dig("subscription", "ended_reason")
+      .blank?
+  rescue GdsApi::HTTPGone, GdsApi::HTTPNotFound
+    false
+  end
+
   def reactivate_if_confirmed!(email, email_verified)
     deactivate!
 
