@@ -21,7 +21,6 @@ class EmailSubscription < ApplicationRecord
   def check_if_still_active!
     GdsApi
       .email_alert_api.get_subscription(email_alert_api_subscription_id)
-      .to_hash
       .dig("subscription", "ended_reason")
       .blank?
   rescue GdsApi::HTTPGone, GdsApi::HTTPNotFound
@@ -38,13 +37,13 @@ class EmailSubscription < ApplicationRecord
     )
 
     subscription = GdsApi.email_alert_api.subscribe(
-      subscriber_list_id: subscriber_list.to_hash.dig("subscriber_list", "id"),
+      subscriber_list_id: subscriber_list.dig("subscriber_list", "id"),
       address: email,
       frequency: "daily",
       skip_confirmation_email: true,
     )
 
-    update!(email_alert_api_subscription_id: subscription.to_hash.dig("subscription", "id"))
+    update!(email_alert_api_subscription_id: subscription.dig("subscription", "id"))
   end
 
   def deactivate!
