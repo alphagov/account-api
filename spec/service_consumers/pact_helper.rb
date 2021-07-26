@@ -177,4 +177,10 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_remote_attribute_request(name: "test_attribute_1", value: { bar: "baz" })
     end
   end
+
+  provider_state "there is a user with subject identifier 'the-subject-identifier'" do
+    set_up do
+      FactoryBot.build(:oidc_user, sub: "the-subject-identifier")
+    end
+  end
 end
