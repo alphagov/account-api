@@ -18,6 +18,7 @@ management. This API is not for other government services.
   - [`GET /api/email-subscriptions/:subscription_name`](#get-apiemail-subscriptionssubscription_name)
   - [`PUT /api/email-subscriptions/:subscription_name`](#put-apiemail-subscriptionssubscription_name)
   - [`DELETE /api/email-subscriptions/:subscription_name`](#delete-apiemail-subscriptionssubscription_name)
+  - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
   - [`GET /api/saved-pages`](#get-apisaved-pages)
   - [`GET /api/saved-pages/:page_path`](#get-apisaved-pagespage_path)
@@ -507,6 +508,61 @@ GdsApi.account_api.delete_email_subscription(
 ```
 
 Response is status code only.
+
+### `PUT /api/oidc-users/:subject_identifier`
+
+Update an account and its email subscriptions by subject identifier.
+This endpoint requires the `update_protected_attributes` scope.
+
+#### Request parameters
+
+- `subject_identifier`
+  - the subject identifier of the user to delete
+
+#### JSON request parameters
+
+- `email`
+  - the new email address (a string)
+- `email_verified`
+  - whether the new email address is verified (a boolean)
+- `has_unconfirmed_email`
+  - whether the user has a pending email change to confirm (a boolean)
+
+#### JSON response fields
+
+- `sub`
+  - the subject identifier
+- `email`
+- `email_verified`
+- `has_unconfirmed_email`
+
+#### Response codes
+
+- 200
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.update_user_by_subject_identifier(
+    subject_identifier: "subject-identifier",
+    email: "user@example.com",
+    email_verified: true,
+    has_unconfirmed_email: false,
+)
+```
+
+Response:
+
+```json
+{
+    "sub": "subject-identifier",
+    "email": "user@example.com",
+    "email_verified": true,
+    "has_unconfirmed_email": false
+}
+```
 
 ### `DELETE /api/oidc-users/:subject_identifier`
 
