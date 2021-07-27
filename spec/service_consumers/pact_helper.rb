@@ -165,13 +165,6 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  # TODO: remove when gds-api-adapters PR is merged
-  provider_state "there is a valid user session, with an attribute called 'foo'" do
-    set_up do
-      stub_remote_attribute_request(name: "foo", value: { bar: "baz" })
-    end
-  end
-
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
       stub_remote_attribute_request(name: "test_attribute_1", value: { bar: "baz" })
