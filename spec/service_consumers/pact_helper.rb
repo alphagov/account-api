@@ -180,7 +180,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a user with subject identifier 'the-subject-identifier'" do
     set_up do
-      FactoryBot.build(:oidc_user, sub: "the-subject-identifier")
+      FactoryBot.create(:oidc_user, sub: "the-subject-identifier")
     end
   end
 end
