@@ -165,13 +165,6 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  # TODO: remove when gds-api-adapters PR is merged
-  provider_state "there is a valid user session, with an attribute called 'foo'" do
-    set_up do
-      stub_remote_attribute_request(name: "foo", value: { bar: "baz" })
-    end
-  end
-
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
       stub_remote_attribute_request(name: "test_attribute_1", value: { bar: "baz" })
@@ -180,7 +173,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a user with subject identifier 'the-subject-identifier'" do
     set_up do
-      FactoryBot.build(:oidc_user, sub: "the-subject-identifier")
+      FactoryBot.create(:oidc_user, sub: "the-subject-identifier")
     end
   end
 end
