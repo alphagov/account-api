@@ -44,6 +44,8 @@ class EmailSubscription < ApplicationRecord
     )
 
     update!(email_alert_api_subscription_id: subscription.dig("subscription", "id"))
+
+    send_transition_checker_onboarding_email!(email)
   end
 
   def deactivate!
@@ -55,5 +57,19 @@ class EmailSubscription < ApplicationRecord
     # user through email-alert-frontend
   ensure
     update!(email_alert_api_subscription_id: nil)
+  end
+
+  def send_transition_checker_onboarding_email!(email)
+    return unless email_alert_api_subscription_id
+    return unless name == "transition-checker-results"
+    return if oidc_user.has_received_transition_checker_onboarding_email
+
+    SendEmailWorker.perform_async(
+      email,
+      I18n.t("emails.onboarding.transition_checker.subject"),
+      I18n.t("emails.onboarding.transition_checker.body", sign_in_link: "#{Plek.find('account-manager')}/sign-in"),
+    )
+
+    oidc_user.update!(has_received_transition_checker_onboarding_email: true)
   end
 end
