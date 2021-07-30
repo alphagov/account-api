@@ -224,6 +224,8 @@ GEM
     nokogiri (1.11.7)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
+    notifications-ruby-client (5.3.0)
+      jwt (>= 1.5, < 3)
     null_logger (0.0.1)
     oauth2 (1.4.7)
       faraday (>= 0.8, < 2.0)
@@ -524,6 +526,7 @@ DEPENDENCIES
   govuk_sidekiq
   govuk_test
   listen
+  notifications-ruby-client
   openid_connect
   pact
   pact_broker-client
