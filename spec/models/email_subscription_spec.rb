@@ -3,7 +3,26 @@ require "gds_api/test_helpers/email_alert_api"
 RSpec.describe EmailSubscription do
   include GdsApi::TestHelpers::EmailAlertApi
 
-  subject(:email_subscription) { FactoryBot.build(:email_subscription) }
+  subject(:email_subscription) do
+    FactoryBot.create(
+      :email_subscription,
+      oidc_user: oidc_user,
+      name: name,
+      email_alert_api_subscription_id: email_alert_api_subscription_id,
+    )
+  end
+
+  let(:oidc_user) do
+    FactoryBot.create(
+      :oidc_user,
+      has_received_transition_checker_onboarding_email: has_received_transition_checker_onboarding_email,
+    )
+  end
+
+  let(:email) { "email@example.com" }
+  let(:name) { "subscription-name" }
+  let(:email_alert_api_subscription_id) { nil }
+  let(:has_received_transition_checker_onboarding_email) { true }
 
   describe "associations" do
     it { is_expected.to belong_to(:oidc_user) }
@@ -40,8 +59,20 @@ RSpec.describe EmailSubscription do
         expect(email_subscription.email_alert_api_subscription_id).to eq("new-subscription-id")
       end
 
+      context "when this should trigger the Transition Checker onboarding email" do
+        let(:name) { "transition-checker-results" }
+        let(:has_received_transition_checker_onboarding_email) { false }
+
+        it "sends the onboarding email" do
+          stub_subscriber_list
+          stub_create_subscription
+
+          expect { email_subscription.reactivate_if_confirmed!(email, email_verified) }.to change(SendEmailWorker.jobs, :size).by(1)
+        end
+      end
+
       context "when the user has a prior subscription" do
-        subject(:email_subscription) { FactoryBot.build(:email_subscription, email_alert_api_subscription_id: "prior-subscription-id") }
+        let(:email_alert_api_subscription_id) { "prior-subscription-id" }
 
         it "calls email-alert-api to remove the prior subscription" do
           stub = stub_email_alert_api_unsubscribes_a_subscription("prior-subscription-id")
@@ -94,6 +125,37 @@ RSpec.describe EmailSubscription do
       email_subscription.destroy!
 
       expect(stub).to have_been_made
+    end
+  end
+
+  describe "#send_transition_checker_onboarding_email!" do
+    it "does not send the email" do
+      expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+    end
+
+    context "when the subscription has been activated" do
+      let(:email_alert_api_subscription_id) { "subscription-id" }
+
+      it "does not send the email" do
+        expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+      end
+
+      context "when this is the transition checker subscription" do
+        let(:name) { "transition-checker-results" }
+
+        it "does not send the email" do
+          expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+        end
+
+        context "when the user has not already received the onboarding email" do
+          let(:has_received_transition_checker_onboarding_email) { false }
+
+          it "sends the email and updates the user" do
+            expect { email_subscription.send_transition_checker_onboarding_email!(email) }.to change(SendEmailWorker.jobs, :size).by(1)
+            expect(oidc_user.reload.has_received_transition_checker_onboarding_email).to be(true)
+          end
+        end
+      end
     end
   end
 

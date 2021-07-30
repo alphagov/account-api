@@ -7,6 +7,7 @@ end
 
 require File.expand_path("../config/environment", __dir__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
+require "govuk_sidekiq/testing"
 require "rspec/rails"
 require "webmock/rspec"
 
@@ -26,7 +27,10 @@ RSpec.configure do |config|
     config.after { Bullet.end_request }
   end
 
-  config.before { Rails.application.load_seed }
+  config.before do
+    Rails.application.load_seed
+    Sidekiq::Worker.clear_all
+  end
 
   config.expose_dsl_globally = false
   config.use_transactional_fixtures = true
