@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_30_125116) do
+ActiveRecord::Schema.define(version: 2021_07_30_133729) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -48,7 +48,7 @@ ActiveRecord::Schema.define(version: 2021_07_30_125116) do
     t.string "sub", null: false
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
-    t.boolean "has_received_transition_checker_onboarding_email", default: true, null: false
+    t.boolean "has_received_transition_checker_onboarding_email", default: false, null: false
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end
 
