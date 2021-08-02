@@ -37,10 +37,12 @@ RSpec.describe EmailSubscription do
     let(:email) { "email@example.com" }
     let(:email_verified) { false }
 
+    before { email_subscription.oidc_user.set_local_attributes(email: email, email_verified: email_verified) }
+
     it "doesn't call email-alert-api if the user is not confirmed" do
       stub = stub_subscriber_list
 
-      email_subscription.reactivate_if_confirmed!(email, email_verified)
+      email_subscription.reactivate_if_confirmed!
 
       expect(stub).not_to have_been_made
     end
@@ -52,7 +54,7 @@ RSpec.describe EmailSubscription do
         stub1 = stub_subscriber_list
         stub2 = stub_create_subscription
 
-        email_subscription.reactivate_if_confirmed!(email, email_verified)
+        email_subscription.reactivate_if_confirmed!
 
         expect(stub1).to have_been_made
         expect(stub2).to have_been_made
@@ -67,7 +69,7 @@ RSpec.describe EmailSubscription do
           stub_subscriber_list
           stub_create_subscription
 
-          expect { email_subscription.reactivate_if_confirmed!(email, email_verified) }.to change(SendEmailWorker.jobs, :size).by(1)
+          expect { email_subscription.reactivate_if_confirmed! }.to change(SendEmailWorker.jobs, :size).by(1)
         end
       end
 
@@ -79,7 +81,7 @@ RSpec.describe EmailSubscription do
           stub_subscriber_list
           stub_create_subscription
 
-          email_subscription.reactivate_if_confirmed!(email, email_verified)
+          email_subscription.reactivate_if_confirmed!
 
           expect(stub).to have_been_made
         end
@@ -130,28 +132,28 @@ RSpec.describe EmailSubscription do
 
   describe "#send_transition_checker_onboarding_email!" do
     it "does not send the email" do
-      expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+      expect { email_subscription.send_transition_checker_onboarding_email! }.not_to change(SendEmailWorker.jobs, :size)
     end
 
     context "when the subscription has been activated" do
       let(:email_alert_api_subscription_id) { "subscription-id" }
 
       it "does not send the email" do
-        expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+        expect { email_subscription.send_transition_checker_onboarding_email! }.not_to change(SendEmailWorker.jobs, :size)
       end
 
       context "when this is the transition checker subscription" do
         let(:name) { "transition-checker-results" }
 
         it "does not send the email" do
-          expect { email_subscription.send_transition_checker_onboarding_email!(email) }.not_to change(SendEmailWorker.jobs, :size)
+          expect { email_subscription.send_transition_checker_onboarding_email! }.not_to change(SendEmailWorker.jobs, :size)
         end
 
         context "when the user has not already received the onboarding email" do
           let(:has_received_transition_checker_onboarding_email) { false }
 
           it "sends the email and updates the user" do
-            expect { email_subscription.send_transition_checker_onboarding_email!(email) }.to change(SendEmailWorker.jobs, :size).by(1)
+            expect { email_subscription.send_transition_checker_onboarding_email! }.to change(SendEmailWorker.jobs, :size).by(1)
             expect(oidc_user.reload.has_received_transition_checker_onboarding_email).to be(true)
           end
         end

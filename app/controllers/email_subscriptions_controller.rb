@@ -13,7 +13,7 @@ class EmailSubscriptionsController < ApplicationController
   end
 
   def update
-    attributes = @govuk_account_session.get_attributes(%w[email email_verified])
+    @govuk_account_session.get_attributes(%w[email email_verified])
 
     email_subscription = EmailSubscription.transaction do
       EmailSubscription
@@ -24,10 +24,7 @@ class EmailSubscriptionsController < ApplicationController
         ).tap { |subscription| subscription.update!(topic_slug: params.fetch(:topic_slug)) }
     end
 
-    email_subscription.reactivate_if_confirmed!(
-      attributes["email"],
-      attributes["email_verified"],
-    )
+    email_subscription.reactivate_if_confirmed!
 
     render_api_response(email_subscription: email_subscription.to_hash)
   end
