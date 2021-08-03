@@ -68,7 +68,7 @@ GEM
     attr_required (1.0.1)
     awesome_print (1.9.2)
     bindata (2.4.8)
-    bootsnap (1.7.6)
+    bootsnap (1.7.7)
       msgpack (~> 1.0)
     brakeman (5.0.4)
     builder (3.2.4)
