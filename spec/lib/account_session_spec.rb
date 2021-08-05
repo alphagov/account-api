@@ -26,6 +26,14 @@ RSpec.describe AccountSession do
       expect(decoded).to eq(params)
     end
 
+    it "decodes successfully in the presence of flash messages" do
+      encoded = described_class.new(session_signing_key: "secret", **params).serialise
+      decoded = described_class.deserialise(encoded_session: "#{encoded}$$some,flash,keys", session_signing_key: "secret")
+
+      expect(decoded).not_to be_nil
+      expect(decoded.to_hash).to eq(params)
+    end
+
     it "rejects a session signed with a different key" do
       encoded = described_class.new(session_signing_key: "secret", **params).serialise
       decoded = described_class.deserialise(encoded_session: encoded, session_signing_key: "different-secret")
