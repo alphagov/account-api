@@ -18,9 +18,10 @@ class AccountSession
   end
 
   def self.deserialise(encoded_session:, session_signing_key:)
-    return if encoded_session.blank?
+    encoded_session_without_flash = encoded_session&.split("$$")&.first
+    return if encoded_session_without_flash.blank?
 
-    serialised_session = StringEncryptor.new(signing_key: session_signing_key).decrypt_string(encoded_session)
+    serialised_session = StringEncryptor.new(signing_key: session_signing_key).decrypt_string(encoded_session_without_flash)
     if serialised_session
       new(
         session_signing_key: session_signing_key,
