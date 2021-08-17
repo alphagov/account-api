@@ -26,7 +26,7 @@ RSpec.describe "Attribute names" do
   describe "GET #show" do
     context "when a single attribute is requested" do
       before do
-        stub_remote_attribute_request(name: attribute_name1, value: attribute_value1)
+        stub_userinfo(attribute_name1 => attribute_value1)
         get attributes_names_path, headers: headers, params: params
       end
 
@@ -63,8 +63,10 @@ RSpec.describe "Attribute names" do
 
     context "when multiple attributes are requested" do
       before do
-        stub_remote_attribute_request(name: attribute_name1, value: attribute_value1)
-        stub_remote_attribute_request(name: attribute_name2, value: attribute_value2)
+        stub_userinfo(
+          attribute_name1 => attribute_value1,
+          attribute_name2 => attribute_value2,
+        )
 
         LocalAttribute.create!(
           oidc_user: OidcUser.find_or_create_by(sub: "user-id"),

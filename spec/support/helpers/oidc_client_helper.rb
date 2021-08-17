@@ -35,18 +35,6 @@ module OidcClientHelper
     stub_request(:get, "http://openid-provider/userinfo-endpoint")
       .to_return(status: 200, body: attributes.to_json)
   end
-
-  def stub_remote_attribute_request(name:, value: nil, status: nil)
-    status ||= value.nil? ? 404 : 200
-    stub_request(:get, "http://openid-provider/v1/attributes/#{name}")
-      .to_return(status: status, body: { claim_value: value }.compact.to_json)
-  end
-
-  def stub_remote_attribute_requests(names_and_values = {})
-    names_and_values.each do |name, value|
-      stub_remote_attribute_request(name: name, value: value)
-    end
-  end
 end
 
 RSpec.configuration.send :include, OidcClientHelper
