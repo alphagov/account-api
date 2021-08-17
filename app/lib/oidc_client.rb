@@ -1,3 +1,4 @@
+require "json/jwt"
 require "openid_connect"
 
 class OidcClient
@@ -15,9 +16,13 @@ class OidcClient
            to: :discover
 
   def initialize
-    @provider_uri = Plek.find("account-manager")
+    @provider_uri = ENV.fetch("GOVUK_ACCOUNT_OAUTH_PROVIDER_URI", Plek.find("account-manager"))
     @client_id = Rails.application.secrets.oauth_client_id
     @secret = Rails.application.secrets.oauth_client_secret
+
+    if Rails.application.secrets.oauth_client_private_key.present?
+      @private_key = OpenSSL::PKey::RSA.new Rails.application.secrets.oauth_client_private_key
+    end
   end
 
   def auth_uri(auth_request, level_of_authentication)
@@ -37,7 +42,23 @@ class OidcClient
   end
 
   def tokens!(oidc_nonce: nil)
-    access_token = client.access_token!
+    access_token =
+      if use_client_private_key_auth?
+        client.access_token!(
+          client_auth_method: "jwt_bearer",
+          client_assertion: JSON::JWT.new(
+            iss: client_id,
+            sub: client_id,
+            aud: token_endpoint,
+            jti: SecureRandom.hex(16),
+            iat: Time.zone.now.to_i,
+            exp: 5.minutes.from_now.to_i,
+          ).sign(@private_key, "RS512").to_s,
+        )
+      else
+        client.access_token!
+      end
+
     response = access_token.token_response
 
     if oidc_nonce
@@ -176,14 +197,23 @@ private
   end
 
   def client
-    @client ||= OpenIDConnect::Client.new(
-      identifier: client_id,
-      secret: @secret,
-      redirect_uri: redirect_uri,
-      authorization_endpoint: authorization_endpoint,
-      token_endpoint: token_endpoint,
-      userinfo_endpoint: userinfo_endpoint,
-    )
+    @client ||=
+      begin
+        client_options = {
+          identifier: client_id,
+          redirect_uri: redirect_uri,
+          authorization_endpoint: authorization_endpoint,
+          token_endpoint: token_endpoint,
+          userinfo_endpoint: userinfo_endpoint,
+        }
+
+        client_options.merge!(secret: @secret) unless use_client_private_key_auth?
+        OpenIDConnect::Client.new(client_options)
+      end
+  end
+
+  def use_client_private_key_auth?
+    @private_key.present?
   end
 
   def discover

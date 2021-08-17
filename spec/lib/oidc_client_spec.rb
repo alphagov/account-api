@@ -39,6 +39,26 @@ RSpec.describe OidcClient do
 
       expect { client.tokens! }.to raise_error(OidcClient::OAuthFailure)
     end
+
+    it "uses JWT auth" do
+      # rubocop:disable RSpec/InstanceVariable
+      expect(@client_stub).to receive(:access_token!).with(hash_including(client_auth_method: "jwt_bearer"))
+      # rubocop:enable RSpec/InstanceVariable
+      client.tokens!
+    end
+
+    context "when there is no OAuth private key" do
+      # rubocop:disable RSpec/SubjectStub
+      before { allow(client).to receive(:use_client_private_key_auth?).and_return(false) }
+      # rubocop:enable RSpec/SubjectStub
+
+      it "does not use JWT auth" do
+        # rubocop:disable RSpec/InstanceVariable
+        expect(@client_stub).to receive(:access_token!).with(no_args)
+        # rubocop:enable RSpec/InstanceVariable
+        client.tokens!
+      end
+    end
   end
 
   describe "get_ephemeral_state" do

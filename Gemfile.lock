@@ -525,6 +525,7 @@ DEPENDENCIES
   govuk_schemas
   govuk_sidekiq
   govuk_test
+  json-jwt
   listen
   notifications-ruby-client
   openid_connect
