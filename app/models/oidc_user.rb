@@ -10,7 +10,7 @@ class OidcUser < ApplicationRecord
     find_by!(sub: sub)
   end
 
-  def get_local_attributes(names = [])
+  def get_attributes_by_name(names = [])
     names.index_with { |name| self[name] }.compact
   end
 end

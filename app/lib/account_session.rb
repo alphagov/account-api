@@ -68,7 +68,7 @@ class AccountSession
     cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
-      values_already_cached = user.get_local_attributes(cached)
+      values_already_cached = user.get_attributes_by_name(cached)
       values_to_cache = get_remote_attributes(cached.reject { |name| values_already_cached.key? name })
       user.update!(values_to_cache)
       values = values_already_cached.merge(values_to_cache)
@@ -76,7 +76,7 @@ class AccountSession
       values = {}
     end
 
-    values.merge(user.get_local_attributes(local).merge(get_remote_attributes(remote))).compact
+    values.merge(user.get_attributes_by_name(local).merge(get_remote_attributes(remote))).compact
   end
 
   def set_attributes(attributes)

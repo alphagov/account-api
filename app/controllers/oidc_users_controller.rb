@@ -4,9 +4,9 @@ class OidcUsersController < ApplicationController
   def update
     user = OidcUser.find_or_create_by_sub!(params.fetch(:subject_identifier))
     user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
-    attributes = user.get_local_attributes(OIDC_USER_ATTRIBUTES)
+    user.reload
 
-    if attributes["email"] && attributes["email_verified"]
+    if user.email && user.email_verified
       begin
         # if the user has linked their notifications account to their
         # GOV.UK account we don't need to update their
@@ -17,7 +17,7 @@ class OidcUsersController < ApplicationController
           .dig("subscriber", "id")
         GdsApi.email_alert_api.change_subscriber(
           id: subscriber_id,
-          new_address: attributes["email"],
+          new_address: user.email,
           on_conflict: "merge",
         )
       rescue GdsApi::HTTPNotFound
@@ -34,7 +34,7 @@ class OidcUsersController < ApplicationController
       end
     end
 
-    render json: attributes.merge(sub: user.sub)
+    render json: user.get_attributes_by_name(OIDC_USER_ATTRIBUTES).merge(sub: user.sub)
   end
 
   def destroy
