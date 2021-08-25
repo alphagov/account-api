@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 2021_07_30_133729) do
     t.jsonb "value", null: false
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.boolean "migrated", default: false, null: false
     t.index ["oidc_user_id", "name"], name: "index_local_attributes_on_oidc_user_id_and_name", unique: true
     t.index ["oidc_user_id"], name: "index_local_attributes_on_oidc_user_id"
   end
@@ -49,6 +50,11 @@ ActiveRecord::Schema.define(version: 2021_07_30_133729) do
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
     t.boolean "has_received_transition_checker_onboarding_email", default: false, null: false
+    t.string "email"
+    t.boolean "email_verified"
+    t.boolean "has_unconfirmed_email"
+    t.boolean "oidc_users"
+    t.jsonb "transition_checker_state"
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end
 

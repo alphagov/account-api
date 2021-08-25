@@ -6,18 +6,24 @@ class OidcUser < ApplicationRecord
   validates :sub, presence: true
 
   def get_local_attributes(names = [])
-    local_attributes.where(name: names).each_with_object({}) do |attr, hash|
-      hash[attr.name] = attr.value
+    values = names.index_with do |name|
+      in_model = self[name]
+      if in_model.nil?
+        local_attributes.find_by(name: name, migrated: false)&.value
+      else
+        in_model
+      end
     end
+    values.compact
   end
 
   def set_local_attributes(values = {})
-    return if values.empty?
-
-    LocalAttribute.upsert_all(
-      values.map { |name, value| { oidc_user_id: id, name: name, value: value, updated_at: Time.zone.now } },
-      unique_by: :index_local_attributes_on_oidc_user_id_and_name,
-      returning: false,
-    )
+    transaction do
+      unmigrated = local_attributes.where(migrated: false)
+      local_attributes_hash = unmigrated.all.map { |attr| [attr.name, attr.value] }.to_h
+      update!(local_attributes_hash)
+      update!(values)
+      unmigrated.update_all(migrated: true)
+    end
   end
 end

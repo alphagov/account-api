@@ -3,18 +3,20 @@ RSpec.describe "Attributes" do
     stub_oidc_discovery
     stub_userinfo
 
+    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
+    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
   end
 
-  let(:session_identifier) { placeholder_govuk_account_session }
+  let(:session_identifier) { account_session.serialise }
+  let(:account_session) { placeholder_govuk_account_session_object(level_of_authentication: "level1") }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
   # names must be defined in spec/fixtures/user_attributes.yml
   let(:attribute_name1) { "test_attribute_1" }
   let(:attribute_name2) { "test_attribute_2" }
-  let(:local_attribute_name) { "test_local_attribute" }
-  let(:unwritable_attribute_name) { "test_unwritable_attribute" }
+  let(:local_attribute_name) { "transition_checker_state" }
+  let(:unwritable_attribute_name) { "email" }
   let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
   let(:attribute_value2) { [1, 2, 3, 4, 5] }
   let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
@@ -90,7 +92,7 @@ RSpec.describe "Attributes" do
         )
 
         LocalAttribute.create!(
-          oidc_user: OidcUser.find_or_create_by(sub: "user-id"),
+          oidc_user: account_session.user,
           name: local_attribute_name,
           value: local_attribute_value,
         )
@@ -188,7 +190,8 @@ RSpec.describe "Attributes" do
       let(:attributes) { { local_attribute_name => local_attribute_value } }
 
       it "updates the database" do
-        expect { patch attributes_path, headers: headers, params: params.to_json }.to change(LocalAttribute, :count).by(1)
+        patch attributes_path, headers: headers, params: params.to_json
+        expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
         expect(response).to be_successful
       end
 
@@ -196,7 +199,7 @@ RSpec.describe "Attributes" do
         old_value = "hello world"
 
         LocalAttribute.create!(
-          oidc_user: OidcUser.find_or_create_by(sub: "user-id"),
+          oidc_user: account_session.user,
           name: local_attribute_name,
           value: old_value,
         )
@@ -273,7 +276,7 @@ RSpec.describe "Attributes" do
         error = JSON.parse(response.body)
         expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
         expect(error["attributes"]).to eq([local_attribute_name])
-        expect(error["needed_level_of_authentication"]).to eq("level0")
+        expect(error["needed_level_of_authentication"]).to eq("level1")
       end
     end
   end

@@ -2,8 +2,9 @@ RSpec.describe AccountSession do
   before do
     stub_oidc_discovery
 
+    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
     fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(fixture_file)
+    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
   end
 
   let(:user_id) { SecureRandom.hex(10) }
@@ -92,7 +93,7 @@ RSpec.describe AccountSession do
   describe "attributes" do
     let(:attribute_name1) { "test_attribute_1" }
     let(:attribute_name2) { "test_attribute_2" }
-    let(:local_attribute_name) { "test_local_attribute" }
+    let(:local_attribute_name) { "transition_checker_state" }
     let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
     let(:attribute_value2) { [1, 2, 3, 4, 5] }
     let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
@@ -102,6 +103,26 @@ RSpec.describe AccountSession do
 
       it "returns no values" do
         expect(account_session.get_attributes([attribute_name1])).to eq({})
+      end
+
+      context "when the attribute is a LocalAttribute" do
+        before do
+          LocalAttribute.create!(
+            oidc_user: account_session.user,
+            name: local_attribute_name,
+            value: local_attribute_value,
+          )
+        end
+
+        it "migrates the value to the OidcUser model" do
+          expect(account_session.user.local_attributes.find_by(name: local_attribute_name, migrated: false)).not_to be_nil
+          expect(account_session.user[local_attribute_name]).not_to eq(local_attribute_value)
+
+          account_session.get_attributes([local_attribute_name])
+
+          expect(account_session.user.local_attributes.find_by(name: local_attribute_name, migrated: false)).to be_nil
+          expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
+        end
       end
 
       context "when the attribute value is in the userinfo response" do
@@ -116,11 +137,11 @@ RSpec.describe AccountSession do
         end
 
         context "when an attribute is cached_locally" do
-          let(:attribute_name1) { "test_attribute_cache" }
+          let(:attribute_name1) { "email" }
 
           it "fetches the attribute and stores it locally" do
-            expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
-            expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => value_from_userinfo })
+            account_session.get_attributes([attribute_name1])
+            expect(account_session.user[attribute_name1]).to eq(value_from_userinfo)
           end
         end
       end
@@ -138,12 +159,7 @@ RSpec.describe AccountSession do
         let(:status) { 200 }
 
         it "returns the attributes" do
-          LocalAttribute.create!(
-            oidc_user: OidcUser.find_or_create_by(sub: user_id),
-            name: local_attribute_name,
-            value: local_attribute_value,
-          )
-
+          account_session.user.update!(local_attribute_name => local_attribute_value)
           values = account_session.get_attributes([attribute_name1, attribute_name2, local_attribute_name])
           expect(values).to eq({ attribute_name1 => attribute_value1, attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
         end
@@ -157,19 +173,20 @@ RSpec.describe AccountSession do
         end
 
         context "when an attribute is cached_locally" do
-          let(:attribute_name1) { "test_attribute_cache" }
+          let(:attribute_name1) { "email" }
+          let(:attribute_value1) { "value-from-account-manager" }
 
           it "fetches the attribute and stores it locally" do
-            expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
-            expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
+            account_session.get_attributes([attribute_name1])
+            expect(account_session.user[attribute_name1]).to eq(attribute_value1)
           end
 
           context "when the attribute is unset" do
             let(:attribute_value1) { nil }
 
             it "does not try to cache locally" do
-              expect { account_session.get_attributes([attribute_name1]) }.not_to change(LocalAttribute, :count)
-              expect(account_session.get_attributes([attribute_name1])).to eq({})
+              account_session.get_attributes([attribute_name1])
+              expect(account_session.user[attribute_name1]).to be_nil
             end
           end
         end
@@ -182,7 +199,8 @@ RSpec.describe AccountSession do
       let(:attributes) { remote_attributes.merge(local_attributes) }
 
       it "saves local attributes to the database" do
-        expect { account_session.set_attributes(local_attributes) }.to change(LocalAttribute, :count).by(1)
+        account_session.set_attributes(local_attributes)
+        expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
       end
 
       it "raises an error when saving remote attributes" do
@@ -201,26 +219,6 @@ RSpec.describe AccountSession do
         end
       end
 
-      context "when the local attribute already exists" do
-        it "increases the updated_at time" do
-          attribute = LocalAttribute.create!(
-            oidc_user: OidcUser.find_or_create_by(sub: user_id),
-            name: local_attribute_name,
-            value: local_attribute_value,
-          )
-
-          expect { account_session.set_attributes(local_attributes) }.to(change { attribute.reload.updated_at })
-        end
-      end
-
-      context "when there are no local attributes" do
-        let(:local_attributes) { {} }
-
-        it "doesn't update the database" do
-          expect { account_session.set_attributes(local_attributes) }.not_to change(LocalAttribute, :count)
-        end
-      end
-
       context "when there are no remote attributes" do
         let(:remote_attributes) { {} }
 
@@ -232,7 +230,8 @@ RSpec.describe AccountSession do
       end
 
       context "when an attribute is cached_locally" do
-        let(:attribute_name1) { "test_attribute_cache" }
+        let(:attribute_name1) { "has_unconfirmed_email" }
+        let(:attribute_value1) { true }
         let(:remote_attributes) { { attribute_name1 => attribute_value1 } }
 
         it "raises an error" do
@@ -246,7 +245,8 @@ RSpec.describe AccountSession do
 
           it "sets the attribute both locally and remotely" do
             stub = stub_set_remote_attributes
-            expect { account_session.set_attributes(remote_attributes) }.to change(LocalAttribute, :count).by(1)
+            account_session.set_attributes(remote_attributes)
+            expect(account_session.user[attribute_name1]).to eq(attribute_value1)
             expect(stub).to have_been_made
           end
         end
