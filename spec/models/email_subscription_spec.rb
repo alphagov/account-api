@@ -37,7 +37,7 @@ RSpec.describe EmailSubscription do
     let(:email) { "email@example.com" }
     let(:email_verified) { false }
 
-    before { email_subscription.oidc_user.set_local_attributes(email: email, email_verified: email_verified) }
+    before { email_subscription.oidc_user.update!(email: email, email_verified: email_verified) }
 
     it "doesn't call email-alert-api if the user is not confirmed" do
       stub = stub_subscriber_list

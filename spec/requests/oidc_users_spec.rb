@@ -42,7 +42,7 @@ RSpec.describe "OIDC Users endpoint" do
       end
 
       it "updates the attribute values" do
-        user.set_local_attributes(email: "old-email@example.com", email_verified: false)
+        user.update!(email: "old-email@example.com", email_verified: false)
 
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq(email)

@@ -91,7 +91,7 @@ RSpec.describe "Attributes" do
           attribute_name2 => attribute_value2,
         )
 
-        account_session.user.set_local_attributes(local_attribute_name => local_attribute_value)
+        account_session.user.update!(local_attribute_name => local_attribute_value)
       end
 
       let(:params) { { attributes: [attribute_name1, attribute_name2, local_attribute_name] } }
@@ -194,7 +194,7 @@ RSpec.describe "Attributes" do
       it "correctly round-trips local attributes" do
         old_value = "hello world"
 
-        account_session.user.set_local_attributes(local_attribute_name => old_value)
+        account_session.user.update!(local_attribute_name => old_value)
 
         get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
         expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => old_value })

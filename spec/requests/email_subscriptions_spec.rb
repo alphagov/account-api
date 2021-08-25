@@ -120,9 +120,9 @@ RSpec.describe "Email subscriptions" do
     end
 
     def stub_local_attributes
-      session_identifier.user.set_local_attributes(
-        "email" => email,
-        "email_verified" => email_verified,
+      session_identifier.user.update!(
+        email: email,
+        email_verified: email_verified,
       )
     end
 
