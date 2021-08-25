@@ -3,7 +3,7 @@ class OidcUsersController < ApplicationController
 
   def update
     user = OidcUser.find_or_create_by_sub!(params.fetch(:subject_identifier))
-    user.set_local_attributes(params.permit(OIDC_USER_ATTRIBUTES).to_h)
+    user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
     attributes = user.get_local_attributes(OIDC_USER_ATTRIBUTES)
 
     if attributes["email"] && attributes["email_verified"]

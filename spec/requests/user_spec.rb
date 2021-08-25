@@ -52,7 +52,7 @@ RSpec.describe "User information endpoint" do
     end
 
     context "when the user has used the checker" do
-      before { session_identifier.user.set_local_attributes("transition_checker_state" => "state") }
+      before { session_identifier.user.update!(transition_checker_state: "state") }
 
       it "returns 'yes_but_must_reauthenticate'" do
         get "/api/user", headers: headers
