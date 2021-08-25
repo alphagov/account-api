@@ -118,26 +118,6 @@ RSpec.describe AccountSession do
         expect(account_session.get_attributes(%w[has_unconfirmed_email])).to eq({ "has_unconfirmed_email" => false })
       end
 
-      context "when the attribute is a LocalAttribute" do
-        before do
-          LocalAttribute.create!(
-            oidc_user: account_session.user,
-            name: local_attribute_name,
-            value: local_attribute_value,
-          )
-        end
-
-        it "migrates the value to the OidcUser model" do
-          expect(account_session.user.local_attributes.find_by(name: local_attribute_name, migrated: false)).not_to be_nil
-          expect(account_session.user[local_attribute_name]).not_to eq(local_attribute_value)
-
-          account_session.get_attributes([local_attribute_name])
-
-          expect(account_session.user.local_attributes.find_by(name: local_attribute_name, migrated: false)).to be_nil
-          expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
-        end
-      end
-
       context "when the attribute value is in the userinfo response" do
         before do
           stub_userinfo(attribute_name1 => value_from_userinfo)
