@@ -1,9 +1,8 @@
+require "json/jwt"
 require "openid_connect"
 
 class OidcClient
   class OAuthFailure < RuntimeError; end
-
-  DEFAULT_SCOPES = %i[email openid].freeze
 
   attr_reader :client_id,
               :provider_uri
@@ -15,14 +14,20 @@ class OidcClient
            to: :discover
 
   def initialize
-    @provider_uri = Plek.find("account-manager")
+    @provider_uri = ENV.fetch("GOVUK_ACCOUNT_OAUTH_PROVIDER_URI", Plek.find("account-manager"))
     @client_id = Rails.application.secrets.oauth_client_id
     @secret = Rails.application.secrets.oauth_client_secret
+
+    if Rails.application.secrets.oauth_client_private_key.present?
+      @private_key = OpenSSL::PKey::RSA.new Rails.application.secrets.oauth_client_private_key
+    end
   end
 
-  def auth_uri(auth_request, level_of_authentication)
+  # TODO: Digital Identity don't have an implementation of levels of
+  # authentication yet.
+  def auth_uri(auth_request, _level_of_authentication)
     client.authorization_uri(
-      scope: DEFAULT_SCOPES + [level_of_authentication],
+      scope: %i[openid email],
       state: auth_request.to_oauth_state,
       nonce: auth_request.oidc_nonce,
     )
@@ -37,7 +42,23 @@ class OidcClient
   end
 
   def tokens!(oidc_nonce: nil)
-    access_token = client.access_token!
+    access_token =
+      if use_client_private_key_auth?
+        client.access_token!(
+          client_auth_method: "jwt_bearer",
+          client_assertion: JSON::JWT.new(
+            iss: client_id,
+            sub: client_id,
+            aud: token_endpoint,
+            jti: SecureRandom.hex(16),
+            iat: Time.zone.now.to_i,
+            exp: 5.minutes.from_now.to_i,
+          ).sign(@private_key, "RS512").to_s,
+        )
+      else
+        client.access_token!
+      end
+
     response = access_token.token_response
 
     if oidc_nonce
@@ -68,53 +89,6 @@ class OidcClient
       response.merge(result: JSON.parse(response[:result].body))
     rescue JSON::ParserError
       raise OAuthFailure
-    end
-  end
-
-  def get_ephemeral_state(access_token:, refresh_token:)
-    response = time_and_return "get_ephemeral_state" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :get,
-        uri: ephemeral_state_uri,
-      )
-    end
-
-    begin
-      response.merge(result: JSON.parse(response[:result].body))
-    rescue JSON::ParserError
-      response.merge(result: {})
-    end
-  end
-
-  def get_attribute(attribute:, access_token:, refresh_token: nil)
-    response = time_and_return "get_attribute" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :get,
-        uri: attribute_uri(attribute),
-      )
-    end
-
-    body = response[:result].body
-    if response[:result].status != 200 || body.empty?
-      response.merge(result: nil)
-    else
-      response.merge(result: JSON.parse(body)["claim_value"])
-    end
-  end
-
-  def bulk_set_attributes(attributes:, access_token:, refresh_token: nil)
-    time_and_return "bulk_set_attributes" do
-      oauth_request(
-        access_token: access_token,
-        refresh_token: refresh_token,
-        method: :post,
-        uri: bulk_attribute_uri,
-        arg: attributes.transform_keys { |key| "attributes[#{key}]" }.transform_values(&:to_json),
-      )
     end
   end
 
@@ -157,33 +131,24 @@ private
     "#{host}/sign-in/callback"
   end
 
-  def ephemeral_state_uri
-    URI.parse(provider_uri).tap do |u|
-      u.path = "/api/v1/ephemeral-state"
-    end
-  end
-
-  def attribute_uri(attribute)
-    URI.parse(userinfo_endpoint).tap do |u|
-      u.path = "/v1/attributes/#{attribute}"
-    end
-  end
-
-  def bulk_attribute_uri
-    URI.parse(userinfo_endpoint).tap do |u|
-      u.path = "/v1/attributes"
-    end
-  end
-
   def client
-    @client ||= OpenIDConnect::Client.new(
-      identifier: client_id,
-      secret: @secret,
-      redirect_uri: redirect_uri,
-      authorization_endpoint: authorization_endpoint,
-      token_endpoint: token_endpoint,
-      userinfo_endpoint: userinfo_endpoint,
-    )
+    @client ||=
+      begin
+        client_options = {
+          identifier: client_id,
+          redirect_uri: redirect_uri,
+          authorization_endpoint: authorization_endpoint,
+          token_endpoint: token_endpoint,
+          userinfo_endpoint: userinfo_endpoint,
+        }
+
+        client_options.merge!(secret: @secret) unless use_client_private_key_auth?
+        OpenIDConnect::Client.new(client_options)
+      end
+  end
+
+  def use_client_private_key_auth?
+    @private_key.present?
   end
 
   def discover

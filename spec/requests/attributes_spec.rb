@@ -21,11 +21,10 @@ RSpec.describe "Attributes" do
 
   describe "GET" do
     before do
-      stub_remote_attribute_request(name: attribute_name1, value: attribute_value1, status: status)
+      stub_userinfo(attribute_name1 => attribute_value1)
     end
 
     let(:params) { { attributes: [attribute_name1] } }
-    let(:status) { 200 }
 
     it "returns the attribute" do
       get attributes_path, headers: headers, params: params
@@ -34,7 +33,7 @@ RSpec.describe "Attributes" do
     end
 
     context "when the attribute is not found" do
-      let(:status) { 404 }
+      let(:attribute_value1) { nil }
 
       it "returns no value" do
         get attributes_path, headers: headers, params: params
@@ -44,9 +43,10 @@ RSpec.describe "Attributes" do
     end
 
     context "when the tokens are rejected" do
-      before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
-
-      let(:status) { 401 }
+      before do
+        stub_request(:get, "http://openid-provider/userinfo-endpoint").to_return(status: 401)
+        stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
+      end
 
       it "returns a 401" do
         get attributes_path, headers: headers, params: params
@@ -84,7 +84,10 @@ RSpec.describe "Attributes" do
 
     context "when multiple attributes are requested" do
       before do
-        stub_remote_attribute_request(name: attribute_name2, value: attribute_value2)
+        stub_userinfo(
+          attribute_name1 => attribute_value1,
+          attribute_name2 => attribute_value2,
+        )
 
         LocalAttribute.create!(
           oidc_user: OidcUser.find_or_create_by(sub: "user-id"),
@@ -108,7 +111,12 @@ RSpec.describe "Attributes" do
       end
 
       context "when one of the attributes is not found" do
-        let(:status) { 404 }
+        before do
+          stub_userinfo(
+            attribute_name1 => nil,
+            attribute_name2 => attribute_value2,
+          )
+        end
 
         it "returns only the present attribute" do
           get attributes_path, headers: headers, params: params
@@ -134,35 +142,57 @@ RSpec.describe "Attributes" do
   end
 
   describe "PATCH" do
-    let(:attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
+    let(:attributes) { {} }
     let(:params) { { attributes: attributes } }
 
-    it "calls the attribute service" do
-      stub = stub_request(:post, "http://openid-provider/v1/attributes")
-        .with(body: { attributes: attributes.transform_values(&:to_json) })
-        .to_return(status: 200)
+    context "with remote attributes" do
+      let(:attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
 
-      patch attributes_path, headers: headers, params: params.to_json
-      expect(response).to be_successful
-      expect(stub).to have_been_made
-    end
-
-    context "when there is a local attribute" do
-      let(:remote_attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
-      let(:attributes) { remote_attributes.merge(local_attribute_name => local_attribute_value) }
-
-      before do
-        stub_request(:post, "http://openid-provider/v1/attributes")
-          .with(body: { attributes: remote_attributes.transform_values(&:to_json) })
-          .to_return(status: 200)
+      it "throws an error" do
+        expect { patch attributes_path, headers: headers, params: params.to_json }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
       end
 
-      it "doesn't send the local attribute to the attribute service" do
-        patch attributes_path, headers: headers, params: params.to_json
+      context "when using the account manager" do
+        before do
+          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+        end
+
+        it "calls the attribute service" do
+          stub = stub_request(:post, "http://openid-provider/v1/attributes")
+            .with(body: { attributes: attributes.transform_values(&:to_json) })
+            .to_return(status: 200)
+
+          patch attributes_path, headers: headers, params: params.to_json
+          expect(response).to be_successful
+          expect(stub).to have_been_made
+        end
+
+        context "when the tokens are rejected" do
+          before do
+            stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
+
+            stub_request(:post, "http://openid-provider/v1/attributes")
+              .with(body: { attributes: attributes.transform_values(&:to_json) })
+              .to_return(status: 401)
+          end
+
+          it "returns a 401" do
+            patch attributes_path, headers: headers, params: params.to_json
+            expect(response).to have_http_status(:unauthorized)
+          end
+        end
+      end
+    end
+
+    context "with local attributes" do
+      let(:attributes) { { local_attribute_name => local_attribute_value } }
+
+      it "updates the database" do
+        expect { patch attributes_path, headers: headers, params: params.to_json }.to change(LocalAttribute, :count).by(1)
         expect(response).to be_successful
       end
 
-      it "correctly round-trips the local attribute" do
+      it "correctly round-trips local attributes" do
         old_value = "hello world"
 
         LocalAttribute.create!(
@@ -179,10 +209,27 @@ RSpec.describe "Attributes" do
         get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
         expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
       end
+
+      context "when using the account manager" do
+        before do
+          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+
+          stub_request(:post, "http://openid-provider/v1/attributes")
+            .with(body: { attributes: {} })
+            .to_return(status: 200)
+        end
+
+        it "doesn't send the local attribute to the attribute service" do
+          patch attributes_path, headers: headers, params: params.to_json
+          expect(response).to be_successful
+        end
+      end
     end
 
-    context "when there are no attributes" do
-      let(:attributes) { {} }
+    context "when using the account manager" do
+      before do
+        allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+      end
 
       it "doesn't call the attribute service" do
         stub = stub_request(:post, "http://openid-provider/v1/attributes")
@@ -192,21 +239,6 @@ RSpec.describe "Attributes" do
         patch attributes_path, headers: headers, params: params.to_json
         expect(response).to be_successful
         expect(stub).not_to have_been_made
-      end
-    end
-
-    context "when the tokens are rejected" do
-      before do
-        stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
-
-        stub_request(:post, "http://openid-provider/v1/attributes")
-          .with(body: { attributes: attributes.transform_values(&:to_json) })
-          .to_return(status: 401)
-      end
-
-      it "returns a 401" do
-        patch attributes_path, headers: headers, params: params.to_json
-        expect(response).to have_http_status(:unauthorized)
       end
     end
 
@@ -232,6 +264,7 @@ RSpec.describe "Attributes" do
 
     context "when the user doesn't have a high enough level of authentication" do
       let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+      let(:attributes) { { local_attribute_name => local_attribute_value } }
 
       it "returns a 403 and the required level" do
         patch attributes_path, headers: headers, params: params.to_json
@@ -239,7 +272,7 @@ RSpec.describe "Attributes" do
 
         error = JSON.parse(response.body)
         expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
-        expect(error["attributes"]).to eq([attribute_name1, attribute_name2])
+        expect(error["attributes"]).to eq([local_attribute_name])
         expect(error["needed_level_of_authentication"]).to eq("level0")
       end
     end

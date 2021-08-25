@@ -3,12 +3,6 @@ RSpec.describe OidcClient do
 
   before { stub_oidc_discovery }
 
-  describe "auth_uri" do
-    it "includes the requested level of authentication in the scopes" do
-      expect(client.auth_uri(AuthRequest.generate!, "level1234567890")).to include("scope=email%20openid%20level1234567890")
-    end
-  end
-
   describe "tokens!" do
     before do
       access_token = Rack::OAuth2::AccessToken.new(
@@ -39,13 +33,25 @@ RSpec.describe OidcClient do
 
       expect { client.tokens! }.to raise_error(OidcClient::OAuthFailure)
     end
-  end
 
-  describe "get_ephemeral_state" do
-    it "returns {} if there is no JSON" do
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(body: "")
+    it "uses JWT auth" do
+      # rubocop:disable RSpec/InstanceVariable
+      expect(@client_stub).to receive(:access_token!).with(hash_including(client_auth_method: "jwt_bearer"))
+      # rubocop:enable RSpec/InstanceVariable
+      client.tokens!
+    end
 
-      expect(client.get_ephemeral_state(access_token: "access-token", refresh_token: "refresh-token")).to eq({ access_token: "access-token", refresh_token: "refresh-token", result: {} })
+    context "when there is no OAuth private key" do
+      # rubocop:disable RSpec/SubjectStub
+      before { allow(client).to receive(:use_client_private_key_auth?).and_return(false) }
+      # rubocop:enable RSpec/SubjectStub
+
+      it "does not use JWT auth" do
+        # rubocop:disable RSpec/InstanceVariable
+        expect(@client_stub).to receive(:access_token!).with(no_args)
+        # rubocop:enable RSpec/InstanceVariable
+        client.tokens!
+      end
     end
   end
 

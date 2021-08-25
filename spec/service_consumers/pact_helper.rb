@@ -9,11 +9,12 @@ Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 module PactStubHelpers
   EMAIL_ADDRESS = "user@example.com".freeze
 
-  def stub_email_attribute_requests(email_verified: true, has_unconfirmed_email: false)
-    stub_remote_attribute_requests(
+  def stub_remote_attributes(email_verified: true, has_unconfirmed_email: false, **attributes)
+    stub_userinfo(
       email: EMAIL_ADDRESS,
       email_verified: email_verified,
       has_unconfirmed_email: has_unconfirmed_email,
+      **attributes,
     )
   end
 
@@ -75,6 +76,8 @@ Pact.provider_states_for "GDS API Adapters" do
     WebMock.enable!
     WebMock.reset!
 
+    allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+
     stub_oidc_discovery
     stub_token_response
     stub_userinfo
@@ -129,16 +132,15 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session" do
     set_up do
-      stub_email_attribute_requests
+      stub_remote_attributes(test_attribute_1: nil)
       stub_will_create_email_subscription "wizard-news-topic-slug"
-      stub_remote_attribute_requests(test_attribute_1: nil)
       stub_request(:post, "http://openid-provider/v1/attributes").to_return(status: 200)
     end
   end
 
   provider_state "there is a valid user session, with a 'wizard-news' email subscription" do
     set_up do
-      stub_email_attribute_requests
+      stub_remote_attributes
       stub_will_create_email_subscription "wizard-news-topic-slug"
       FactoryBot.create(:email_subscription, name: "wizard-news", oidc_user_id: oidc_user.id)
     end
@@ -153,21 +155,21 @@ Pact.provider_states_for "GDS API Adapters" do
   # TODO: remove when gds-api-adapters PR is merged
   provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
     set_up do
-      stub_email_attribute_requests
+      stub_remote_attributes
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
     end
   end
 
   provider_state "there is a valid user session, with '/guidance/some-govuk-guidance' saved" do
     set_up do
-      stub_email_attribute_requests
+      stub_remote_attributes
       FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
     end
   end
 
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
-      stub_remote_attribute_request(name: "test_attribute_1", value: { bar: "baz" })
+      stub_remote_attributes(test_attribute_1: { bar: "baz" })
     end
   end
 

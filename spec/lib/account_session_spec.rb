@@ -98,25 +98,10 @@ RSpec.describe AccountSession do
     let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
 
     describe "get_attributes" do
-      before do
-        stub_userinfo
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
-          .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
-        stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
-          .to_return(status: 200, body: { claim_value: attribute_value2 }.compact.to_json)
-      end
+      before { stub_userinfo }
 
-      let(:status) { 200 }
-
-      it "returns the attributes" do
-        LocalAttribute.create!(
-          oidc_user: OidcUser.find_or_create_by(sub: user_id),
-          name: local_attribute_name,
-          value: local_attribute_value,
-        )
-
-        values = account_session.get_attributes([attribute_name1, attribute_name2, local_attribute_name])
-        expect(values).to eq({ attribute_name1 => attribute_value1, attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
+      it "returns no values" do
+        expect(account_session.get_attributes([attribute_name1])).to eq({})
       end
 
       context "when the attribute value is in the userinfo response" do
@@ -129,30 +114,63 @@ RSpec.describe AccountSession do
         it "uses the value from the userinfo response" do
           expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => value_from_userinfo })
         end
-      end
 
-      context "when some attributes are not found" do
-        let(:status) { 404 }
+        context "when an attribute is cached_locally" do
+          let(:attribute_name1) { "test_attribute_cache" }
 
-        it "returns no value" do
-          expect(account_session.get_attributes([attribute_name1, attribute_name2])).to eq({ attribute_name2 => attribute_value2 })
+          it "fetches the attribute and stores it locally" do
+            expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
+            expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => value_from_userinfo })
+          end
         end
       end
 
-      context "when an attribute is cached_locally" do
-        let(:attribute_name1) { "test_attribute_cache" }
+      context "when using the account manager" do
+        before do
+          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
 
-        it "fetches the attribute and stores it locally" do
-          expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
-          expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
+          stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name1}")
+            .to_return(status: status, body: { claim_value: attribute_value1 }.compact.to_json)
+          stub_request(:get, "http://openid-provider/v1/attributes/#{attribute_name2}")
+            .to_return(status: 200, body: { claim_value: attribute_value2 }.compact.to_json)
         end
 
-        context "when the attribute is unset" do
-          let(:attribute_value1) { nil }
+        let(:status) { 200 }
 
-          it "does not try to cache locally" do
-            expect { account_session.get_attributes([attribute_name1]) }.not_to change(LocalAttribute, :count)
-            expect(account_session.get_attributes([attribute_name1])).to eq({})
+        it "returns the attributes" do
+          LocalAttribute.create!(
+            oidc_user: OidcUser.find_or_create_by(sub: user_id),
+            name: local_attribute_name,
+            value: local_attribute_value,
+          )
+
+          values = account_session.get_attributes([attribute_name1, attribute_name2, local_attribute_name])
+          expect(values).to eq({ attribute_name1 => attribute_value1, attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
+        end
+
+        context "when some attributes are not found" do
+          let(:status) { 404 }
+
+          it "returns no value" do
+            expect(account_session.get_attributes([attribute_name1, attribute_name2])).to eq({ attribute_name2 => attribute_value2 })
+          end
+        end
+
+        context "when an attribute is cached_locally" do
+          let(:attribute_name1) { "test_attribute_cache" }
+
+          it "fetches the attribute and stores it locally" do
+            expect { account_session.get_attributes([attribute_name1]) }.to change(LocalAttribute, :count).by(1)
+            expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => attribute_value1 })
+          end
+
+          context "when the attribute is unset" do
+            let(:attribute_value1) { nil }
+
+            it "does not try to cache locally" do
+              expect { account_session.get_attributes([attribute_name1]) }.not_to change(LocalAttribute, :count)
+              expect(account_session.get_attributes([attribute_name1])).to eq({})
+            end
           end
         end
       end
@@ -163,10 +181,24 @@ RSpec.describe AccountSession do
       let(:local_attributes) { { local_attribute_name => local_attribute_value } }
       let(:attributes) { remote_attributes.merge(local_attributes) }
 
-      it "calls the attribute service for remote attributes, calls the database for local attributes" do
-        stub = stub_set_remote_attributes
-        expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count).by(1)
-        expect(stub).to have_been_made
+      it "saves local attributes to the database" do
+        expect { account_session.set_attributes(local_attributes) }.to change(LocalAttribute, :count).by(1)
+      end
+
+      it "raises an error when saving remote attributes" do
+        expect { account_session.set_attributes(remote_attributes) }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
+      end
+
+      context "when using the account manager" do
+        before do
+          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+        end
+
+        it "calls the attribute service for remote attributes" do
+          stub = stub_set_remote_attributes
+          account_session.set_attributes(remote_attributes)
+          expect(stub).to have_been_made
+        end
       end
 
       context "when the local attribute already exists" do
@@ -185,9 +217,7 @@ RSpec.describe AccountSession do
         let(:local_attributes) { {} }
 
         it "doesn't update the database" do
-          stub = stub_set_remote_attributes
-          expect { account_session.set_attributes(attributes) }.not_to change(LocalAttribute, :count)
-          expect(stub).to have_been_made
+          expect { account_session.set_attributes(local_attributes) }.not_to change(LocalAttribute, :count)
         end
       end
 
@@ -204,12 +234,21 @@ RSpec.describe AccountSession do
       context "when an attribute is cached_locally" do
         let(:attribute_name1) { "test_attribute_cache" }
         let(:remote_attributes) { { attribute_name1 => attribute_value1 } }
-        let(:local_attributes) { {} }
 
-        it "sets the attribute both locally and remotely" do
-          stub = stub_set_remote_attributes
-          expect { account_session.set_attributes(attributes) }.to change(LocalAttribute, :count).by(1)
-          expect(stub).to have_been_made
+        it "raises an error" do
+          expect { account_session.set_attributes(remote_attributes) }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
+        end
+
+        context "when using the account manager" do
+          before do
+            allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+          end
+
+          it "sets the attribute both locally and remotely" do
+            stub = stub_set_remote_attributes
+            expect { account_session.set_attributes(remote_attributes) }.to change(LocalAttribute, :count).by(1)
+            expect(stub).to have_been_made
+          end
         end
       end
 

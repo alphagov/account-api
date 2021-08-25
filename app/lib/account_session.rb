@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class AccountSession
+  include DigitalIdentityHelper
+
   class Frozen < StandardError; end
+
+  class CannotSetRemoteDigitalIdentityAttributes < StandardError; end
 
   LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
@@ -95,6 +99,14 @@ private
     values = remote_attributes.index_with do |name|
       if userinfo.key? name
         userinfo[name]
+      elsif using_digital_identity?
+        # TODO: Digital Identity currently returns all attributes in
+        # the UserInfo.  We should change this logic so that:
+        #
+        # - if they say that will always be the case, remove the
+        # fallback and always lookup in UserInfo.
+        # - if they say that will change, implement their API.
+        nil
       else
         oidc_do :get_attribute, { attribute: name }
       end
@@ -106,7 +118,15 @@ private
   def set_remote_attributes(remote_attributes)
     return if remote_attributes.empty?
 
-    oidc_do :bulk_set_attributes, { attributes: remote_attributes }
+    # TODO: Digital Identity currently have no way to set remote
+    # attributes.  We don't have any writable remote attributes at the
+    # moment so this isn't a problem.  But when they do, implement
+    # their API.
+    if using_digital_identity?
+      raise CannotSetRemoteDigitalIdentityAttributes, remote_attributes
+    else
+      oidc_do :bulk_set_attributes, { attributes: remote_attributes }
+    end
   end
 
   def oidc_do(method, args = {})
@@ -126,7 +146,7 @@ private
   end
 
   def oidc_client
-    @oidc_client ||= OidcClient.new
+    @oidc_client ||= oidc_client_class.new
   end
 
   def user_attributes
