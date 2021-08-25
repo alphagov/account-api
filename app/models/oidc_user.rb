@@ -4,7 +4,7 @@ class OidcUser < ApplicationRecord
 
   validates :sub, presence: true
 
-  def get_local_attributes(names = [])
+  def get_attributes_by_name(names = [])
     names.index_with { |name| self[name] }.compact
   end
 end
