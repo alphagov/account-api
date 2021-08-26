@@ -33,7 +33,8 @@ class AuthenticationController < ApplicationController
       ga_client_id: details.fetch(:ga_session_id),
       cookie_consent: details.fetch(:cookie_consent),
     }
-  rescue OidcClient::OAuthFailure
+  rescue OidcClient::OAuthFailure => e
+    GovukError.notify e
     head :unauthorized
   end
 
