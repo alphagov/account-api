@@ -45,6 +45,7 @@ class OidcClient
     access_token =
       if use_client_private_key_auth?
         client.access_token!(
+          client_id: client_id,
           client_auth_method: "jwt_bearer",
           client_assertion: JSON::JWT.new(
             iss: client_id,
