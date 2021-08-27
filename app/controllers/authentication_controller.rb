@@ -38,6 +38,24 @@ class AuthenticationController < ApplicationController
     head :unauthorized
   end
 
+  def end_session
+    end_session_uri =
+      if using_digital_identity?
+        id_token = get_id_token_from_session
+        uri = oidc_client_class.new.end_session_endpoint
+        if id_token
+          querystring = Rack::Utils.build_nested_query(id_token_hint: id_token)
+          "#{uri}?#{querystring}"
+        else
+          uri
+        end
+      else
+        "#{Plek.find('account-manager')}/sign-out?continue=1"
+      end
+
+    render json: { end_session_uri: end_session_uri }
+  end
+
 private
 
   # TODO: Digital Identity don't yet have an implementation of levels
@@ -65,5 +83,14 @@ private
         cookie_consent: oauth_response.fetch(:result)["cookie_consent"],
       )
     end
+  end
+
+  def get_id_token_from_session
+    AccountSession.deserialise(
+      encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
+      session_signing_key: Rails.application.secrets.session_signing_key,
+    )&.id_token
+  rescue OidcClient::OAuthFailure
+    nil
   end
 end
