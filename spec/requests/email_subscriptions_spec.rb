@@ -120,8 +120,10 @@ RSpec.describe "Email subscriptions" do
     end
 
     def stub_local_attributes
-      LocalAttribute.create!(oidc_user: session_identifier.user, name: "email", value: email)
-      LocalAttribute.create!(oidc_user: session_identifier.user, name: "email_verified", value: email_verified)
+      session_identifier.user.update!(
+        email: email,
+        email_verified: email_verified,
+      )
     end
 
     def expect_activate_email_subscription
