@@ -63,13 +63,15 @@ class OidcClient
     response = access_token.token_response
 
     if oidc_nonce
-      id_token = OpenIDConnect::ResponseObject::IdToken.decode access_token.id_token, discover.jwks
+      id_token_jwt = access_token.id_token
+      id_token = OpenIDConnect::ResponseObject::IdToken.decode id_token_jwt, discover.jwks
       id_token.verify! client_id: client_id, issuer: discover.issuer, nonce: oidc_nonce
     end
 
     {
       access_token: response[:access_token],
       refresh_token: response[:refresh_token],
+      id_token_jwt: id_token_jwt,
       id_token: id_token,
     }.compact
   rescue Rack::OAuth2::Client::Error

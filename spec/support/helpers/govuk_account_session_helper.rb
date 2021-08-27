@@ -7,6 +7,7 @@ module GovukAccountSessionHelper
     AccountSession.new(
       **{
         session_signing_key: Rails.application.secrets.session_signing_key,
+        id_token: "id-token",
         user_id: "user-id",
         access_token: "access-token",
         refresh_token: "refresh-token",
