@@ -24,6 +24,7 @@ class AuthenticationController < ApplicationController
     render json: {
       govuk_account_session: AccountSession.new(
         session_secret: Rails.application.secrets.session_secret,
+        id_token: details.fetch(:id_token_jwt),
         user_id: details.fetch(:id_token).sub,
         access_token: details.fetch(:access_token),
         refresh_token: details.fetch(:refresh_token),
@@ -45,28 +46,24 @@ private
   # before we can migrate production.
   def get_level_of_authentication_and_suchlike(client, tokens)
     if using_digital_identity?
-      {
-        id_token: tokens[:id_token],
-        access_token: tokens[:access_token],
-        refresh_token: tokens[:refresh_token],
+      tokens.merge(
         level_of_authentication: "level1",
         ga_session_id: nil,
         cookie_consent: false,
-      }
+      )
     else
       oauth_response = client.get_ephemeral_state(
         access_token: tokens[:access_token],
         refresh_token: tokens[:refresh_token],
       )
 
-      {
-        id_token: tokens[:id_token],
+      tokens.merge(
         access_token: oauth_response.fetch(:access_token),
         refresh_token: oauth_response.fetch(:refresh_token),
         level_of_authentication: oauth_response.fetch(:result).fetch("level_of_authentication"),
         ga_session_id: oauth_response.fetch(:result)["_ga"],
         cookie_consent: oauth_response.fetch(:result)["cookie_consent"],
-      }
+      )
     end
   end
 end

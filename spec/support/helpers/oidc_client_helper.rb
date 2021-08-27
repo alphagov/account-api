@@ -16,6 +16,7 @@ module OidcClientHelper
     token_response = {
       access_token: "access-token",
       refresh_token: "refresh-token",
+      id_token_jwt: "id-token",
       id_token: instance_double(
         "OpenIDConnect::ResponseObject::IdToken",
         iss: "http://openid-provider",

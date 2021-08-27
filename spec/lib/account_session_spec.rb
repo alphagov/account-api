@@ -7,11 +7,12 @@ RSpec.describe AccountSession do
     allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
   end
 
+  let(:id_token) { SecureRandom.hex(10) }
   let(:user_id) { SecureRandom.hex(10) }
   let(:access_token) { SecureRandom.hex(10) }
   let(:refresh_token) { SecureRandom.hex(10) }
   let(:level_of_authentication) { AccountSession::LOWEST_LEVEL_OF_AUTHENTICATION }
-  let(:params) { { user_id: user_id, access_token: access_token, refresh_token: refresh_token, level_of_authentication: level_of_authentication }.compact }
+  let(:params) { { id_token: id_token, user_id: user_id, access_token: access_token, refresh_token: refresh_token, level_of_authentication: level_of_authentication }.compact }
   let(:account_session) { described_class.new(session_secret: "key", **params) }
 
   it "throws an error if making an OAuth call after serialising the session" do
@@ -45,6 +46,14 @@ RSpec.describe AccountSession do
     it "returns nil on a missing value" do
       expect(described_class.deserialise(encoded_session: nil, session_secret: "secret")).to be_nil
       expect(described_class.deserialise(encoded_session: "", session_secret: "secret")).to be_nil
+    end
+
+    context "when there isn't an ID token in the header" do
+      let(:id_token) { nil }
+
+      it "successfully decodes with a nil token value" do
+        expect(described_class.new(session_signing_key: "secret", **params).to_hash).to eq(params.merge(id_token: nil))
+      end
     end
 
     context "when there isn't a user ID in the header" do
