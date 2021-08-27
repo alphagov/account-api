@@ -11,6 +11,7 @@ management. This API is not for other government services.
 - [API endpoints](#api-endpoints)
   - [`GET /api/oauth2/sign-in`](#get-apioauth2sign-in)
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
+  - [`GET /api/oauth2/end-session`](#get-apioauth2end-session)
   - [`GET /api/user`](#get-apiuser)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
@@ -168,6 +169,44 @@ Response:
     "redirect_path": "/guidance/keeping-a-pet-pig-or-micropig",
     "ga_client_id": "ga-123-userid",
     "cookie_consent": false,
+}
+```
+
+### `GET /api/oauth2/end-session`
+
+Generates a sign out URL.
+
+This URL should be served to the user with a 302 response to terminate their session with the identity provider and connected services.  If the session identifier is given, it may be passed to the identity provider to validate the user's session.
+
+#### Request headers
+
+- `GOVUK-Account-Session` *(optional)*
+  - the user's session identifier
+
+#### JSON response fields
+
+- `end_session_uri`
+  - an absolute URL, pointing to the identity provider, which the user should be redirected to to end their session
+
+#### Response codes
+
+- 200
+
+#### Example request / response
+
+Request (with gds-api-adapters):
+
+```ruby
+GdsApi.account_api.get_end_session_url(
+    govuk_account_session: "session-identifier",
+)
+```
+
+Response:
+
+```json
+{
+    "end_session_uri": "https://www.account.publishing.service.gov.uk/sign-out?continue=1"
 }
 ```
 

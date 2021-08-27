@@ -52,7 +52,7 @@ RSpec.describe AccountSession do
       let(:id_token) { nil }
 
       it "successfully decodes with a nil token value" do
-        expect(described_class.new(session_signing_key: "secret", **params).to_hash).to eq(params.merge(id_token: nil))
+        expect(described_class.new(session_secret: "secret", **params).to_hash).to eq(params.merge(id_token: nil))
       end
     end
 
