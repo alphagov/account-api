@@ -132,7 +132,7 @@ GEM
     ffi (1.15.3)
     filelock (1.1.1)
     find_a_port (1.0.1)
-    fugit (1.5.0)
+    fugit (1.5.1)
       et-orbi (~> 1.1, >= 1.1.8)
       raabro (~> 1.4)
     gds-api-adapters (73.0.0)
@@ -431,7 +431,7 @@ GEM
       redis (>= 3.3.5, < 4.2)
     sidekiq-logging-json (0.0.19)
       sidekiq (>= 3)
-    sidekiq-scheduler (3.0.1)
+    sidekiq-scheduler (3.1.0)
       e2mmap
       redis (>= 3, < 5)
       rufus-scheduler (~> 3.2)
@@ -538,7 +538,7 @@ DEPENDENCIES
   rspec-rails
   rubocop-govuk
   shoulda-matchers
-  sidekiq-scheduler (= 3.0.1)
+  sidekiq-scheduler (= 3.1.0)
   simplecov
   webmock
 
