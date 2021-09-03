@@ -9,13 +9,14 @@ class AccountSession
 
   LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
 
-  attr_reader :user_id, :level_of_authentication
+  attr_reader :id_token, :user_id, :level_of_authentication
 
-  def initialize(session_secret:, access_token:, refresh_token:, level_of_authentication:, user_id: nil)
+  def initialize(session_secret:, access_token:, refresh_token:, level_of_authentication:, user_id: nil, id_token: nil)
     @session_secret = session_secret
     @access_token = access_token
     @refresh_token = refresh_token
     @level_of_authentication = level_of_authentication
+    @id_token = id_token
     @frozen = false
 
     @user_id = user_id || userinfo["sub"]
@@ -53,6 +54,7 @@ class AccountSession
 
   def to_hash
     {
+      id_token: id_token,
       user_id: user_id,
       access_token: @access_token,
       refresh_token: @refresh_token,

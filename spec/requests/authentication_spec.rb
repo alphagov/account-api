@@ -66,4 +66,44 @@ RSpec.describe "Authentication" do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe "/end-session" do
+    it "returns the end_session_endpoint for the identity provider" do
+      get end_session_path, headers: headers
+      expect(response).to be_successful
+      expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint")
+    end
+
+    context "when a session is given" do
+      let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier.serialise } }
+      let(:session_identifier) { placeholder_govuk_account_session_object(id_token: id_token) }
+      let(:id_token) { "id-token" }
+
+      it "includes an id_token_hint" do
+        get end_session_path, headers: headers
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint?id_token_hint=#{id_token}")
+      end
+
+      context "when there is no ID token in the session" do
+        let(:id_token) { nil }
+
+        it "does not include an id_token_hint" do
+          get end_session_path, headers: headers
+          expect(response).to be_successful
+          expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint")
+        end
+      end
+    end
+
+    context "when using the account manager" do
+      before { allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil) }
+
+      it "returns the account-manager sign out URL" do
+        get end_session_path, headers: headers
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)["end_session_uri"]).to eq("#{Plek.find('account-manager')}/sign-out?continue=1")
+      end
+    end
+  end
 end
