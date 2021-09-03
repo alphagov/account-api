@@ -11,8 +11,8 @@ class AccountSession
 
   attr_reader :user_id, :level_of_authentication
 
-  def initialize(session_signing_key:, access_token:, refresh_token:, level_of_authentication:, user_id: nil)
-    @session_signing_key = session_signing_key
+  def initialize(session_secret:, access_token:, refresh_token:, level_of_authentication:, user_id: nil)
+    @session_secret = session_secret
     @access_token = access_token
     @refresh_token = refresh_token
     @level_of_authentication = level_of_authentication
@@ -21,14 +21,14 @@ class AccountSession
     @user_id = user_id || userinfo["sub"]
   end
 
-  def self.deserialise(encoded_session:, session_signing_key:)
+  def self.deserialise(encoded_session:, session_secret:)
     encoded_session_without_flash = encoded_session&.split("$$")&.first
     return if encoded_session_without_flash.blank?
 
-    serialised_session = StringEncryptor.new(signing_key: session_signing_key).decrypt_string(encoded_session_without_flash)
+    serialised_session = StringEncryptor.new(secret: session_secret).decrypt_string(encoded_session_without_flash)
     if serialised_session
       new(
-        session_signing_key: session_signing_key,
+        session_secret: session_secret,
         **{
           level_of_authentication: LOWEST_LEVEL_OF_AUTHENTICATION,
         }.merge(JSON.parse(serialised_session).symbolize_keys),
@@ -48,7 +48,7 @@ class AccountSession
 
   def serialise
     @frozen = true
-    StringEncryptor.new(signing_key: session_signing_key).encrypt_string(to_hash.to_json)
+    StringEncryptor.new(secret: session_secret).encrypt_string(to_hash.to_json)
   end
 
   def to_hash
@@ -93,7 +93,7 @@ class AccountSession
 
 private
 
-  attr_reader :session_signing_key
+  attr_reader :session_secret
 
   def get_remote_attributes(remote_attributes)
     values = remote_attributes.index_with do |name|

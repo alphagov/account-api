@@ -12,7 +12,7 @@ RSpec.describe AccountSession do
   let(:refresh_token) { SecureRandom.hex(10) }
   let(:level_of_authentication) { AccountSession::LOWEST_LEVEL_OF_AUTHENTICATION }
   let(:params) { { user_id: user_id, access_token: access_token, refresh_token: refresh_token, level_of_authentication: level_of_authentication }.compact }
-  let(:account_session) { described_class.new(session_signing_key: "key", **params) }
+  let(:account_session) { described_class.new(session_secret: "key", **params) }
 
   it "throws an error if making an OAuth call after serialising the session" do
     account_session.serialise
@@ -21,30 +21,30 @@ RSpec.describe AccountSession do
 
   describe "serialisation / deserialisation" do
     it "round-trips" do
-      encoded = described_class.new(session_signing_key: "secret", **params).serialise
-      decoded = described_class.deserialise(encoded_session: encoded, session_signing_key: "secret").to_hash
+      encoded = described_class.new(session_secret: "secret", **params).serialise
+      decoded = described_class.deserialise(encoded_session: encoded, session_secret: "secret").to_hash
 
       expect(decoded).to eq(params)
     end
 
     it "decodes successfully in the presence of flash messages" do
-      encoded = described_class.new(session_signing_key: "secret", **params).serialise
-      decoded = described_class.deserialise(encoded_session: "#{encoded}$$some,flash,keys", session_signing_key: "secret")
+      encoded = described_class.new(session_secret: "secret", **params).serialise
+      decoded = described_class.deserialise(encoded_session: "#{encoded}$$some,flash,keys", session_secret: "secret")
 
       expect(decoded).not_to be_nil
       expect(decoded.to_hash).to eq(params)
     end
 
     it "rejects a session signed with a different key" do
-      encoded = described_class.new(session_signing_key: "secret", **params).serialise
-      decoded = described_class.deserialise(encoded_session: encoded, session_signing_key: "different-secret")
+      encoded = described_class.new(session_secret: "secret", **params).serialise
+      decoded = described_class.deserialise(encoded_session: encoded, session_secret: "different-secret")
 
       expect(decoded).to be_nil
     end
 
     it "returns nil on a missing value" do
-      expect(described_class.deserialise(encoded_session: nil, session_signing_key: "secret")).to be_nil
-      expect(described_class.deserialise(encoded_session: "", session_signing_key: "secret")).to be_nil
+      expect(described_class.deserialise(encoded_session: nil, session_secret: "secret")).to be_nil
+      expect(described_class.deserialise(encoded_session: "", session_secret: "secret")).to be_nil
     end
 
     context "when there isn't a user ID in the header" do
@@ -58,7 +58,7 @@ RSpec.describe AccountSession do
       end
 
       it "queries userinfo for the user ID" do
-        expect(described_class.new(session_signing_key: "secret", **params).to_hash).to eq(params.merge(user_id: user_id_from_userinfo))
+        expect(described_class.new(session_secret: "secret", **params).to_hash).to eq(params.merge(user_id: user_id_from_userinfo))
       end
 
       context "when the userinfo request fails" do
@@ -68,7 +68,7 @@ RSpec.describe AccountSession do
 
         it "returns nil" do
           encoded = "#{Base64.urlsafe_encode64(access_token)}.#{Base64.urlsafe_encode64(refresh_token)}"
-          expect(described_class.deserialise(encoded_session: encoded, session_signing_key: "secret")).to be_nil
+          expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret")).to be_nil
         end
       end
     end
