@@ -1,8 +1,8 @@
 class StringEncryptor
   KEY_LEN = ActiveSupport::MessageEncryptor.key_len
 
-  def initialize(signing_key:)
-    @signing_key = signing_key
+  def initialize(secret:)
+    @secret = secret
   end
 
   def encrypt_string(plaintext)
@@ -27,10 +27,10 @@ class StringEncryptor
 
 private
 
-  attr_reader :signing_key
+  attr_reader :secret
 
   def encryptor(salt)
-    key = ActiveSupport::KeyGenerator.new(signing_key).generate_key(salt, KEY_LEN)
+    key = ActiveSupport::KeyGenerator.new(secret).generate_key(salt, KEY_LEN)
     ActiveSupport::MessageEncryptor.new key
   end
 end
