@@ -24,7 +24,6 @@ class AuthenticationController < ApplicationController
     render json: {
       govuk_account_session: AccountSession.new(
         session_secret: Rails.application.secrets.session_secret,
-        id_token: details.fetch(:id_token_jwt),
         user_id: details.fetch(:id_token).sub,
         access_token: details.fetch(:access_token),
         refresh_token: details.fetch(:refresh_token),
