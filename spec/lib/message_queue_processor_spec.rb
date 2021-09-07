@@ -91,6 +91,17 @@ RSpec.describe MessageQueueProcessor do
             expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
           end
         end
+
+        context "when the redirect target has been marked 'gone'" do
+          before { stub_content_store_has_gone_item(alternative_path, content_item) }
+
+          let(:expected_effect) { "destroyed" }
+
+          it "destroys matching pages" do
+            expect(actual_output).to eq(expected_output)
+            expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
+          end
+        end
       end
     end
 
@@ -119,6 +130,17 @@ RSpec.describe MessageQueueProcessor do
 
       context "when the redirect target does not exist" do
         before { stub_content_store_does_not_have_item(alternative_path, content_item) }
+
+        let(:expected_effect) { "destroyed" }
+
+        it "destroys matching pages" do
+          expect(actual_output).to eq(expected_output)
+          expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
+        end
+      end
+
+      context "when the redirect target has been marked 'gone'" do
+        before { stub_content_store_has_gone_item(alternative_path, content_item) }
 
         let(:expected_effect) { "destroyed" }
 

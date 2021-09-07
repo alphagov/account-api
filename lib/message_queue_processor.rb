@@ -73,7 +73,7 @@ class MessageQueueProcessor
     else
       destroy_saved_pages(saved_pages)
     end
-  rescue GdsApi::ContentStore::ItemNotFound
+  rescue GdsApi::ContentStore::ItemNotFound, GdsApi::HTTPGone
     destroy_saved_pages(saved_pages)
   end
 
