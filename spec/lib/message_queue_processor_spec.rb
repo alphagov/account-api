@@ -49,74 +49,7 @@ RSpec.describe MessageQueueProcessor do
       expect(saved_page.reload.to_hash).to eq(expected_to_hash)
     end
 
-    context "with a 'gone' notification" do
-      let(:alternative_path) { nil }
-      let(:expected_effect) { "destroyed" }
-
-      let(:payload) do
-        GovukSchemas::RandomExample.for_schema(notification_schema: "gone") do |payload|
-          payload["details"] ||= {}
-          payload["details"] = payload["details"].merge("alternative_path" => alternative_path).compact
-          payload
-        end
-      end
-
-      it "destroys matching pages" do
-        expect(actual_output).to eq(expected_output)
-        expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
-      end
-
-      context "with an alternative path" do
-        let(:alternative_path) { "/alternative-path" }
-        let(:content_item) { content_item_for_base_path(alternative_path).merge("content_id" => SecureRandom.uuid) }
-
-        context "when the redirect target exists" do
-          before { stub_content_store_has_item(alternative_path, content_item) }
-
-          let(:expected_effect) { "redirected 1 to #{alternative_path} and destroyed 0 duplicates" }
-
-          it "updates matching pages" do
-            expect(actual_output).to eq(expected_output)
-            expect(saved_page.reload.to_hash).to eq(expected_to_hash)
-          end
-        end
-
-        context "when the redirect target does not exist" do
-          before { stub_content_store_does_not_have_item(alternative_path, content_item) }
-
-          let(:expected_effect) { "destroyed" }
-
-          it "destroys matching pages" do
-            expect(actual_output).to eq(expected_output)
-            expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
-          end
-        end
-
-        context "when the redirect target has been marked 'gone'" do
-          before { stub_content_store_has_gone_item(alternative_path, content_item) }
-
-          let(:expected_effect) { "destroyed" }
-
-          it "destroys matching pages" do
-            expect(actual_output).to eq(expected_output)
-            expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
-          end
-        end
-      end
-    end
-
-    context "with a 'redirect' notification" do
-      let(:alternative_path) { "/alternative-path" }
-      let(:content_item) { content_item_for_base_path(alternative_path).merge("content_id" => SecureRandom.uuid) }
-
-      let(:payload) do
-        GovukSchemas::RandomExample.for_schema(notification_schema: "redirect") do |payload|
-          payload.merge(
-            "redirects" => [{ "path" => payload["base_path"], "type" => "exact", "destination" => alternative_path }],
-          )
-        end
-      end
-
+    shared_examples "redirection" do
       context "when the redirect target exists" do
         before { stub_content_store_has_item(alternative_path, content_item) }
 
@@ -149,6 +82,46 @@ RSpec.describe MessageQueueProcessor do
           expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
         end
       end
+    end
+
+    context "with a 'gone' notification" do
+      let(:alternative_path) { nil }
+      let(:expected_effect) { "destroyed" }
+
+      let(:payload) do
+        GovukSchemas::RandomExample.for_schema(notification_schema: "gone") do |payload|
+          payload["details"] ||= {}
+          payload["details"] = payload["details"].merge("alternative_path" => alternative_path).compact
+          payload
+        end
+      end
+
+      it "destroys matching pages" do
+        expect(actual_output).to eq(expected_output)
+        expect { saved_page.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      context "with an alternative path" do
+        let(:alternative_path) { "/alternative-path" }
+        let(:content_item) { content_item_for_base_path(alternative_path).merge("content_id" => SecureRandom.uuid) }
+
+        include_examples "redirection"
+      end
+    end
+
+    context "with a 'redirect' notification" do
+      let(:alternative_path) { "/alternative-path" }
+      let(:content_item) { content_item_for_base_path(alternative_path).merge("content_id" => SecureRandom.uuid) }
+
+      let(:payload) do
+        GovukSchemas::RandomExample.for_schema(notification_schema: "redirect") do |payload|
+          payload.merge(
+            "redirects" => [{ "path" => payload["base_path"], "type" => "exact", "destination" => alternative_path }],
+          )
+        end
+      end
+
+      include_examples "redirection"
     end
 
     context "with a 'vanish' notification" do
