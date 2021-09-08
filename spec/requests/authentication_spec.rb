@@ -1,10 +1,11 @@
 RSpec.describe "Authentication" do
   before do
     stub_oidc_discovery
-    stub_token_response
+    stub_token_response(refresh_token: refresh_token)
   end
 
   let(:headers) { { "Content-Type" => "application/json" } }
+  let(:refresh_token) { "refresh-token" }
 
   describe "/sign-in" do
     it "creates an AuthRequest to persist the attributes" do
@@ -34,6 +35,15 @@ RSpec.describe "Authentication" do
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path)
+    end
+
+    context "when there is no refresh token" do
+      let(:refresh_token) { nil }
+
+      it "responds successfully" do
+        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+        expect(response).to be_successful
+      end
     end
 
     context "when using the account manager" do

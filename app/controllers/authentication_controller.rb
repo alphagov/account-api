@@ -26,12 +26,12 @@ class AuthenticationController < ApplicationController
         session_secret: Rails.application.secrets.session_secret,
         user_id: details.fetch(:id_token).sub,
         access_token: details.fetch(:access_token),
-        refresh_token: details.fetch(:refresh_token),
+        refresh_token: details[:refresh_token],
         level_of_authentication: details.fetch(:level_of_authentication),
       ).serialise,
       redirect_path: redirect_path,
-      ga_client_id: details.fetch(:ga_session_id),
-      cookie_consent: details.fetch(:cookie_consent),
+      ga_client_id: details[:ga_session_id],
+      cookie_consent: details[:cookie_consent],
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
@@ -56,11 +56,7 @@ private
   # before we can migrate production.
   def get_level_of_authentication_and_suchlike(client, tokens)
     if using_digital_identity?
-      tokens.merge(
-        level_of_authentication: "level1",
-        ga_session_id: nil,
-        cookie_consent: false,
-      )
+      tokens.merge(level_of_authentication: "level1")
     else
       oauth_response = client.get_ephemeral_state(
         access_token: tokens[:access_token],
