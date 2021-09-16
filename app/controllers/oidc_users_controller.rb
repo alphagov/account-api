@@ -40,9 +40,9 @@ class OidcUsersController < ApplicationController
   def destroy
     user = OidcUser.find_by!(sub: params.fetch(:subject_identifier))
     user.destroy!
-    head :no_content and return
+    head :no_content
   rescue ActiveRecord::RecordNotFound
-    head :not_found and return
+    head :not_found
   end
 
 private
