@@ -144,7 +144,24 @@ private
   end
 
   def userinfo
-    @userinfo ||= oidc_do :userinfo
+    @userinfo ||= begin
+      userinfo_hash = oidc_do :userinfo
+      if using_digital_identity?
+        # TODO: Digital Identity do not have unconfirmed email
+        # addresses, so this attribute is not present.  We only cache
+        # non-nil attribute values, so the effect of this being
+        # missing is that every request to /account/home (or another
+        # page which uses this attribute) makes a userinfo request.
+        # This adds latency, and gives us a 15-minute session timeout
+        # as that's how long the DI access token is valid for.
+        #
+        # We can remove this after we have migrated to DI in
+        # production and removed all use of this attribute.
+        userinfo_hash.merge("has_unconfirmed_email" => false)
+      else
+        userinfo_hash
+      end
+    end
   end
 
   def oidc_client
