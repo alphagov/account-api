@@ -35,7 +35,7 @@ module PactStubHelpers
 end
 
 def oidc_user
-  OidcUser.find_or_create_by(sub: "user-id")
+  OidcUser.find_or_create_by_sub!("user-id")
 end
 
 def url_encode(str)
