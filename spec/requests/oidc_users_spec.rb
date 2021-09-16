@@ -12,8 +12,7 @@ RSpec.describe "OIDC Users endpoint" do
 
   describe "PUT" do
     before do
-      next_oidc_user_id = ActiveRecord::Base.connection.execute("select last_value from oidc_users_id_seq").first["last_value"] + 1
-      stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(next_oidc_user_id)
+      stub_request(:get, %r{\A#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/\d+\z}).to_return(status: 404)
     end
 
     it "creates the user if they do not exist" do
