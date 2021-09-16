@@ -114,6 +114,10 @@ RSpec.describe AccountSession do
         expect(account_session.get_attributes([attribute_name1])).to eq({})
       end
 
+      it "handles the 'has_unconfirmed_email' attribute as a special case" do
+        expect(account_session.get_attributes(%w[has_unconfirmed_email])).to eq({ "has_unconfirmed_email" => false })
+      end
+
       context "when the attribute is a LocalAttribute" do
         before do
           LocalAttribute.create!(
@@ -171,6 +175,12 @@ RSpec.describe AccountSession do
           account_session.user.update!(local_attribute_name => local_attribute_value)
           values = account_session.get_attributes([attribute_name1, attribute_name2, local_attribute_name])
           expect(values).to eq({ attribute_name1 => attribute_value1, attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
+        end
+
+        it "does not handle the 'has_unconfirmed_email' attribute as a special case" do
+          stub = stub_request(:get, "http://openid-provider/v1/attributes/has_unconfirmed_email")
+          account_session.get_attributes(%w[has_unconfirmed_email])
+          expect(stub).to have_been_made
         end
 
         context "when some attributes are not found" do
