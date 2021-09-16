@@ -5,6 +5,12 @@ class OidcUser < ApplicationRecord
 
   validates :sub, presence: true
 
+  def self.find_or_create_by_sub!(sub)
+    find_or_create_by!(sub: sub)
+  rescue ActiveRecord::RecordNotUnique
+    find_by!(sub: sub)
+  end
+
   def get_local_attributes(names = [])
     values = names.index_with do |name|
       in_model = self[name]

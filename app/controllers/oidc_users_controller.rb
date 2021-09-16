@@ -2,7 +2,7 @@ class OidcUsersController < ApplicationController
   OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email].freeze
 
   def update
-    user = OidcUser.find_or_create_by!(sub: params.fetch(:subject_identifier))
+    user = OidcUser.find_or_create_by_sub!(params.fetch(:subject_identifier))
     user.set_local_attributes(params.permit(OIDC_USER_ATTRIBUTES).to_h)
     attributes = user.get_local_attributes(OIDC_USER_ATTRIBUTES)
 
