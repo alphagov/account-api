@@ -29,16 +29,13 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "govuk_schemas"
   gem "govuk_test"
+  gem "listen"
   gem "pact", require: false
   gem "pact_broker-client"
   gem "pry-byebug"
   gem "pry-rails"
   gem "rspec-rails"
   gem "rubocop-govuk"
-end
-
-group :development do
-  gem "listen"
 end
 
 group :test do
