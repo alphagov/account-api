@@ -4,12 +4,6 @@ RSpec.describe "Support tasks" do
   describe ":find_user" do
     subject(:task) { Rake.application["support:find_user"] }
 
-    context "when there are no users" do
-      it "outputs the user doesn't exist" do
-        expect { task.execute({ email: "foo@example.gov.uk" }) }.to output("User 'foo@example.gov.uk' does not exist\n").to_stdout
-      end
-    end
-
     context "when a user with email 'foo@example.gov.uk' exists" do
       before do
         FactoryBot.create(:oidc_user, email: "foo@example.gov.uk")
