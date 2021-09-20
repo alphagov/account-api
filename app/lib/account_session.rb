@@ -68,15 +68,15 @@ class AccountSession
     cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
-      values_already_cached = user.get_local_attributes(cached)
+      values_already_cached = user.get_attributes_by_name(cached)
       values_to_cache = get_remote_attributes(cached.reject { |name| values_already_cached.key? name })
-      user.set_local_attributes(values_to_cache)
+      user.update!(values_to_cache)
       values = values_already_cached.merge(values_to_cache)
     else
       values = {}
     end
 
-    values.merge(user.get_local_attributes(local).merge(get_remote_attributes(remote))).compact
+    values.merge(user.get_attributes_by_name(local).merge(get_remote_attributes(remote))).compact
   end
 
   def set_attributes(attributes)
@@ -84,13 +84,8 @@ class AccountSession
     remote = attributes.select { |name| user_attributes.type(name) == "remote" }
     cached = attributes.select { |name| user_attributes.type(name) == "cached" }
 
-    if cached
-      user.set_local_attributes(cached)
-      set_remote_attributes(cached)
-    end
-
-    user.set_local_attributes(local)
-    set_remote_attributes(remote)
+    user.update!(local.merge(cached))
+    set_remote_attributes(remote.merge(cached))
   end
 
 private

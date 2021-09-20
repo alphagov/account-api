@@ -41,14 +41,17 @@ RSpec.describe "OIDC Users endpoint" do
       end
 
       it "updates the attribute values" do
-        user.set_local_attributes(email: "old-email@example.com", email_verified: false)
+        user.update!(email: "old-email@example.com", email_verified: false)
 
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
         expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
 
-        expect(user.reload.get_local_attributes(%w[email email_verified has_unconfirmed_email])).to eq({ "email" => email, "email_verified" => email_verified, "has_unconfirmed_email" => has_unconfirmed_email })
+        user.reload
+        expect(user.email).to eq(email)
+        expect(user.email_verified).to eq(email_verified)
+        expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
       end
 
       context "when the user has linked their notifications account" do

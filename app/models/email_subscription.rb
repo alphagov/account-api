@@ -30,8 +30,8 @@ class EmailSubscription < ApplicationRecord
   def reactivate_if_confirmed!
     deactivate!
 
-    attributes = oidc_user.get_local_attributes(%w[email email_verified])
-    return unless attributes["email_verified"]
+    return unless oidc_user.email
+    return unless oidc_user.email_verified
 
     subscriber_list = GdsApi.email_alert_api.get_subscriber_list(
       slug: topic_slug,
@@ -39,7 +39,7 @@ class EmailSubscription < ApplicationRecord
 
     subscription = GdsApi.email_alert_api.subscribe(
       subscriber_list_id: subscriber_list.dig("subscriber_list", "id"),
-      address: attributes["email"],
+      address: oidc_user.email,
       frequency: "daily",
       skip_confirmation_email: true,
     )
@@ -66,7 +66,7 @@ class EmailSubscription < ApplicationRecord
     return if oidc_user.has_received_transition_checker_onboarding_email
 
     SendEmailWorker.perform_async(
-      oidc_user.get_local_attributes(%w[email])["email"],
+      oidc_user.email,
       I18n.t("emails.onboarding.transition_checker.subject"),
       I18n.t("emails.onboarding.transition_checker.body", sign_in_link: "#{Plek.find('account-manager')}/sign-in"),
     )
