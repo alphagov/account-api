@@ -2,30 +2,30 @@ RSpec.describe AttributeDefinition do
   subject(:attribute) { described_class.new(type: :local) }
 
   it { is_expected.to validate_presence_of(:type) }
-  it { is_expected.to validate_presence_of(:level_of_auth_check) }
-  it { is_expected.to validate_presence_of(:level_of_auth_get) }
-  it { is_expected.to validate_presence_of(:level_of_auth_set) }
 
   it { is_expected.to validate_inclusion_of(:type).in_array(%w[local remote cached]) }
+  it { is_expected.to validate_exclusion_of(:check_requires_mfa).in_array([nil]) }
+  it { is_expected.to validate_exclusion_of(:get_requires_mfa).in_array([nil]) }
+  it { is_expected.to validate_exclusion_of(:set_requires_mfa).in_array([nil]) }
   it { is_expected.to validate_exclusion_of(:writable).in_array([nil]) }
 
-  it "validates that :level_of_auth_check <= :level_of_auth_get" do
-    attribute = described_class.new(type: :local, level_of_auth_check: 9, level_of_auth_get: 0, level_of_auth_set: 0)
+  it "validates that :check_requires_mfa implies :get_requires_mfa" do
+    attribute = described_class.new(type: :local, check_requires_mfa: true, get_requires_mfa: false, set_requires_mfa: false)
     attribute.valid?
-    expect(attribute.errors[:level_of_auth_check]).not_to be_empty
+    expect(attribute.errors[:check_requires_mfa]).not_to be_empty
   end
 
-  it "validates that :level_of_auth_get <= :level_of_auth_set" do
-    attribute = described_class.new(type: :local, level_of_auth_check: 0, level_of_auth_get: 9, level_of_auth_set: 0)
+  it "validates that :get_requires_mfa implies :set_requires_mfa" do
+    attribute = described_class.new(type: :local, check_requires_mfa: false, get_requires_mfa: true, set_requires_mfa: false)
     attribute.valid?
-    expect(attribute.errors[:level_of_auth_get]).not_to be_empty
+    expect(attribute.errors[:get_requires_mfa]).not_to be_empty
   end
 
   context "when the attribute is not writable" do
-    it "does not validate that :level_of_auth_get <= :level_of_auth_set" do
-      attribute = described_class.new(type: :local, level_of_auth_check: 0, level_of_auth_get: 9, level_of_auth_set: 0, writable: false)
+    it "does not validate that :get_requires_mfa implies :set_requires_mfa" do
+      attribute = described_class.new(type: :local, check_requires_mfa: false, get_requires_mfa: true, set_requires_mfa: false, writable: false)
       attribute.valid?
-      expect(attribute.errors[:level_of_auth_get]).to be_empty
+      expect(attribute.errors[:get_requires_mfa]).to be_empty
     end
   end
 end

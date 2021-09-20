@@ -86,8 +86,11 @@ This URL should be served to the user with a 302 response to authenticate the us
 
 #### Query parameters
 
-- `level_of_authentication` *(optional)*
+- `level_of_authentication` *(optional)* *(deprecated)*
   - either `level1` (require MFA) or `level0` (do not require MFA, the default)
+  - this will be replaced by `mfa`
+- `mfa` *(optional)*
+  - either `true` (require MFA) or `false` (do not require MFA, the default)
 - `redirect_path` *(optional)*
   - a path on GOV.UK to send the user to after authenticating
 

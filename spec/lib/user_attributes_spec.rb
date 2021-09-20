@@ -9,9 +9,9 @@ RSpec.describe UserAttributes do
     end
   end
 
-  describe "#level_of_authentication_for" do
+  describe "#requires_mfa_for?" do
     it "raises an error for an unknown permission level" do
-      expect { user_attributes.level_of_authentication_for("attribute", :wizardry) }.to raise_error(UserAttributes::UnknownPermission)
+      expect { user_attributes.requires_mfa_for?("attribute", :wizardry) }.to raise_error(UserAttributes::UnknownPermission)
     end
   end
 end

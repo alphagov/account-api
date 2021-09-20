@@ -3,7 +3,7 @@ module ApiError
     def initialize(attributes:, needed_level_of_authentication:)
       super
       @attributes = attributes
-      @needed_level_of_authentication = LevelOfAuthentication.integer_to_name needed_level_of_authentication
+      @needed_level_of_authentication = needed_level_of_authentication
     end
 
     def status_code

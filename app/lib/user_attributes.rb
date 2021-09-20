@@ -8,9 +8,9 @@ class UserAttributes
       AttributeDefinition.new(
         type: config["type"],
         writable: config.fetch("writable", true),
-        level_of_auth_check: config.dig("permissions", "check") || 0,
-        level_of_auth_get: config.dig("permissions", "get") || 0,
-        level_of_auth_set: config.dig("permissions", "set") || 0,
+        check_requires_mfa: config.fetch("check_requires_mfa", false),
+        get_requires_mfa: config.fetch("get_requires_mfa", false),
+        set_requires_mfa: config.fetch("set_requires_mfa", false),
       )
     end
   end
@@ -28,17 +28,21 @@ class UserAttributes
   end
 
   def has_permission_for?(name, permission_level, user_session)
-    user_session.level_of_authentication_as_integer >= level_of_authentication_for(name, permission_level)
+    if requires_mfa_for?(name, permission_level)
+      user_session.mfa?
+    else
+      true
+    end
   end
 
-  def level_of_authentication_for(name, permission_level)
+  def requires_mfa_for?(name, permission_level)
     case permission_level
     when :check
-      attributes.fetch(name).level_of_auth_check
+      attributes.fetch(name).check_requires_mfa
     when :get
-      attributes.fetch(name).level_of_auth_get
+      attributes.fetch(name).get_requires_mfa
     when :set
-      attributes.fetch(name).level_of_auth_set
+      attributes.fetch(name).set_requires_mfa
     else
       raise UnknownPermission, permission_level
     end

@@ -1,35 +1,15 @@
 # overwrite this to be writable
 has_unverified_email:
   type: cached
-  permissions:
-    check: 0
-    get: 0
-    set: 0
 
 test_attribute_1:
   type: remote
-  permissions:
-    check: 0
-    get: 0
-    set: 0
 
 test_attribute_2:
   type: remote
-  permissions:
-    check: 0
-    get: 0
-    set: 0
 
 foo:
   type: remote
-  permissions:
-    check: 0
-    get: 0
-    set: 0
 
 bar:
   type: remote
-  permissions:
-    check: 0
-    get: 0
-    set: 0
