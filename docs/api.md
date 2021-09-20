@@ -226,8 +226,11 @@ Retrieves the information needed to render the `/account/home` page.
 
 - `id`
   - the user identifier
-- `level_of_authentication`
+- `mfa`
+  - `true` if the user has authenticated with MFA, `false` otherwise
+- `level_of_authentication` *(deprecated)*
   - the user's current level of authentication (`level0` or `level1`)
+  - this will be replaced by `mfa`
 - `email`
   - the user's current email address
 - `email_verified`
@@ -235,9 +238,9 @@ Retrieves the information needed to render the `/account/home` page.
 - `services`
   - object of known services, keys are service names and values are one of:
     - `yes`: the user has used the service and can use it now
-    - `yes_but_must_reauthenticate`: the user has used the service but must reauthenticate at a higher level to use it now
+    - `yes_but_must_reauthenticate`: the user has used the service but must reauthenticate with MFA
     - `no`: the user has not used the service
-    - `unknown`: the user is not authenticated at a high enough level to check whether they have used the service or not
+    - `unknown`: the user must reauthenticate with MFA to check whether they have used the service or not
 
 #### Response codes
 
@@ -258,6 +261,8 @@ Response:
 
 ```json
 {
+    "id": "some-user-identifier",
+    "mfa": false,
     "level_of_authentication": "level0",
     "email": "email@example.com",
     "email_verified": false,
