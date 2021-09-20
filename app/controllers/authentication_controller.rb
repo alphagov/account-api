@@ -7,12 +7,7 @@ class AuthenticationController < ApplicationController
   def sign_in
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
-    level_of_authentication =
-      if params[:mfa]
-        WITH_MFA_LEVEL_OF_AUTHENTICATION
-      else
-        params.fetch(:level_of_authentication, DEFAULT_LEVEL_OF_AUTHENTICATION)
-      end
+    level_of_authentication = params[:mfa] ? "level1" : "level0"
 
     render json: {
       auth_uri: oidc_client_class.new.auth_uri(auth_request, level_of_authentication),

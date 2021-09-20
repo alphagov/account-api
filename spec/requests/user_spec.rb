@@ -32,11 +32,6 @@ RSpec.describe "User information endpoint" do
     expect(response_body["id"]).to eq(session_identifier.user.id.to_s)
   end
 
-  it "returns the user's level of authentication" do
-    get "/api/user", headers: headers
-    expect(response_body["level_of_authentication"]).to eq(session_identifier.level_of_authentication)
-  end
-
   it "returns whether the user has done MFA" do
     get "/api/user", headers: headers
     expect(response_body["mfa"]).to eq(session_identifier.mfa?)

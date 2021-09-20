@@ -11,7 +11,6 @@ class UserController < ApplicationController
       {
         id: @govuk_account_session.user.id.to_s,
         mfa: @govuk_account_session.mfa?,
-        level_of_authentication: @govuk_account_session.level_of_authentication,
         email: attributes.dig("email", :value),
         email_verified: attributes.dig("email_verified", :value),
         has_unconfirmed_email: has_unconfirmed_email,
