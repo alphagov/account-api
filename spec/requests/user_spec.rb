@@ -8,9 +8,9 @@ RSpec.describe "User information endpoint" do
     stub_userinfo(attributes)
   end
 
-  let(:session_identifier) { placeholder_govuk_account_session_object(level_of_authentication: level_of_authentication) }
+  let(:session_identifier) { placeholder_govuk_account_session_object(mfa: mfa) }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier&.serialise }.compact }
-  let(:level_of_authentication) { "level0" }
+  let(:mfa) { false }
 
   let(:attributes) do
     {
@@ -59,8 +59,8 @@ RSpec.describe "User information endpoint" do
         expect(service_state).to eq("yes_but_must_reauthenticate")
       end
 
-      context "when the user is logged in at level1" do
-        let(:level_of_authentication) { "level1" }
+      context "when the user is logged in with MFA" do
+        let(:mfa) { true }
 
         it "returns 'yes'" do
           get "/api/user", headers: headers

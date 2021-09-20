@@ -7,15 +7,13 @@ class AccountSession
 
   class CannotSetRemoteDigitalIdentityAttributes < StandardError; end
 
-  LOWEST_LEVEL_OF_AUTHENTICATION = "level0"
+  attr_reader :id_token, :user_id
 
-  attr_reader :id_token, :user_id, :level_of_authentication
-
-  def initialize(session_secret:, access_token:, refresh_token:, level_of_authentication:, user_id: nil, id_token: nil)
+  def initialize(session_secret:, access_token:, refresh_token: nil, mfa: false, user_id: nil, id_token: nil)
     @session_secret = session_secret
     @access_token = access_token
     @refresh_token = refresh_token
-    @level_of_authentication = level_of_authentication
+    @mfa = mfa
     @id_token = id_token
     @frozen = false
 
@@ -28,12 +26,14 @@ class AccountSession
 
     serialised_session = StringEncryptor.new(secret: session_secret).decrypt_string(encoded_session_without_flash)
     if serialised_session
-      new(
-        session_secret: session_secret,
-        **{
-          level_of_authentication: LOWEST_LEVEL_OF_AUTHENTICATION,
-        }.merge(JSON.parse(serialised_session).symbolize_keys),
-      )
+      options = JSON.parse(serialised_session).symbolize_keys
+
+      if options.key? :level_of_authentication
+        options.merge!(mfa: options[:level_of_authentication] == "level1")
+        options.delete(:level_of_authentication)
+      end
+
+      new(session_secret: session_secret, **options)
     end
   rescue OidcClient::OAuthFailure
     nil
@@ -44,7 +44,7 @@ class AccountSession
   end
 
   def mfa?
-    level_of_authentication == "level1"
+    @mfa
   end
 
   def serialise
@@ -56,9 +56,9 @@ class AccountSession
     {
       id_token: id_token,
       user_id: user_id,
+      mfa: @mfa,
       access_token: @access_token,
       refresh_token: @refresh_token,
-      level_of_authentication: level_of_authentication,
     }
   end
 

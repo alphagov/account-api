@@ -84,7 +84,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
     account_session = placeholder_govuk_account_session_object(
       user_id: oidc_user.sub,
-      level_of_authentication: "level1",
+      mfa: true,
     )
     allow(AccountSession).to receive(:deserialise).and_return(account_session)
 

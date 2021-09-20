@@ -1,9 +1,6 @@
 class AuthenticationController < ApplicationController
   include DigitalIdentityHelper
 
-  DEFAULT_LEVEL_OF_AUTHENTICATION = "level0".freeze
-  WITH_MFA_LEVEL_OF_AUTHENTICATION = "level1".freeze
-
   def sign_in
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
@@ -32,7 +29,7 @@ class AuthenticationController < ApplicationController
         user_id: details.fetch(:id_token).sub,
         access_token: details.fetch(:access_token),
         refresh_token: details[:refresh_token],
-        level_of_authentication: details.fetch(:level_of_authentication),
+        mfa: details.fetch(:mfa),
       ).serialise,
       redirect_path: redirect_path,
       ga_client_id: details[:ga_session_id],
@@ -61,7 +58,7 @@ private
   # before we can migrate production.
   def get_level_of_authentication_and_suchlike(client, tokens)
     if using_digital_identity?
-      tokens.merge(level_of_authentication: "level1")
+      tokens.merge(mfa: true)
     else
       oauth_response = client.get_ephemeral_state(
         access_token: tokens[:access_token],
@@ -71,7 +68,7 @@ private
       tokens.merge(
         access_token: oauth_response.fetch(:access_token),
         refresh_token: oauth_response.fetch(:refresh_token),
-        level_of_authentication: oauth_response.fetch(:result).fetch("level_of_authentication"),
+        mfa: oauth_response.fetch(:result).fetch("level_of_authentication") == "level1",
         ga_session_id: oauth_response.fetch(:result)["_ga"],
         cookie_consent: oauth_response.fetch(:result)["cookie_consent"],
       )
