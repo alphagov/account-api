@@ -79,9 +79,8 @@ RSpec.describe "Attributes" do
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
-        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
         expect(error["attributes"]).to eq([attribute_name1])
-        expect(error["needed_level_of_authentication"]).to eq("level1")
       end
     end
 
@@ -262,14 +261,13 @@ RSpec.describe "Attributes" do
       let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level0") }
       let(:attributes) { { local_attribute_name => local_attribute_value } }
 
-      it "returns a 403 and the required level" do
+      it "returns a 403" do
         patch attributes_path, headers: headers, params: params.to_json
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
-        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
         expect(error["attributes"]).to eq([local_attribute_name])
-        expect(error["needed_level_of_authentication"]).to eq("level1")
       end
     end
   end

@@ -25,7 +25,7 @@ management. This API is not for other government services.
   - [`PUT /api/saved-pages/:page_path`](#put-apisaved-pagespage_path)
   - [`DELETE /api/saved-pages/:page_path`](#delete-apisaved-pagespage_path)
 - [API errors](#api-errors)
-  - [Level of authentication too low](#level-of-authentication-too-low)
+  - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
   - [Unwritable attributes](#unwritable-attributes)
   - [Page cannot be saved](#page-cannot-be-saved)
@@ -67,7 +67,7 @@ class YourRailsController < ApplicationController
     # the user's session is invalid
     logout!
   rescue GdsApi::HTTPForbidden
-    # the user needs to reauthenticate, the required level of authentication is in the response body
+    # the user needs to reauthenticate with MFA
   end
 end
 ```
@@ -297,7 +297,7 @@ Retrieves attribute values for the current user.
 #### Response codes
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
-- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
+- 403 if the user must reauthenticate with MFA (see [error: MFA required](#mfa-required))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -347,7 +347,7 @@ Updates the attributes of the current user.
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
 - 403 if any attributes are unwritable (see [error: unwritable attributes](#unwritable-attributes))
-- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
+- 403 if the user must reauthenticate with MFA (see [error: MFA required](#mfa-required))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -799,17 +799,14 @@ Each error type may define additional response fields.
 
 [RFC 7807]: https://tools.ietf.org/html/rfc7807
 
-### Level of authentication too low
+### MFA required
 
-You have tried to access something which the current user is not
-authenticated highly enough to use.  The
-`needed_level_of_authentication` response field gives the required
-level.
+You have tried to access something requires MFA, but the current user
+has not authenticated with MFA.
 
 #### Debugging steps
 
-This is not an error, the user must be reauthenticated at the higher
-level to access.
+This is not an error, the user must be reauthenticated with MFA.
 
 ### Unknown attribute names
 

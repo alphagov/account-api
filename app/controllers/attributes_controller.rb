@@ -32,7 +32,7 @@ private
 
     attributes_needing_mfa = attribute_names.reject { |name| user_attributes.has_permission_for? name, permission_level, @govuk_account_session }
     if attributes_needing_mfa.any?
-      raise ApiError::LevelOfAuthenticationTooLow, { attributes: attributes_needing_mfa, needed_level_of_authentication: "level1" }
+      raise ApiError::MfaRequired, { attributes: attributes_needing_mfa }
     end
   end
 
