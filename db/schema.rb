@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_30_133729) do
+ActiveRecord::Schema.define(version: 2021_09_20_101003) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,17 +32,6 @@ ActiveRecord::Schema.define(version: 2021_07_30_133729) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["oidc_user_id", "name"], name: "index_email_subscriptions_on_oidc_user_id_and_name", unique: true
     t.index ["oidc_user_id"], name: "index_email_subscriptions_on_oidc_user_id"
-  end
-
-  create_table "local_attributes", force: :cascade do |t|
-    t.bigint "oidc_user_id", null: false
-    t.string "name", null: false
-    t.jsonb "value", null: false
-    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
-    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
-    t.boolean "migrated", default: false, null: false
-    t.index ["oidc_user_id", "name"], name: "index_local_attributes_on_oidc_user_id_and_name", unique: true
-    t.index ["oidc_user_id"], name: "index_local_attributes_on_oidc_user_id"
   end
 
   create_table "oidc_users", force: :cascade do |t|
