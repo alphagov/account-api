@@ -1,22 +1,23 @@
 class AttributeDefinition < OpenStruct
   include ActiveModel::Validations
 
-  validates :type, :level_of_auth_check, :level_of_auth_get, :level_of_auth_set, presence: true
+  validates :type, presence: true
   validates :type, inclusion: %w[local remote cached]
-  validates :writable, exclusion: [nil]
-  validate :auth_ordering
+  validates :check_requires_mfa, :get_requires_mfa, :set_requires_mfa, :writable, exclusion: [nil]
+  validate :check_mfa_implies_get_mfa
+  validate :get_mfa_implies_set_mfa_if_writable
 
-  def initialize(type:, writable: true, level_of_auth_check: 0, level_of_auth_get: 0, level_of_auth_set: 0)
+  def initialize(type:, writable: true, check_requires_mfa: false, get_requires_mfa: false, set_requires_mfa: false)
     super
   end
 
-  def auth_ordering
-    if level_of_auth_get && level_of_auth_check && level_of_auth_get < level_of_auth_check
-      errors.add(:level_of_auth_check, "must be <= :level_of_auth_get")
-    end
+  def check_mfa_implies_get_mfa
+    errors.add(:check_requires_mfa, "implies :get_requires_mfa") if check_requires_mfa && !get_requires_mfa
+  end
 
-    if writable && level_of_auth_get && level_of_auth_set && level_of_auth_set < level_of_auth_get
-      errors.add(:level_of_auth_get, "must be <= :level_of_auth_set")
-    end
+  def get_mfa_implies_set_mfa_if_writable
+    return unless writable
+
+    errors.add(:get_requires_mfa, "implies :set_requires_mfa") if get_requires_mfa && !set_requires_mfa
   end
 end

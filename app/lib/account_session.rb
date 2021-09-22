@@ -43,8 +43,8 @@ class AccountSession
     @user ||= OidcUser.find_or_create_by_sub!(user_id)
   end
 
-  def level_of_authentication_as_integer
-    @level_of_authentication_as_integer ||= LevelOfAuthentication.name_to_integer level_of_authentication
+  def mfa?
+    level_of_authentication == "level1"
   end
 
   def serialise

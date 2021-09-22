@@ -26,6 +26,26 @@ RSpec.describe "Authentication" do
       get sign_in_path, params: { redirect_path: "/transition-check/results?c[]=import-wombats&c[]=practice-wizardry" }
       expect(AuthRequest.last.redirect_path).to eq("/transition-check/results?c[]=import-wombats&c[]=practice-wizardry")
     end
+
+    context "when using the account manager" do
+      before do
+        allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+      end
+
+      it "passes 'level0' to the account manager" do
+        get sign_in_path
+        expect(JSON.parse(response.body)["auth_uri"]).to include("level0")
+        expect(JSON.parse(response.body)["auth_uri"]).not_to include("level1")
+      end
+
+      context "when mfa: true is given" do
+        it "passes 'level1' to the account manager" do
+          get sign_in_path, params: { mfa: true }
+          expect(JSON.parse(response.body)["auth_uri"]).not_to include("level0")
+          expect(JSON.parse(response.body)["auth_uri"]).to include("level1")
+        end
+      end
+    end
   end
 
   describe "/callback" do

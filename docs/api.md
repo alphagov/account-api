@@ -25,7 +25,7 @@ management. This API is not for other government services.
   - [`PUT /api/saved-pages/:page_path`](#put-apisaved-pagespage_path)
   - [`DELETE /api/saved-pages/:page_path`](#delete-apisaved-pagespage_path)
 - [API errors](#api-errors)
-  - [Level of authentication too low](#level-of-authentication-too-low)
+  - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
   - [Unwritable attributes](#unwritable-attributes)
   - [Page cannot be saved](#page-cannot-be-saved)
@@ -67,7 +67,7 @@ class YourRailsController < ApplicationController
     # the user's session is invalid
     logout!
   rescue GdsApi::HTTPForbidden
-    # the user needs to reauthenticate, the required level of authentication is in the response body
+    # the user needs to reauthenticate with MFA
   end
 end
 ```
@@ -86,8 +86,11 @@ This URL should be served to the user with a 302 response to authenticate the us
 
 #### Query parameters
 
-- `level_of_authentication` *(optional)*
+- `level_of_authentication` *(optional)* *(deprecated)*
   - either `level1` (require MFA) or `level0` (do not require MFA, the default)
+  - this will be replaced by `mfa`
+- `mfa` *(optional)*
+  - either `true` (require MFA) or `false` (do not require MFA, the default)
 - `redirect_path` *(optional)*
   - a path on GOV.UK to send the user to after authenticating
 
@@ -223,8 +226,11 @@ Retrieves the information needed to render the `/account/home` page.
 
 - `id`
   - the user identifier
-- `level_of_authentication`
+- `mfa`
+  - `true` if the user has authenticated with MFA, `false` otherwise
+- `level_of_authentication` *(deprecated)*
   - the user's current level of authentication (`level0` or `level1`)
+  - this will be replaced by `mfa`
 - `email`
   - the user's current email address
 - `email_verified`
@@ -232,9 +238,9 @@ Retrieves the information needed to render the `/account/home` page.
 - `services`
   - object of known services, keys are service names and values are one of:
     - `yes`: the user has used the service and can use it now
-    - `yes_but_must_reauthenticate`: the user has used the service but must reauthenticate at a higher level to use it now
+    - `yes_but_must_reauthenticate`: the user has used the service but must reauthenticate with MFA
     - `no`: the user has not used the service
-    - `unknown`: the user is not authenticated at a high enough level to check whether they have used the service or not
+    - `unknown`: the user must reauthenticate with MFA to check whether they have used the service or not
 
 #### Response codes
 
@@ -255,6 +261,8 @@ Response:
 
 ```json
 {
+    "id": "some-user-identifier",
+    "mfa": false,
     "level_of_authentication": "level0",
     "email": "email@example.com",
     "email_verified": false,
@@ -289,7 +297,7 @@ Retrieves attribute values for the current user.
 #### Response codes
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
-- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
+- 403 if the user must reauthenticate with MFA (see [error: MFA required](#mfa-required))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -339,7 +347,7 @@ Updates the attributes of the current user.
 
 - 422 if any attributes are unknown (see [error: unknown attribute names](#unknown-attribute-names))
 - 403 if any attributes are unwritable (see [error: unwritable attributes](#unwritable-attributes))
-- 403 if the session's level of authentication is too low (see [error: level of authentication too low](#level-of-authentication-too-low))
+- 403 if the user must reauthenticate with MFA (see [error: MFA required](#mfa-required))
 - 401 if the session identifier is invalid
 - 200 otherwise
 
@@ -791,17 +799,14 @@ Each error type may define additional response fields.
 
 [RFC 7807]: https://tools.ietf.org/html/rfc7807
 
-### Level of authentication too low
+### MFA required
 
-You have tried to access something which the current user is not
-authenticated highly enough to use.  The
-`needed_level_of_authentication` response field gives the required
-level.
+You have tried to access something requires MFA, but the current user
+has not authenticated with MFA.
 
 #### Debugging steps
 
-This is not an error, the user must be reauthenticated at the higher
-level to access.
+This is not an error, the user must be reauthenticated with MFA.
 
 ### Unknown attribute names
 

@@ -2,27 +2,16 @@
 email:
   type: cached
   writable: false
-  permissions:
-    check: 0
-    get: 0
 
 email_verified:
   type: cached
   writable: false
-  permissions:
-    check: 0
-    get: 0
 
 has_unconfirmed_email:
   type: cached
   writable: false
-  permissions:
-    check: 0
-    get: 0
 
 transition_checker_state:
   type: local
-  permissions:
-    check: 0
-    get: 1
-    set: 1
+  get_requires_mfa: true
+  set_requires_mfa: true

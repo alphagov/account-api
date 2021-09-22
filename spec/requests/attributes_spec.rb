@@ -70,17 +70,17 @@ RSpec.describe "Attributes" do
       end
     end
 
-    context "when the user doesn't have a high enough level of authentication" do
-      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+    context "when the user tries to get a protected attribute without having done MFA" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level0") }
+      let(:attribute_name1) { "transition_checker_state" }
 
-      it "returns a 403 and the required level" do
+      it "returns a 403" do
         get attributes_path, headers: headers, params: params
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
-        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
         expect(error["attributes"]).to eq([attribute_name1])
-        expect(error["needed_level_of_authentication"]).to eq("level0")
       end
     end
 
@@ -257,18 +257,17 @@ RSpec.describe "Attributes" do
       end
     end
 
-    context "when the user doesn't have a high enough level of authentication" do
-      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level-1") }
+    context "when the user tries to set a protected attribute without having done MFA" do
+      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level0") }
       let(:attributes) { { local_attribute_name => local_attribute_value } }
 
-      it "returns a 403 and the required level" do
+      it "returns a 403" do
         patch attributes_path, headers: headers, params: params.to_json
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
-        expect(error["type"]).to eq(I18n.t("errors.level_of_authentication_too_low.type"))
+        expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
         expect(error["attributes"]).to eq([local_attribute_name])
-        expect(error["needed_level_of_authentication"]).to eq("level1")
       end
     end
   end

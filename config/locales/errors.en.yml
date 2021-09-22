@@ -1,10 +1,10 @@
 ---
 en:
   errors:
-    level_of_authentication_too_low:
-      type: https://github.com/alphagov/account-api/blob/main/docs/api.md#level-of-authentication-too-low
-      title: Level of authentication too low
-      detail: Attributes %{attributes} require at least %{needed_level_of_authentication}, which is greater level of authentication that you currently have.
+    mfa_required:
+      type: https://github.com/alphagov/account-api/blob/main/docs/api.md#mfa-required
+      title: MFA required
+      detail: Attributes %{attributes} require MFA, which the user has not authenticated with.
     unknown_attribute_names:
       type: https://github.com/alphagov/account-api/blob/main/docs/api.md#unknown-attribute-names
       title: Unknown attribute names

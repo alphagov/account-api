@@ -1,11 +1,21 @@
 class AuthenticationController < ApplicationController
   include DigitalIdentityHelper
 
+  DEFAULT_LEVEL_OF_AUTHENTICATION = "level0".freeze
+  WITH_MFA_LEVEL_OF_AUTHENTICATION = "level1".freeze
+
   def sign_in
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
+    level_of_authentication =
+      if params[:mfa]
+        WITH_MFA_LEVEL_OF_AUTHENTICATION
+      else
+        params.fetch(:level_of_authentication, DEFAULT_LEVEL_OF_AUTHENTICATION)
+      end
+
     render json: {
-      auth_uri: oidc_client_class.new.auth_uri(auth_request, params.fetch(:level_of_authentication, LevelOfAuthentication::DEFAULT_FOR_SIGN_IN)),
+      auth_uri: oidc_client_class.new.auth_uri(auth_request, level_of_authentication),
       state: auth_request.to_oauth_state,
     }
   end
