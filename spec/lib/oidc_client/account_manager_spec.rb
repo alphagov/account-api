@@ -4,8 +4,12 @@ RSpec.describe OidcClient::AccountManager do
   before { stub_oidc_discovery }
 
   describe "auth_uri" do
-    it "includes the requested level of authentication in the scopes" do
-      expect(client.auth_uri(AuthRequest.generate!, "level1234567890")).to include("scope=email%20openid%20level1234567890")
+    it "includes level0 in the scopes when MFA is not required" do
+      expect(client.auth_uri(AuthRequest.generate!, mfa: false)).to include("scope=email%20openid%20level0")
+    end
+
+    it "includes level1 in the scopes when MFA is required" do
+      expect(client.auth_uri(AuthRequest.generate!, mfa: true)).to include("scope=email%20openid%20level1")
     end
   end
 

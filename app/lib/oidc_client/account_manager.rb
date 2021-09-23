@@ -1,5 +1,6 @@
 class OidcClient::AccountManager < OidcClient
-  def auth_uri(auth_request, level_of_authentication)
+  def auth_uri(auth_request, mfa: false)
+    level_of_authentication = mfa ? "level1" : "level0"
     client.authorization_uri(
       scope: [:email, :openid, level_of_authentication],
       state: auth_request.to_oauth_state,

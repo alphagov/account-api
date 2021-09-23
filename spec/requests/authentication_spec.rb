@@ -27,6 +27,28 @@ RSpec.describe "Authentication" do
       expect(AuthRequest.last.redirect_path).to eq("/transition-check/results?c[]=import-wombats&c[]=practice-wizardry")
     end
 
+    it "passes 'Cl' and 'Cl.Cm' to the auth service" do
+      get sign_in_path
+      expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl"'))
+      expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl.Cm"'))
+    end
+
+    context "when mfa: false is given" do
+      it "passes 'Cl' and 'Cl.Cm' to the auth service" do
+        get sign_in_path, params: { mfa: false }
+        expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl"'))
+        expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl.Cm"'))
+      end
+    end
+
+    context "when mfa: true is given" do
+      it "passes 'Cl.Cm', but not 'Cl', to the auth service" do
+        get sign_in_path, params: { mfa: true }
+        expect(JSON.parse(response.body)["auth_uri"]).not_to include(Rack::Utils.escape('"Cl"'))
+        expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl.Cm"'))
+      end
+    end
+
     context "when using the account manager" do
       before do
         allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)

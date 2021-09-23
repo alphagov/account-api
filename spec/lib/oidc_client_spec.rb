@@ -3,6 +3,16 @@ RSpec.describe OidcClient do
 
   before { stub_oidc_discovery }
 
+  describe "auth_uri" do
+    it "includes vtr=['Cl','Cl.Cm'] when MFA is not required" do
+      expect(client.auth_uri(AuthRequest.generate!, mfa: false)).to include(Rack::Utils.escape('["Cl","Cl.Cm"]'))
+    end
+
+    it "includes vtr=['Cl.Cm'] when MFA is required" do
+      expect(client.auth_uri(AuthRequest.generate!, mfa: true)).to include(Rack::Utils.escape('["Cl.Cm"]'))
+    end
+  end
+
   describe "tokens!" do
     before do
       access_token = Rack::OAuth2::AccessToken.new(

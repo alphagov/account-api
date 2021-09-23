@@ -4,10 +4,10 @@ class AuthenticationController < ApplicationController
   def sign_in
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 
-    level_of_authentication = params[:mfa] == "true" ? "level1" : "level0"
+    mfa = params[:mfa] == "true"
 
     render json: {
-      auth_uri: oidc_client_class.new.auth_uri(auth_request, level_of_authentication),
+      auth_uri: oidc_client_class.new.auth_uri(auth_request, mfa: mfa),
       state: auth_request.to_oauth_state,
     }
   end
@@ -52,13 +52,14 @@ class AuthenticationController < ApplicationController
 
 private
 
-  # TODO: Digital Identity don't yet have an implementation of levels
-  # of authentication, a way to pass around GA session tokens, or a
-  # cookie consent flag.  These will need implementing in some form
-  # before we can migrate production.
+  # TODO: Digital Identity will be passing around GA session tokens
+  # and cookie consent flags in a different way, likely through query
+  # params.
   def get_level_of_authentication_and_suchlike(client, tokens)
     if using_digital_identity?
-      tokens.merge(mfa: true)
+      tokens.merge(
+        mfa: tokens.fetch(:id_token).raw_attributes["vot"] == "Cl.Cm",
+      )
     else
       oauth_response = client.get_ephemeral_state(
         access_token: tokens[:access_token],

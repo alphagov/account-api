@@ -12,7 +12,7 @@ module OidcClientHelper
     # rubocop:enable RSpec/AnyInstance
   end
 
-  def stub_token_response(refresh_token: "refresh-token")
+  def stub_token_response(refresh_token: "refresh-token", vot: "Cl")
     token_response = {
       access_token: "access-token",
       refresh_token: refresh_token,
@@ -24,6 +24,7 @@ module OidcClientHelper
         aud: "oauth-client",
         exp: 300,
         iat: 0,
+        raw_attributes: { "vot" => vot },
       ),
     }.compact
 
