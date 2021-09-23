@@ -38,6 +38,14 @@ RSpec.describe "Authentication" do
         expect(JSON.parse(response.body)["auth_uri"]).not_to include("level1")
       end
 
+      context "when mfa: false is given" do
+        it "passes 'level0' to the account manager" do
+          get sign_in_path, params: { mfa: false }
+          expect(JSON.parse(response.body)["auth_uri"]).to include("level0")
+          expect(JSON.parse(response.body)["auth_uri"]).not_to include("level1")
+        end
+      end
+
       context "when mfa: true is given" do
         it "passes 'level1' to the account manager" do
           get sign_in_path, params: { mfa: true }
