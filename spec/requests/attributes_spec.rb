@@ -9,7 +9,8 @@ RSpec.describe "Attributes" do
   end
 
   let(:session_identifier) { account_session.serialise }
-  let(:account_session) { placeholder_govuk_account_session_object(level_of_authentication: "level1") }
+  let(:account_session) { placeholder_govuk_account_session_object(mfa: mfa) }
+  let(:mfa) { true }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
   # names must be defined in spec/fixtures/user_attributes.yml
@@ -71,7 +72,7 @@ RSpec.describe "Attributes" do
     end
 
     context "when the user tries to get a protected attribute without having done MFA" do
-      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level0") }
+      let(:mfa) { false }
       let(:attribute_name1) { "transition_checker_state" }
 
       it "returns a 403" do
@@ -258,7 +259,7 @@ RSpec.describe "Attributes" do
     end
 
     context "when the user tries to set a protected attribute without having done MFA" do
-      let(:session_identifier) { placeholder_govuk_account_session(level_of_authentication: "level0") }
+      let(:mfa) { false }
       let(:attributes) { { local_attribute_name => local_attribute_value } }
 
       it "returns a 403" do

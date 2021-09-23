@@ -86,9 +86,6 @@ This URL should be served to the user with a 302 response to authenticate the us
 
 #### Query parameters
 
-- `level_of_authentication` *(optional)* *(deprecated)*
-  - either `level1` (require MFA) or `level0` (do not require MFA, the default)
-  - this will be replaced by `mfa`
 - `mfa` *(optional)*
   - either `true` (require MFA) or `false` (do not require MFA, the default)
 - `redirect_path` *(optional)*
@@ -228,9 +225,6 @@ Retrieves the information needed to render the `/account/home` page.
   - the user identifier
 - `mfa`
   - `true` if the user has authenticated with MFA, `false` otherwise
-- `level_of_authentication` *(deprecated)*
-  - the user's current level of authentication (`level0` or `level1`)
-  - this will be replaced by `mfa`
 - `email`
   - the user's current email address
 - `email_verified`
@@ -263,7 +257,6 @@ Response:
 {
     "id": "some-user-identifier",
     "mfa": false,
-    "level_of_authentication": "level0",
     "email": "email@example.com",
     "email_verified": false,
     "services": {

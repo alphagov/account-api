@@ -11,8 +11,8 @@ RSpec.describe AccountSession do
   let(:user_id) { SecureRandom.hex(10) }
   let(:access_token) { SecureRandom.hex(10) }
   let(:refresh_token) { SecureRandom.hex(10) }
-  let(:level_of_authentication) { AccountSession::LOWEST_LEVEL_OF_AUTHENTICATION }
-  let(:params) { { id_token: id_token, user_id: user_id, access_token: access_token, refresh_token: refresh_token, level_of_authentication: level_of_authentication }.compact }
+  let(:mfa) { false }
+  let(:params) { { id_token: id_token, user_id: user_id, access_token: access_token, refresh_token: refresh_token, mfa: mfa }.compact }
   let(:account_session) { described_class.new(session_secret: "key", **params) }
 
   it "throws an error if making an OAuth call after serialising the session" do
@@ -48,15 +48,31 @@ RSpec.describe AccountSession do
       expect(described_class.deserialise(encoded_session: "", session_secret: "secret")).to be_nil
     end
 
+    context "when there is a level of authentication, not an mfa flag, in the header" do
+      let(:mfa) { nil }
+
+      it "decodes level0 to mfa: false" do
+        encoded = StringEncryptor.new(secret: "secret").encrypt_string(params.merge(level_of_authentication: "level0").to_json)
+        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").mfa?).to be(false)
+      end
+
+      it "decodes level1 to mfa: true" do
+        encoded = StringEncryptor.new(secret: "secret").encrypt_string(params.merge(level_of_authentication: "level1").to_json)
+        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").mfa?).to be(true)
+      end
+    end
+
     context "when there isn't an ID token in the header" do
       let(:id_token) { nil }
+      let(:encoded) { StringEncryptor.new(secret: "secret").encrypt_string(params.to_json) }
 
       it "successfully decodes with a nil token value" do
-        expect(described_class.new(session_secret: "secret", **params).to_hash).to eq(params.merge(id_token: nil))
+        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").to_hash).to eq(params.merge(id_token: nil))
       end
     end
 
     context "when there isn't a user ID in the header" do
+      let(:encoded) { StringEncryptor.new(secret: "secret").encrypt_string(params.to_json) }
       let(:user_id) { nil }
       let(:user_id_from_userinfo) { "user-id-from-userinfo" }
       let(:userinfo_status) { 200 }
@@ -67,7 +83,7 @@ RSpec.describe AccountSession do
       end
 
       it "queries userinfo for the user ID" do
-        expect(described_class.new(session_secret: "secret", **params).to_hash).to eq(params.merge(user_id: user_id_from_userinfo))
+        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").to_hash).to eq(params.merge(user_id: user_id_from_userinfo))
       end
 
       context "when the userinfo request fails" do
@@ -76,7 +92,6 @@ RSpec.describe AccountSession do
         before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
 
         it "returns nil" do
-          encoded = "#{Base64.urlsafe_encode64(access_token)}.#{Base64.urlsafe_encode64(refresh_token)}"
           expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret")).to be_nil
         end
       end

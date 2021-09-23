@@ -11,7 +11,7 @@ module GovukAccountSessionHelper
         user_id: "user-id",
         access_token: "access-token",
         refresh_token: "refresh-token",
-        level_of_authentication: AccountSession::LOWEST_LEVEL_OF_AUTHENTICATION,
+        mfa: false,
       }.merge(options),
     )
   end
