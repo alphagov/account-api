@@ -35,9 +35,13 @@ class OidcClient
   def callback(auth_request, code)
     client.authorization_code = code
 
-    time_and_return "tokens" do
+    tokens = time_and_return "tokens" do
       tokens!(oidc_nonce: auth_request.oidc_nonce)
     end
+
+    tokens.merge(
+      mfa: tokens.fetch(:id_token).raw_attributes["vot"] == "Cl.Cm",
+    )
   end
 
   def tokens!(oidc_nonce: nil)

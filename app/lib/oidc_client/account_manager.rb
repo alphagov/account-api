@@ -8,6 +8,27 @@ class OidcClient::AccountManager < OidcClient
     )
   end
 
+  def callback(auth_request, code)
+    client.authorization_code = code
+
+    tokens = time_and_return "tokens" do
+      tokens!(oidc_nonce: auth_request.oidc_nonce)
+    end
+
+    response = get_ephemeral_state(
+      access_token: tokens[:access_token],
+      refresh_token: tokens[:refresh_token],
+    )
+
+    tokens.merge(
+      access_token: response.fetch(:access_token),
+      refresh_token: response.fetch(:refresh_token),
+      mfa: response.fetch(:result).fetch("level_of_authentication") == "level1",
+      ga_session_id: response.fetch(:result)["_ga"],
+      cookie_consent: response.fetch(:result)["cookie_consent"],
+    )
+  end
+
   def get_ephemeral_state(access_token:, refresh_token:)
     response = time_and_return "get_ephemeral_state" do
       oauth_request(

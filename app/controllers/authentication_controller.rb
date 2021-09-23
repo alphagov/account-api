@@ -16,13 +16,14 @@ class AuthenticationController < ApplicationController
     auth_request = AuthRequest.from_oauth_state(params.fetch(:state))
     head :unauthorized and return unless auth_request
 
-    client = oidc_client_class.new
-    tokens = client.callback(auth_request, params.fetch(:code))
-    details = get_level_of_authentication_and_suchlike(client, tokens)
+    details = oidc_client_class.new.callback(auth_request, params.fetch(:code))
     redirect_path = auth_request.redirect_path
 
     auth_request.delete
 
+    # TODO: remove `ga_client_id` and `cookie_consent` after we switch
+    # to DI, we're using a different approach there which doesn't go
+    # via the account-api
     render json: {
       govuk_account_session: AccountSession.new(
         session_secret: Rails.application.secrets.session_secret,
@@ -51,30 +52,6 @@ class AuthenticationController < ApplicationController
   end
 
 private
-
-  # TODO: Digital Identity will be passing around GA session tokens
-  # and cookie consent flags in a different way, likely through query
-  # params.
-  def get_level_of_authentication_and_suchlike(client, tokens)
-    if using_digital_identity?
-      tokens.merge(
-        mfa: tokens.fetch(:id_token).raw_attributes["vot"] == "Cl.Cm",
-      )
-    else
-      oauth_response = client.get_ephemeral_state(
-        access_token: tokens[:access_token],
-        refresh_token: tokens[:refresh_token],
-      )
-
-      tokens.merge(
-        access_token: oauth_response.fetch(:access_token),
-        refresh_token: oauth_response.fetch(:refresh_token),
-        mfa: oauth_response.fetch(:result).fetch("level_of_authentication") == "level1",
-        ga_session_id: oauth_response.fetch(:result)["_ga"],
-        cookie_consent: oauth_response.fetch(:result)["cookie_consent"],
-      )
-    end
-  end
 
   def oidc_end_session_url
     end_session_endpoint = oidc_client_class.new.end_session_endpoint
