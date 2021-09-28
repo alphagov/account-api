@@ -16,7 +16,6 @@ class UserController < ApplicationController
         has_unconfirmed_email: has_unconfirmed_email,
         services: {
           transition_checker: attribute_service("transition_checker_state"),
-          saved_pages: saved_pages_service,
         }.compact,
       },
     )
@@ -26,14 +25,6 @@ private
 
   def attribute_service(attribute_name)
     attributes[attribute_name][:state]
-  end
-
-  def saved_pages_service
-    if @govuk_account_session.user.saved_pages.exists?
-      :yes
-    else
-      :no
-    end
   end
 
   def attributes
