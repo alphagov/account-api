@@ -146,27 +146,6 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  provider_state "there is a valid user session, with saved pages" do
-    set_up do
-      FactoryBot.create_list(:saved_page, 2, oidc_user_id: oidc_user.id)
-    end
-  end
-
-  # TODO: remove when gds-api-adapters PR is merged
-  provider_state "there is a valid user session, with /guidance/some-govuk-guidance saved" do
-    set_up do
-      stub_remote_attributes
-      FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
-    end
-  end
-
-  provider_state "there is a valid user session, with '/guidance/some-govuk-guidance' saved" do
-    set_up do
-      stub_remote_attributes
-      FactoryBot.create(:saved_page, page_path: "/guidance/some-govuk-guidance", oidc_user_id: oidc_user.id)
-    end
-  end
-
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
       stub_remote_attributes(test_attribute_1: { bar: "baz" })
