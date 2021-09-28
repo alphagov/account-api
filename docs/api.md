@@ -261,7 +261,6 @@ Response:
     "email_verified": false,
     "services": {
         "transition_checker": "yes_but_must_reauthenticate",
-        "saved_pages": "yes"
     }
 }
 ```

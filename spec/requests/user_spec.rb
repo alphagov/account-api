@@ -70,24 +70,6 @@ RSpec.describe "User information endpoint" do
     end
   end
 
-  describe "services.saved_pages" do
-    let(:service_state) { response_body.dig("services", "saved_pages") }
-
-    it "returns 'no'" do
-      get "/api/user", headers: headers
-      expect(service_state).to eq("no")
-    end
-
-    context "when the user has saved pages" do
-      before { stub_user_has_saved_pages }
-
-      it "returns 'yes'" do
-        get "/api/user", headers: headers
-        expect(service_state).to eq("yes")
-      end
-    end
-  end
-
   context "when the user is not logged in" do
     let(:session_identifier) { nil }
 
@@ -95,11 +77,5 @@ RSpec.describe "User information endpoint" do
       get "/api/user", headers: headers
       expect(response).to have_http_status(:unauthorized)
     end
-  end
-
-  def stub_user_has_saved_pages
-    page_path = "/page-path"
-    stub_content_store_has_item(page_path, content_item_for_base_path(page_path).merge("content_id" => SecureRandom.uuid))
-    put saved_page_path(page_path: page_path), headers: headers
   end
 end
