@@ -24,7 +24,6 @@ management. This API is not for other government services.
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
   - [Unwritable attributes](#unwritable-attributes)
-  - [Page cannot be saved](#page-cannot-be-saved)
 
 ## Nomenclature
 
@@ -614,10 +613,6 @@ One or more of the attributes you have specified cannot be updated
 through account-api.  The `attributes` response field lists these.
 
 Do not just reauthenticate the user and try again.
-
-### Page cannot be saved
-
-The page you have specified could not be saved. The errors response field lists the problems.
 
 #### Debugging steps
 
