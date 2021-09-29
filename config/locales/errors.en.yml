@@ -13,7 +13,3 @@ en:
       type: https://github.com/alphagov/account-api/blob/main/docs/api.md#unwritable-attributes
       title: Unwritable attributes
       detail: Attributes %{attributes} cannot be updated through the account-api.
-    cannot_save_page:
-      type: https://github.com/alphagov/account-api/blob/main/docs/api.md#cannot-save-page
-      title: Cannot save page
-      detail: Cannot save page with path %{page_path}, check it is not blank, and is a well formatted url path.

@@ -20,15 +20,10 @@ management. This API is not for other government services.
   - [`DELETE /api/email-subscriptions/:subscription_name`](#delete-apiemail-subscriptionssubscription_name)
   - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
-  - [`GET /api/saved-pages`](#get-apisaved-pages)
-  - [`GET /api/saved-pages/:page_path`](#get-apisaved-pagespage_path)
-  - [`PUT /api/saved-pages/:page_path`](#put-apisaved-pagespage_path)
-  - [`DELETE /api/saved-pages/:page_path`](#delete-apisaved-pagespage_path)
 - [API errors](#api-errors)
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
   - [Unwritable attributes](#unwritable-attributes)
-  - [Page cannot be saved](#page-cannot-be-saved)
 
 ## Nomenclature
 
@@ -261,7 +256,6 @@ Response:
     "email_verified": false,
     "services": {
         "transition_checker": "yes_but_must_reauthenticate",
-        "saved_pages": "yes"
     }
 }
 ```
@@ -582,199 +576,6 @@ GdsApi.account_api.delete_user_by_subject_identifier(
 
 Response is status code only.
 
-### `GET /api/saved-pages`
-
-Returns all a user's saved pages
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### JSON response fields
-
-- `govuk_account_session` *(optional)*
-  - a new session identifier
-- `saved_pages`
-  - an array of pages the user has saved, identified by their page path
-
-#### Response codes
-
-- 401 if the session identifier is invalid
-- 200 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.get_saved_pages(
-    govuk_account_session: "session-identifier",
-)
-```
-
-Response when no pages are saved:
-
-```json
-{
-    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
-    "saved_pages": []
-}
-```
-
-Response when a user has saved two pages:
-
-```json
-{
-    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
-    "saved_pages": [
-      {
-        "page_path": "/government/organisations/government-digital-service",
-        "content_id": "af07d5a5-df63-4ddc-9383-6a666845ebe9",
-        "title": "Government Digital Service"
-      },
-      {
-        "page_path": "/government/organisations/cabinet-office",
-        "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
-        "title": "Cabinet Office"
-      },
-  ]
-}
-```
-
-### `GET /api/saved-pages/:page_path`
-
-Query if a specific path has been saved by the user
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### Request parameters
-
-- `page_path`
-  - the path on GOV.UK to save
-
-#### JSON response fields
-
-- `govuk_account_session` *(optional)*
-  - a new session identifier
-- `saved_page`
-  - an object containing the page path of the successfully queried page
-
-#### Response codes
-
-- 404 cannot find a page with the provided path
-- 401 if the session identifier is invalid
-- 200 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.get_saved_page(
-    page_path: "/guidance/bar",
-    govuk_account_session: "session-identifier",
-)
-```
-
-```json
-{
-    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
-    "saved_page": {
-      "page_path": "/guidance/bar",
-      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
-      "title": "Guidance for Bar-related Activities"
-    },
-}
-```
-
-### `PUT /api/saved-pages/:page_path`
-
-Upsert a saved page in a user's account
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### Request parameters
-
-- `page_path`
-  - An escaped URL safe string that identifies the path of a saved page.
-
-#### JSON response fields
-
-- `govuk_account_session` *(optional)*
-  - a new session identifier
-- `saved_page`
-  - an object containing the page path of the successfully saved page
-
-#### Response codes
-
-- 422 if the page could not be saved (see [error: page cannot be saved](#page-cannot-be-saved))
-- 410 if the page has been removed (the latest edition is in the "gone" or "redirect" state)
-- 404 if the page does not exist (not present in the content store)
-- 401 if the session identifier is invalid
-- 200 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.save_page(
-    page_path: "/guidance/foo",
-    govuk_account_session: "session-identifier",
-)
-```
-
-```json
-{
-    "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
-    "saved_page": {
-      "page_path": "/guidance/foo",
-      "content_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381",
-      "title": "Guidance for Foo-related Activities"
-    },
-}
-```
-
-### `DELETE /api/saved-pages/:page_path`
-
-Remove a saved page from a user's account
-
-#### Request headers
-
-- `GOVUK-Account-Session`
-  - the user's session identifier
-
-#### Request parameters
-
-- `page_path`
-  - the path on GOV.UK to save
-
-#### Response codes
-
-- 404 cannot find a page with the provided path
-- 401 if the session identifier is invalid
-- 204 successfully deleted
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.delete_saved_page(
-    page_path: "/guidance/bar",
-    govuk_account_session: "session-identifier",
-)
-```
-
-Response is status code only.
-
 ## API errors
 
 API errors are returned as an [RFC 7807][] "Problem Detail" object, in
@@ -812,10 +613,6 @@ One or more of the attributes you have specified cannot be updated
 through account-api.  The `attributes` response field lists these.
 
 Do not just reauthenticate the user and try again.
-
-### Page cannot be saved
-
-The page you have specified could not be saved. The errors response field lists the problems.
 
 #### Debugging steps
 
