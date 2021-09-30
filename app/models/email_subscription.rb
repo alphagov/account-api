@@ -68,7 +68,7 @@ class EmailSubscription < ApplicationRecord
     SendEmailWorker.perform_async(
       oidc_user.email,
       I18n.t("emails.onboarding.transition_checker.subject"),
-      I18n.t("emails.onboarding.transition_checker.body", sign_in_link: "#{Plek.find('account-manager')}/sign-in"),
+      I18n.t("emails.onboarding.transition_checker.body", sign_in_link: GovukPersonalisation::Urls.sign_in),
     )
 
     oidc_user.update!(has_received_transition_checker_onboarding_email: true)
