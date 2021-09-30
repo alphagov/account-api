@@ -3,14 +3,16 @@ require "gds_api/test_helpers/email_alert_api"
 RSpec.describe "OIDC Users endpoint" do
   include GdsApi::TestHelpers::EmailAlertApi
 
-  let(:headers) { { "Content-Type" => "application/json" } }
-  let(:params) { { email: email, email_verified: email_verified, has_unconfirmed_email: has_unconfirmed_email }.compact.to_json }
-  let(:email) { "email@example.com" }
-  let(:email_verified) { true }
-  let(:has_unconfirmed_email) { false }
   let(:subject_identifier) { "subject-identifier" }
+  let(:legacy_sub) { nil }
 
   describe "PUT" do
+    let(:headers) { { "Content-Type" => "application/json" } }
+    let(:params) { { email: email, email_verified: email_verified, has_unconfirmed_email: has_unconfirmed_email, legacy_sub: legacy_sub }.compact.to_json }
+    let(:email) { "email@example.com" }
+    let(:email_verified) { true }
+    let(:has_unconfirmed_email) { false }
+
     before do
       stub_request(:get, %r{\A#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/\d+\z}).to_return(status: 404)
     end
@@ -33,7 +35,7 @@ RSpec.describe "OIDC Users endpoint" do
     end
 
     context "when the user already exists" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
 
       it "does not create a new user" do
         expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
@@ -52,6 +54,27 @@ RSpec.describe "OIDC Users endpoint" do
         expect(user.email).to eq(email)
         expect(user.email_verified).to eq(email_verified)
         expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
+      end
+
+      context "when the user is pre-migration" do
+        let(:legacy_sub) { "legacy-subject-identifier" }
+        let(:subject_identifier) { "pre-migration-subject-identifier" }
+
+        it "updates and migrates the user by legacy_sub" do
+          user.update!(email: "old-email@example.com", email_verified: false)
+
+          put oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: params, headers: headers
+          expect(JSON.parse(response.body)["sub"]).to eq(subject_identifier)
+          expect(JSON.parse(response.body)["email"]).to eq(email)
+          expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
+          expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
+
+          user.reload
+          expect(user.sub).to eq(subject_identifier)
+          expect(user.email).to eq(email)
+          expect(user.email_verified).to eq(email_verified)
+          expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
+        end
       end
 
       context "when the user has linked their notifications account" do
@@ -94,21 +117,29 @@ RSpec.describe "OIDC Users endpoint" do
   end
 
   describe "DELETE" do
-    context "when the user exists" do
-      before { FactoryBot.create(:oidc_user, sub: subject_identifier) }
-
-      it "deletes the user" do
-        expect { delete oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count).by(-1)
-        expect(response).to be_no_content
+    it "does not change the count of users and returns not found" do
+      without_detailed_exceptions do
+        expect { delete oidc_user_path(subject_identifier: subject_identifier) }.not_to change(OidcUser, :count)
       end
+      expect(response).to be_not_found
     end
 
-    context "when a user does not exist" do
-      it "does not change the count of users and returns not found" do
-        without_detailed_exceptions do
-          expect { delete oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
+    context "when the user exists" do
+      before { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
+
+      it "deletes the user" do
+        expect { delete oidc_user_path(subject_identifier: subject_identifier) }.to change(OidcUser, :count).by(-1)
+        expect(response).to be_no_content
+      end
+
+      context "when the user is pre-migration" do
+        let(:legacy_sub) { "legacy-subject-identifier" }
+        let(:subject_identifier) { "pre-migration-subject-identifier" }
+
+        it "deletes the user by legacy_sub" do
+          expect { delete oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: { legacy_sub: legacy_sub } }.to change(OidcUser, :count).by(-1)
+          expect(response).to be_no_content
         end
-        expect(response).to be_not_found
       end
     end
   end

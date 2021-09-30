@@ -18,6 +18,18 @@ class AccountSession
     @frozen = false
 
     @user_id = user_id || userinfo["sub"]
+
+    # TODO: When we have session versioning, and when we know what the
+    # DI claim will be for the legacy sub, implement upgrading the old
+    # session and user record.  The logic will be something like:
+    #
+    # if using_digital_identity? && this is a pre-migration session
+    #   @user = OidcUser.find_or_create_by_sub!(userinfo["sub"], legacy_sub: userinfo["legacy_sub"])
+    #   @user_id = @user.sub
+    # end
+    #
+    # then the use of `legacy_sub` can be removed from the `user`
+    # method.
   end
 
   def self.deserialise(encoded_session:, session_secret:)
@@ -40,7 +52,7 @@ class AccountSession
   end
 
   def user
-    @user ||= OidcUser.find_or_create_by_sub!(user_id)
+    @user ||= OidcUser.find_or_create_by_sub!(user_id, legacy_sub: user_id)
   end
 
   def mfa?

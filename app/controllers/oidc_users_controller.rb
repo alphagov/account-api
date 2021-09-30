@@ -1,8 +1,14 @@
 class OidcUsersController < ApplicationController
+  include DigitalIdentityHelper
+
   OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email].freeze
 
   def update
-    user = OidcUser.find_or_create_by_sub!(params.fetch(:subject_identifier))
+    user = OidcUser.find_or_create_by_sub!(
+      params.fetch(:subject_identifier),
+      legacy_sub: using_digital_identity? ? params[:legacy_sub] : nil,
+    )
+
     user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
     user.reload
 
@@ -38,8 +44,10 @@ class OidcUsersController < ApplicationController
   end
 
   def destroy
-    user = OidcUser.find_by!(sub: params.fetch(:subject_identifier))
-    user.destroy!
+    OidcUser.find_by_sub!(
+      params.fetch(:subject_identifier),
+      legacy_sub: using_digital_identity? ? params[:legacy_sub] : nil,
+    ).destroy!
     head :no_content
   rescue ActiveRecord::RecordNotFound
     head :not_found
