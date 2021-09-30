@@ -17,7 +17,7 @@ RSpec.describe OidcUser do
     end
 
     context "when the user already exists" do
-      let!(:user) { described_class.create!(sub: sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: sub) }
 
       it "returns the existing model" do
         expect { described_class.find_or_create_by_sub!(sub) }.not_to change(described_class, :count)

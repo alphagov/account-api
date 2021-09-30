@@ -33,7 +33,7 @@ RSpec.describe "OIDC Users endpoint" do
     end
 
     context "when the user already exists" do
-      let!(:user) { OidcUser.create!(sub: subject_identifier) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier) }
 
       it "does not create a new user" do
         expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
@@ -95,7 +95,7 @@ RSpec.describe "OIDC Users endpoint" do
 
   describe "DELETE" do
     context "when the user exists" do
-      before { OidcUser.create!(sub: subject_identifier) }
+      before { FactoryBot.create(:oidc_user, sub: subject_identifier) }
 
       it "deletes the user" do
         expect { delete oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count).by(-1)

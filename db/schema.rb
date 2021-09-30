@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_30_103307) do
+ActiveRecord::Schema.define(version: 2021_09_30_105948) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 2021_09_30_103307) do
     t.boolean "oidc_users"
     t.jsonb "transition_checker_state"
     t.string "legacy_sub"
+    t.index ["legacy_sub"], name: "index_oidc_users_on_legacy_sub", unique: true
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end
 
