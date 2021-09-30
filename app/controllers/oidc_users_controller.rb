@@ -6,7 +6,7 @@ class OidcUsersController < ApplicationController
   def update
     user = OidcUser.find_or_create_by_sub!(
       params.fetch(:subject_identifier),
-      legacy_sub: using_digital_identity? ? params[:legacy_sub] : nil,
+      legacy_sub: using_digital_identity? ? params[:legacy_sub] : params.fetch(:subject_identifier),
     )
 
     user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
