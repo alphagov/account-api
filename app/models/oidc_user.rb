@@ -3,12 +3,20 @@ class OidcUser < ApplicationRecord
 
   validates :sub, presence: true
 
-  def self.find_or_create_by_sub!(sub)
-    find_or_create_by!(sub: sub) do |new_user|
-      new_user.legacy_sub = sub
+  def self.find_by_sub!(sub, legacy_sub: nil)
+    if legacy_sub
+      find_by(sub: sub) || find_by!(legacy_sub: legacy_sub)
+    else
+      find_by!(sub: sub)
     end
-  rescue ActiveRecord::RecordNotUnique
-    find_by!(sub: sub)
+  end
+
+  def self.find_or_create_by_sub!(sub, legacy_sub: nil)
+    transaction do
+      find_by_sub!(sub, legacy_sub: legacy_sub)
+    rescue ActiveRecord::RecordNotFound
+      create!(sub: sub, legacy_sub: legacy_sub)
+    end
   end
 
   def get_attributes_by_name(names = [])

@@ -506,6 +506,8 @@ This endpoint requires the `update_protected_attributes` scope.
 
 #### JSON request parameters
 
+- `legacy_sub` *(optional)*
+  - if this is a user created pre-migration, their original subject identifier (a string)
 - `email`
   - the new email address (a string)
 - `email_verified`
@@ -558,6 +560,11 @@ Delete an account by subject identifier.  This endpoint requires the
 
 - `subject_identifier`
   - the subject identifier of the user to delete
+
+#### Query parameters
+
+- `legacy_sub` *(optional)*
+  - if this is a user created pre-migration, their original subject identifier (a string)
 
 #### Response codes
 
