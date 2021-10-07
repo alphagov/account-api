@@ -5,7 +5,9 @@ class OidcUser < ApplicationRecord
 
   def self.find_by_sub!(sub, legacy_sub: nil)
     if legacy_sub
-      find_by(sub: sub) || find_by!(legacy_sub: legacy_sub)
+      find_by(sub: sub) || find_by!(legacy_sub: legacy_sub).tap do |legacy_user|
+        legacy_user.update!(sub: sub)
+      end
     else
       find_by!(sub: sub)
     end

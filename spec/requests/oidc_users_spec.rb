@@ -64,13 +64,13 @@ RSpec.describe "OIDC Users endpoint" do
           user.update!(email: "old-email@example.com", email_verified: false)
 
           put oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: params, headers: headers
-          expect(JSON.parse(response.body)["sub"]).to eq(subject_identifier)
+          expect(JSON.parse(response.body)["sub"]).to eq("post-migration-subject-identifier")
           expect(JSON.parse(response.body)["email"]).to eq(email)
           expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
           expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
 
           user.reload
-          expect(user.sub).to eq(subject_identifier)
+          expect(user.sub).to eq("post-migration-subject-identifier")
           expect(user.email).to eq(email)
           expect(user.email_verified).to eq(email_verified)
           expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)

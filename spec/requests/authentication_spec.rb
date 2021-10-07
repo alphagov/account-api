@@ -79,6 +79,8 @@ RSpec.describe "Authentication" do
   end
 
   describe "/callback" do
+    before { FactoryBot.create(:oidc_user, sub: "user-id") }
+
     let!(:auth_request) { AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path") }
 
     it "fetches the tokens" do
