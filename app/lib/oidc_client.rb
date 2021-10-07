@@ -23,22 +23,25 @@ class OidcClient
     end
   end
 
-  # TODO: Digital Identity don't have an implementation of levels of
-  # authentication yet.
-  def auth_uri(auth_request, _level_of_authentication)
+  def auth_uri(auth_request, mfa: false)
+    vtr = Rack::Utils.escape(mfa ? '["Cl.Cm"]' : '["Cl","Cl.Cm"]')
     client.authorization_uri(
       scope: %i[openid email],
       state: auth_request.to_oauth_state,
       nonce: auth_request.oidc_nonce,
-    )
+    ) + "&vtr=#{vtr}"
   end
 
   def callback(auth_request, code)
     client.authorization_code = code
 
-    time_and_return "tokens" do
+    tokens = time_and_return "tokens" do
       tokens!(oidc_nonce: auth_request.oidc_nonce)
     end
+
+    tokens.merge(
+      mfa: tokens.fetch(:id_token).raw_attributes["vot"] == "Cl.Cm",
+    )
   end
 
   def tokens!(oidc_nonce: nil)

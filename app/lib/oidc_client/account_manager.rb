@@ -1,9 +1,31 @@
 class OidcClient::AccountManager < OidcClient
-  def auth_uri(auth_request, level_of_authentication)
+  def auth_uri(auth_request, mfa: false)
+    level_of_authentication = mfa ? "level1" : "level0"
     client.authorization_uri(
       scope: [:email, :openid, level_of_authentication],
       state: auth_request.to_oauth_state,
       nonce: auth_request.oidc_nonce,
+    )
+  end
+
+  def callback(auth_request, code)
+    client.authorization_code = code
+
+    tokens = time_and_return "tokens" do
+      tokens!(oidc_nonce: auth_request.oidc_nonce)
+    end
+
+    response = get_ephemeral_state(
+      access_token: tokens[:access_token],
+      refresh_token: tokens[:refresh_token],
+    )
+
+    tokens.merge(
+      access_token: response.fetch(:access_token),
+      refresh_token: response.fetch(:refresh_token),
+      mfa: response.fetch(:result).fetch("level_of_authentication") == "level1",
+      ga_session_id: response.fetch(:result)["_ga"],
+      cookie_consent: response.fetch(:result)["cookie_consent"],
     )
   end
 
