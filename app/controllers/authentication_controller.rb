@@ -31,6 +31,7 @@ class AuthenticationController < ApplicationController
         access_token: details.fetch(:access_token),
         refresh_token: details[:refresh_token],
         mfa: details.fetch(:mfa),
+        digital_identity_session: using_digital_identity?,
       ).serialise,
       redirect_path: redirect_path,
       ga_client_id: details[:ga_session_id],
