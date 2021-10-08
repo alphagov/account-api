@@ -43,7 +43,10 @@ class AccountSession
   end
 
   def user
-    @user ||= OidcUser.find_or_create_by_sub!(user_id)
+    @user ||= OidcUser.find_or_create_by_sub!(
+      user_id,
+      legacy_sub: using_digital_identity? ? nil : user_id,
+    )
   end
 
   def mfa?
