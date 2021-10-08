@@ -37,6 +37,10 @@ RSpec.describe OidcUser do
       it "finds the user by legacy sub" do
         expect(described_class.find_or_create_by_sub!("bar", legacy_sub: legacy_sub).id).to eq(user.id)
       end
+
+      it "updates the sub" do
+        expect(described_class.find_or_create_by_sub!("bar", legacy_sub: legacy_sub).sub).to eq("bar")
+      end
     end
   end
 end

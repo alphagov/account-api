@@ -7,29 +7,26 @@ class AccountSession
 
   class CannotSetRemoteDigitalIdentityAttributes < StandardError; end
 
-  attr_reader :id_token, :user_id
+  class SessionTooOld < StandardError; end
 
-  def initialize(session_secret:, access_token:, refresh_token: nil, mfa: false, user_id: nil, id_token: nil)
+  attr_reader :id_token, :user_id, :digital_identity_session
+
+  def initialize(session_secret:, **options)
+    if options.key? :level_of_authentication
+      options.merge!(mfa: options[:level_of_authentication] == "level1")
+      options.delete(:level_of_authentication)
+    end
+
+    @access_token = options.fetch(:access_token)
+    @id_token = options[:id_token]
+    @mfa = options.fetch(:mfa, false)
+    @refresh_token = options[:refresh_token]
+    @user_id = options[:user_id] || userinfo["sub"]
+    @digital_identity_session = options.fetch(:digital_identity_session, false)
     @session_secret = session_secret
-    @access_token = access_token
-    @refresh_token = refresh_token
-    @mfa = mfa
-    @id_token = id_token
     @frozen = false
 
-    @user_id = user_id || userinfo["sub"]
-
-    # TODO: When we have session versioning, and when we know what the
-    # DI claim will be for the legacy sub, implement upgrading the old
-    # session and user record.  The logic will be something like:
-    #
-    # if using_digital_identity? && this is a pre-migration session
-    #   @user = OidcUser.find_or_create_by_sub!(userinfo["sub"], legacy_sub: userinfo["legacy_sub"])
-    #   @user_id = @user.sub
-    # end
-    #
-    # then the use of `legacy_sub` can be removed from the `user`
-    # method.
+    raise SessionTooOld if using_digital_identity? && !@digital_identity_session
   end
 
   def self.deserialise(encoded_session:, session_secret:)
@@ -37,22 +34,19 @@ class AccountSession
     return if encoded_session_without_flash.blank?
 
     serialised_session = StringEncryptor.new(secret: session_secret).decrypt_string(encoded_session_without_flash)
-    if serialised_session
-      options = JSON.parse(serialised_session).symbolize_keys
+    return unless serialised_session
 
-      if options.key? :level_of_authentication
-        options.merge!(mfa: options[:level_of_authentication] == "level1")
-        options.delete(:level_of_authentication)
-      end
-
-      new(session_secret: session_secret, **options)
-    end
-  rescue OidcClient::OAuthFailure
+    options = JSON.parse(serialised_session).symbolize_keys
+    new(session_secret: session_secret, **options)
+  rescue OidcClient::OAuthFailure, SessionTooOld
     nil
   end
 
   def user
-    @user ||= OidcUser.find_or_create_by_sub!(user_id, legacy_sub: user_id)
+    @user ||= OidcUser.find_or_create_by_sub!(
+      user_id,
+      legacy_sub: using_digital_identity? ? nil : user_id,
+    )
   end
 
   def mfa?
@@ -68,6 +62,7 @@ class AccountSession
     {
       id_token: id_token,
       user_id: user_id,
+      digital_identity_session: digital_identity_session,
       mfa: @mfa,
       access_token: @access_token,
       refresh_token: @refresh_token,

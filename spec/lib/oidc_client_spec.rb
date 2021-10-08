@@ -13,6 +13,51 @@ RSpec.describe OidcClient do
     end
   end
 
+  describe "callback" do
+    before { stub_token_response }
+
+    it "calls userinfo to fetch the legacy sub and creates the user model" do
+      stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+        .with(headers: { Authorization: "Bearer access-token" })
+        .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+
+      expect { client.callback(AuthRequest.generate!, "code") }.to change(OidcUser, :count).by(1)
+
+      expect(stub).to have_been_made
+      expect(OidcUser.find_by(sub: "user-id", legacy_sub: "legacy-sub")).not_to be_nil
+    end
+
+    context "when the user exists with the legacy sub" do
+      let!(:user) { FactoryBot.create(:oidc_user, sub: "legacy-sub", legacy_sub: "legacy-sub") }
+
+      it "calls userinfo to fetch the legacy sub and updates the user model" do
+        stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+          .with(headers: { Authorization: "Bearer access-token" })
+          .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+
+        expect { client.callback(AuthRequest.generate!, "code") }.not_to change(OidcUser, :count)
+
+        expect(stub).to have_been_made
+        expect(user.reload.sub).to eq("user-id")
+        expect(user.reload.legacy_sub).to eq("legacy-sub")
+      end
+    end
+
+    context "when the user exists with the current sub" do
+      before { FactoryBot.create(:oidc_user, sub: "user-id", legacy_sub: "legacy-sub") }
+
+      it "does not call userinfo" do
+        stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+          .with(headers: { Authorization: "Bearer access-token" })
+          .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+
+        expect { client.callback(AuthRequest.generate!, "code") }.not_to change(OidcUser, :count)
+
+        expect(stub).not_to have_been_made
+      end
+    end
+  end
+
   describe "tokens!" do
     before do
       access_token = Rack::OAuth2::AccessToken.new(

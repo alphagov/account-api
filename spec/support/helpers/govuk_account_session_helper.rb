@@ -12,6 +12,7 @@ module GovukAccountSessionHelper
         access_token: "access-token",
         refresh_token: "refresh-token",
         mfa: false,
+        digital_identity_session: true,
       }.merge(options),
     )
   end

@@ -12,7 +12,7 @@ RSpec.describe AccountSession do
   let(:access_token) { SecureRandom.hex(10) }
   let(:refresh_token) { SecureRandom.hex(10) }
   let(:mfa) { false }
-  let(:params) { { id_token: id_token, user_id: user_id, access_token: access_token, refresh_token: refresh_token, mfa: mfa }.compact }
+  let(:params) { { id_token: id_token, user_id: user_id, access_token: access_token, refresh_token: refresh_token, mfa: mfa, digital_identity_session: true }.compact }
   let(:account_session) { described_class.new(session_secret: "key", **params) }
 
   it "throws an error if making an OAuth call after serialising the session" do

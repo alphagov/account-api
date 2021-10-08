@@ -26,7 +26,7 @@ class OidcClient
   def auth_uri(auth_request, mfa: false)
     vtr = Rack::Utils.escape(mfa ? '["Cl.Cm"]' : '["Cl","Cl.Cm"]')
     client.authorization_uri(
-      scope: %i[openid email],
+      scope: %i[openid email govuk-account],
       state: auth_request.to_oauth_state,
       nonce: auth_request.oidc_nonce,
     ) + "&vtr=#{vtr}"
@@ -37,6 +37,15 @@ class OidcClient
 
     tokens = time_and_return "tokens" do
       tokens!(oidc_nonce: auth_request.oidc_nonce)
+    end
+
+    unless OidcUser.where(sub: tokens[:id_token].sub).exists?
+      response = userinfo(access_token: tokens[:access_token], refresh_token: tokens[:refresh_token])
+      OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response.dig(:result, "govuk-account"))
+      tokens.merge!(
+        access_token: response.fetch(:access_token),
+        refresh_token: response[:refresh_token],
+      )
     end
 
     tokens.merge(

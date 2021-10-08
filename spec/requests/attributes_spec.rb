@@ -9,8 +9,9 @@ RSpec.describe "Attributes" do
   end
 
   let(:session_identifier) { account_session.serialise }
-  let(:account_session) { placeholder_govuk_account_session_object(mfa: mfa) }
+  let(:account_session) { placeholder_govuk_account_session_object(mfa: mfa, digital_identity_session: digital_identity_session) }
   let(:mfa) { true }
+  let(:digital_identity_session) { true }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
   # names must be defined in spec/fixtures/user_attributes.yml
@@ -156,6 +157,8 @@ RSpec.describe "Attributes" do
           allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
         end
 
+        let(:digital_identity_session) { false }
+
         it "calls the attribute service" do
           stub = stub_request(:post, "http://openid-provider/v1/attributes")
             .with(body: { attributes: attributes.transform_values(&:to_json) })
@@ -215,6 +218,8 @@ RSpec.describe "Attributes" do
             .to_return(status: 200)
         end
 
+        let(:digital_identity_session) { false }
+
         it "doesn't send the local attribute to the attribute service" do
           patch attributes_path, headers: headers, params: params.to_json
           expect(response).to be_successful
@@ -226,6 +231,8 @@ RSpec.describe "Attributes" do
       before do
         allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
       end
+
+      let(:digital_identity_session) { false }
 
       it "doesn't call the attribute service" do
         stub = stub_request(:post, "http://openid-provider/v1/attributes")
