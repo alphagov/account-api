@@ -110,111 +110,72 @@ RSpec.describe OidcClient do
     end
   end
 
-  describe "the access token has expired" do
-    before do
-      client_stub = stub_oidc_client(client)
+  describe "retrying OAuth requests" do
+    shared_examples "the initial request fails" do |refresh|
+      let(:second_access_token) { refresh ? "new-access-token" : "access-token" }
+      let(:second_refresh_token) { refresh ? "new-refresh-token" : "refresh-token" }
 
-      new_access_token = Rack::OAuth2::AccessToken::Bearer.new(
-        access_token: "new-access-token",
-        refresh_token: "new-refresh-token",
-      )
-
-      allow(client_stub).to receive(:"refresh_token=").with("refresh-token")
-      allow(client_stub).to receive(:access_token!).and_return(new_access_token)
-
-      @stub_fail = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 401)
-    end
-
-    it "refreshes the token and retries" do
-      stub_success = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer new-access-token" })
-        .to_return(status: 200, body: { id: "foo" }.to_json)
-
-      client.userinfo(access_token: "access-token", refresh_token: "refresh-token")
-
-      # rubocop:disable RSpec/InstanceVariable
-      expect(@stub_fail).to have_been_made
-      # rubocop:enable RSpec/InstanceVariable
-      expect(stub_success).to have_been_made
-    end
-
-    context "but there is no refresh token" do
-      it "fails" do
-        expect { client.userinfo(access_token: "access-token", refresh_token: nil) }.to raise_error(OidcClient::OAuthFailure)
-      end
-    end
-
-    context "but the refreshed access token fails" do
-      it "fails" do
-        stub_request(:get, "http://openid-provider/userinfo-endpoint")
-          .with(headers: { Authorization: "Bearer new-access-token" })
-          .to_return(status: 401)
-
-        expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
-      end
-    end
-  end
-
-  describe "there is a networking issue" do
-    before do
-      @stub_fail = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer access-token" })
-        .to_raise(Errno::ECONNRESET)
-    end
-
-    it "retries" do
-      stub_success = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 200, body: { id: "foo" }.to_json)
-
-      client.userinfo(access_token: "access-token", refresh_token: "refresh-token")
-
-      # rubocop:disable RSpec/InstanceVariable
-      expect(@stub_fail).to have_been_made
-      # rubocop:enable RSpec/InstanceVariable
-      expect(stub_success).to have_been_made
-    end
-
-    context "but it fails again" do
-      it "fails" do
-        stub_request(:get, "http://openid-provider/userinfo-endpoint")
+      before do
+        stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
           .with(headers: { Authorization: "Bearer access-token" })
-          .to_raise(Errno::ECONNRESET)
+        setup_failure stub
 
-        expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
+        if refresh
+          client_stub = stub_oidc_client(client)
+
+          new_access_token = Rack::OAuth2::AccessToken::Bearer.new(
+            access_token: "new-access-token",
+            refresh_token: "new-refresh-token",
+          )
+
+          allow(client_stub).to receive(:"refresh_token=").with("refresh-token")
+          allow(client_stub).to receive(:access_token!).and_return(new_access_token)
+        end
+      end
+
+      it "retries" do
+        stub_request(:get, "http://openid-provider/userinfo-endpoint")
+          .with(headers: { Authorization: "Bearer #{second_access_token}" })
+          .to_return(status: 200, body: { id: "foo" }.to_json)
+
+        expect(client.userinfo(access_token: "access-token", refresh_token: "refresh-token"))
+          .to eq({ access_token: second_access_token, refresh_token: second_refresh_token, result: { "id" => "foo" } })
+      end
+
+      context "but it fails again" do
+        before do
+          stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+            .with(headers: { Authorization: "Bearer #{second_access_token}" })
+          setup_failure stub
+        end
+
+        it "fails" do
+          expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
+        end
       end
     end
-  end
 
-  describe "the OAuth provider returns a server error" do
-    before do
-      @stub_fail = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 504)
+    describe "the access token has expired" do
+      include_examples "the initial request fails", true
+
+      def setup_failure(stub)
+        stub.to_return(status: 401)
+      end
     end
 
-    it "retries" do
-      stub_success = stub_request(:get, "http://openid-provider/userinfo-endpoint")
-        .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 200, body: { id: "foo" }.to_json)
+    describe "there is a networking issue" do
+      include_examples "the initial request fails", false
 
-      client.userinfo(access_token: "access-token", refresh_token: "refresh-token")
-
-      # rubocop:disable RSpec/InstanceVariable
-      expect(@stub_fail).to have_been_made
-      # rubocop:enable RSpec/InstanceVariable
-      expect(stub_success).to have_been_made
+      def setup_failure(stub)
+        stub.to_raise(Errno::ECONNRESET)
+      end
     end
 
-    context "but it fails again" do
-      it "fails" do
-        stub_request(:get, "http://openid-provider/userinfo-endpoint")
-          .with(headers: { Authorization: "Bearer access-token" })
-          .to_return(status: 504)
+    describe "the OAuth provider returns a server error" do
+      include_examples "the initial request fails", false
 
-        expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
+      def setup_failure(stub)
+        stub.to_return(status: 504)
       end
     end
   end
