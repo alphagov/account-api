@@ -28,6 +28,7 @@ class AuthenticationController < ApplicationController
       refresh_token: details[:refresh_token],
       mfa: details.fetch(:mfa),
       digital_identity_session: using_digital_identity?,
+      version: AccountSession::CURRENT_VERSION,
     )
 
     render json: {
