@@ -157,6 +157,37 @@ RSpec.describe OidcClient do
     end
   end
 
+  describe "there is a networking issue" do
+    before do
+      @stub_fail = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+        .with(headers: { Authorization: "Bearer access-token" })
+        .to_raise(Errno::ECONNRESET)
+    end
+
+    it "retries" do
+      stub_success = stub_request(:get, "http://openid-provider/userinfo-endpoint")
+        .with(headers: { Authorization: "Bearer access-token" })
+        .to_return(status: 200, body: { id: "foo" }.to_json)
+
+      client.userinfo(access_token: "access-token", refresh_token: "refresh-token")
+
+      # rubocop:disable RSpec/InstanceVariable
+      expect(@stub_fail).to have_been_made
+      # rubocop:enable RSpec/InstanceVariable
+      expect(stub_success).to have_been_made
+    end
+
+    context "but it fails again" do
+      it "fails" do
+        stub_request(:get, "http://openid-provider/userinfo-endpoint")
+          .with(headers: { Authorization: "Bearer access-token" })
+          .to_raise(Errno::ECONNRESET)
+
+        expect { client.userinfo(access_token: "access-token", refresh_token: "refresh-token") }.to raise_error(OidcClient::OAuthFailure)
+      end
+    end
+  end
+
   def stub_oidc_client(client = nil)
     oidc_client = instance_double("OpenIDConnect::Client")
 

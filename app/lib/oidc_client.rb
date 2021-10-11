@@ -109,36 +109,46 @@ class OidcClient
 
 private
 
+  class RetryableOAuthFailure < StandardError; end
+
   OK_STATUSES = [200, 204, 404, 410].freeze
+  MAX_OAUTH_RETRIES = 1
 
   def oauth_request(access_token:, refresh_token:, method:, uri:, arg: nil)
-    access_token_str = access_token
-    refresh_token_str = refresh_token
-
     args = [uri, arg].compact
+    retries = 0
 
-    response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token_str).public_send(method, *args)
+    begin
+      response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token).public_send(method, *args)
+      raise RetryableOAuthFailure unless OK_STATUSES.include? response.status
 
-    unless OK_STATUSES.include? response.status
+      {
+        access_token: access_token,
+        refresh_token: refresh_token,
+        result: response,
+      }
+    rescue RetryableOAuthFailure
+      raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
       raise OAuthFailure unless refresh_token
 
-      client.refresh_token = refresh_token
-      access_token = client.access_token!
+      access_token, refresh_token = refresh_client_tokens(refresh_token)
 
-      response = access_token.public_send(method, *args)
-      raise OAuthFailure unless OK_STATUSES.include? response.status
+      retries += 1
+      retry
+    rescue Errno::ECONNRESET, OpenSSL::SSL::SSLError
+      raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
 
-      access_token_str = access_token.token_response[:access_token]
-      refresh_token_str = access_token.token_response[:refresh_token]
+      retries += 1
+      retry
     end
-
-    {
-      access_token: access_token_str,
-      refresh_token: refresh_token_str,
-      result: response,
-    }
   rescue AttrRequired::AttrMissing, Rack::OAuth2::Client::Error, URI::InvalidURIError
     raise OAuthFailure
+  end
+
+  def refresh_client_tokens(refresh_token)
+    client.refresh_token = refresh_token
+    refreshed = client.access_token!
+    [refreshed.token_response[:access_token], refreshed.token_response[:refresh_token]]
   end
 
   def redirect_uri
