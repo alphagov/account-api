@@ -109,9 +109,10 @@ class OidcClient
 
 private
 
-  class RetryableOAuthFailure < StandardError; end
+  class RefreshAndRetry < StandardError; end
 
-  OK_STATUSES = [200, 204, 404, 410].freeze
+  REFRESH_AND_RETRY_STATUSES = [401, 403].freeze
+
   MAX_OAUTH_RETRIES = 1
 
   def oauth_request(access_token:, refresh_token:, method:, uri:, arg: nil)
@@ -120,14 +121,14 @@ private
 
     begin
       response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token).public_send(method, *args)
-      raise RetryableOAuthFailure unless OK_STATUSES.include? response.status
+      raise RefreshAndRetry if REFRESH_AND_RETRY_STATUSES.include? response.status
 
       {
         access_token: access_token,
         refresh_token: refresh_token,
         result: response,
       }
-    rescue RetryableOAuthFailure
+    rescue RefreshAndRetry
       raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
       raise OAuthFailure unless refresh_token
 
