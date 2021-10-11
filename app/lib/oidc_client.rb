@@ -111,7 +111,10 @@ private
 
   class RefreshAndRetry < StandardError; end
 
+  class OnlyRetry < StandardError; end
+
   REFRESH_AND_RETRY_STATUSES = [401, 403].freeze
+  ONLY_RETRY_STATUSES = [500, 501, 502, 503, 504].freeze
 
   MAX_OAUTH_RETRIES = 1
 
@@ -122,6 +125,7 @@ private
     begin
       response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token).public_send(method, *args)
       raise RefreshAndRetry if REFRESH_AND_RETRY_STATUSES.include? response.status
+      raise OnlyRetry if ONLY_RETRY_STATUSES.include? response.status
 
       {
         access_token: access_token,
@@ -136,7 +140,7 @@ private
 
       retries += 1
       retry
-    rescue Errno::ECONNRESET, OpenSSL::SSL::SSLError
+    rescue OnlyRetry, Errno::ECONNRESET, OpenSSL::SSL::SSLError
       raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
 
       retries += 1
