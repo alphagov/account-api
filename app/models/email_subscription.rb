@@ -1,4 +1,6 @@
 class EmailSubscription < ApplicationRecord
+  class SubscriberListNotFound < StandardError; end
+
   belongs_to :oidc_user
 
   validates :name, presence: true
@@ -33,9 +35,12 @@ class EmailSubscription < ApplicationRecord
     return unless oidc_user.email
     return unless oidc_user.email_verified
 
-    subscriber_list = GdsApi.email_alert_api.get_subscriber_list(
-      slug: topic_slug,
-    )
+    subscriber_list =
+      begin
+        GdsApi.email_alert_api.get_subscriber_list(slug: topic_slug)
+      rescue GdsApi::HTTPNotFound
+        raise SubscriberListNotFound
+      end
 
     subscription = GdsApi.email_alert_api.subscribe(
       subscriber_list_id: subscriber_list.dig("subscriber_list", "id"),

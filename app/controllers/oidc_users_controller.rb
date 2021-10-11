@@ -36,7 +36,11 @@ class OidcUsersController < ApplicationController
         # this branch can be removed once we have no GOV.UK accounts
         # which have subscriptions but are *not* linked to the
         # corresponding notifications account.
-        user.email_subscriptions.each(&:reactivate_if_confirmed!)
+        user.email_subscriptions.find_each do |subscription|
+          subscription.reactivate_if_confirmed!
+        rescue EmailSubscription::SubscriberListNotFound
+          subscription.destroy!
+        end
       end
     end
 
