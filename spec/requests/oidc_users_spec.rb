@@ -8,10 +8,21 @@ RSpec.describe "OIDC Users endpoint" do
 
   describe "PUT" do
     let(:headers) { { "Content-Type" => "application/json" } }
-    let(:params) { { email: email, email_verified: email_verified, has_unconfirmed_email: has_unconfirmed_email, legacy_sub: legacy_sub }.compact.to_json }
+    let(:params) do
+      {
+        email: email,
+        email_verified: email_verified,
+        has_unconfirmed_email: has_unconfirmed_email,
+        legacy_sub: legacy_sub,
+        cookie_consent: cookie_consent,
+        feedback_consent: feedback_consent,
+      }.compact.to_json
+    end
     let(:email) { "email@example.com" }
     let(:email_verified) { true }
     let(:has_unconfirmed_email) { false }
+    let(:cookie_consent) { true }
+    let(:feedback_consent) { false }
 
     before do
       stub_request(:get, %r{\A#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/\d+\z}).to_return(status: 404)
@@ -32,6 +43,8 @@ RSpec.describe "OIDC Users endpoint" do
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
       expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
+      expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
+      expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
     end
 
     context "when the user already exists" do
@@ -49,11 +62,15 @@ RSpec.describe "OIDC Users endpoint" do
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
         expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
+        expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
+        expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
 
         user.reload
         expect(user.email).to eq(email)
         expect(user.email_verified).to eq(email_verified)
         expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
+        expect(user.cookie_consent).to eq(cookie_consent)
+        expect(user.feedback_consent).to eq(feedback_consent)
       end
 
       context "when the user is pre-migration" do

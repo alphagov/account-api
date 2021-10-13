@@ -1,7 +1,7 @@
 class OidcUsersController < ApplicationController
   include DigitalIdentityHelper
 
-  OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email].freeze
+  OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email cookie_consent feedback_consent].freeze
 
   def update
     user = OidcUser.find_or_create_by_sub!(

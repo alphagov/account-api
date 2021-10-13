@@ -508,12 +508,16 @@ This endpoint requires the `update_protected_attributes` scope.
 
 - `legacy_sub` *(optional)*
   - if this is a user created pre-migration, their original subject identifier (a string)
-- `email`
+- `email` *(optional)*
   - the new email address (a string)
-- `email_verified`
+- `email_verified` *(optional)*
   - whether the new email address is verified (a boolean)
-- `has_unconfirmed_email`
+- `has_unconfirmed_email` *(optional)*
   - whether the user has a pending email change to confirm (a boolean)
+- `cookie_consent` *(optional)*
+  - whether the user has consented to analytics cookies, this is temporary while we import data from the account-manager (a boolean)
+- `feedback_consent` *(optional)*
+  - whether the user has consented to being contacted for feedback, this is temporary while we import data from the account-manager (a boolean)
 
 #### JSON response fields
 
@@ -522,6 +526,8 @@ This endpoint requires the `update_protected_attributes` scope.
 - `email`
 - `email_verified`
 - `has_unconfirmed_email`
+- `cookie_consent`
+- `feedback_consent`
 
 #### Response codes
 
@@ -537,6 +543,8 @@ GdsApi.account_api.update_user_by_subject_identifier(
     email: "user@example.com",
     email_verified: true,
     has_unconfirmed_email: false,
+    cookie_consent: true,
+    feedback_consent: false,
 )
 ```
 
