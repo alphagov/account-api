@@ -11,6 +11,14 @@ has_unconfirmed_email:
   type: cached
   writable: false
 
+cookie_consent:
+  type: local
+  writable: false
+
+feedback_consent:
+  type: local
+  writable: false
+
 transition_checker_state:
   type: local
   get_requires_mfa: true
