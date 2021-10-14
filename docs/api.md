@@ -137,8 +137,10 @@ On a `401: Unauthorized` response, the identity provider has rejected the authen
   - the `redirect_path` which was previously passed to `GET /api/oauth2/sign-in`, if given
 - `ga_client_id` *(optional)*
   - the Google Analytics client ID which the identity provider used for analytics
-- `cookie_consent` *(optional)*
-  - whether the user saved a "usage" cookie consent
+- `cookie_consent`
+  - whether the user has accepted or rejected usage cookies (a boolean, or `null` if the user hasn't saved a preference)
+- `feedback_consent`
+  - whether the user has accepted or rejected being contacted for feedback (a boolean, or `null` if the user hasn't saved a preference)
 
 #### Response codes
 

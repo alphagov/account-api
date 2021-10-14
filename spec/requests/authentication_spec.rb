@@ -79,20 +79,33 @@ RSpec.describe "Authentication" do
   end
 
   describe "/callback" do
-    before { FactoryBot.create(:oidc_user, sub: "user-id") }
-
     let!(:auth_request) { AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path") }
 
     it "fetches the tokens" do
+      stub_userinfo
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
-      expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path)
+      expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "cookie_consent" => nil, "feedback_consent" => nil)
+    end
+
+    context "when the user exists and has cookie & feedback consents saved" do
+      before { FactoryBot.create(:oidc_user, sub: "user-id", cookie_consent: cookie_consent, feedback_consent: feedback_consent) }
+
+      let(:cookie_consent) { true }
+      let(:feedback_consent) { false }
+
+      it "returns the consents" do
+        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+        expect(response).to be_successful
+        expect(JSON.parse(response.body)).to include("cookie_consent" => cookie_consent, "feedback_consent" => feedback_consent)
+      end
     end
 
     context "when there is no refresh token" do
       let(:refresh_token) { nil }
 
       it "responds successfully" do
+        stub_userinfo
         post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
         expect(response).to be_successful
       end
@@ -104,13 +117,13 @@ RSpec.describe "Authentication" do
 
         stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state")
           .with(headers: { "Authorization" => "Bearer access-token" })
-          .to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level42", cookie_consent: true }.to_json)
+          .to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level42" }.to_json)
       end
 
       it "fetches the tokens & ephemeral state" do
         post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
         expect(response).to be_successful
-        expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "ga_client_id" => "ga-client-id", "cookie_consent" => true)
+        expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "ga_client_id" => "ga-client-id")
       end
     end
 
@@ -126,6 +139,12 @@ RSpec.describe "Authentication" do
 
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    def stub_userinfo
+      stub_request(:get, "http://openid-provider/userinfo-endpoint")
+        .with(headers: { Authorization: "Bearer access-token" })
+        .to_return(status: 200, body: {}.to_json)
     end
   end
 
