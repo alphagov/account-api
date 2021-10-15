@@ -9,10 +9,13 @@ class OidcUsersController < ApplicationController
       legacy_sub: using_digital_identity? ? params[:legacy_sub] : params.fetch(:subject_identifier),
     )
 
+    email_changed = params.key?(:email) && (params[:email] != user.email)
+    email_verified_changed = params.key?(:email_verified) && params[:email_verified] != user.email_verified
+
     user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
     user.reload
 
-    if user.email && user.email_verified
+    if (email_changed || email_verified_changed) && user.email && user.email_verified
       begin
         # if the user has linked their notifications account to their
         # GOV.UK account we don't need to update their
@@ -37,6 +40,11 @@ class OidcUsersController < ApplicationController
         # which have subscriptions but are *not* linked to the
         # corresponding notifications account.
         user.email_subscriptions.find_each do |subscription|
+          if subscription.activated? && !subscription.check_if_still_active!
+            subscription.destroy!
+            next
+          end
+
           subscription.reactivate_if_confirmed!
         rescue EmailSubscription::SubscriberListNotFound
           subscription.destroy!
