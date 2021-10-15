@@ -25,7 +25,6 @@ class OidcClient::AccountManager < OidcClient
       refresh_token: response.fetch(:refresh_token),
       mfa: response.fetch(:result).fetch("level_of_authentication") == "level1",
       ga_session_id: response.fetch(:result)["_ga"],
-      cookie_consent: response.fetch(:result)["cookie_consent"],
     )
   end
 

@@ -21,21 +21,24 @@ class AuthenticationController < ApplicationController
 
     auth_request.delete
 
-    # TODO: remove `ga_client_id` and `cookie_consent` after we switch
-    # to DI, we're using a different approach there which doesn't go
-    # via the account-api
+    govuk_account_session = AccountSession.new(
+      session_secret: Rails.application.secrets.session_secret,
+      user_id: details.fetch(:id_token).sub,
+      access_token: details.fetch(:access_token),
+      refresh_token: details[:refresh_token],
+      mfa: details.fetch(:mfa),
+      digital_identity_session: using_digital_identity?,
+    )
+
     render json: {
-      govuk_account_session: AccountSession.new(
-        session_secret: Rails.application.secrets.session_secret,
-        user_id: details.fetch(:id_token).sub,
-        access_token: details.fetch(:access_token),
-        refresh_token: details[:refresh_token],
-        mfa: details.fetch(:mfa),
-        digital_identity_session: using_digital_identity?,
-      ).serialise,
+      govuk_account_session: govuk_account_session.serialise,
       redirect_path: redirect_path,
+      cookie_consent: govuk_account_session.user.cookie_consent,
+      feedback_consent: govuk_account_session.user.feedback_consent,
+      # TODO: remove `ga_client_id` after we switch to DI, we're using
+      # a different approach there which doesn't go via the
+      # account-api
       ga_client_id: details[:ga_session_id],
-      cookie_consent: details[:cookie_consent],
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized

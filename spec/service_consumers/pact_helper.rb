@@ -125,8 +125,8 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-
-      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0", cookie_consent: true }.to_json)
+      oidc_user.update!(cookie_consent: true)
+      stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end
 
