@@ -37,6 +37,11 @@ class OidcUsersController < ApplicationController
         # which have subscriptions but are *not* linked to the
         # corresponding notifications account.
         user.email_subscriptions.find_each do |subscription|
+          if subscription.activated? && !subscription.check_if_still_active!
+            subscription.destroy!
+            next
+          end
+
           subscription.reactivate_if_confirmed!
         rescue EmailSubscription::SubscriberListNotFound
           subscription.destroy!
