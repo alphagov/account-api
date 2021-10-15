@@ -130,6 +130,15 @@ RSpec.describe "OIDC Users endpoint" do
           expect(stub_create_new).to have_been_made
         end
 
+        context "when the email and email_verified attributes have not changed" do
+          let(:email) { user.email }
+          let(:email_verified) { user.email_verified }
+
+          it "does not make any requests to email-alert-api" do
+            put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+          end
+        end
+
         context "when the subscriber list has been deleted from email-alert-api" do
           before do
             stub_email_alert_api_does_not_have_subscriber_list_by_slug(slug: "slug")
