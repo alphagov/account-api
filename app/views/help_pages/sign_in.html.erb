@@ -1,0 +1,55 @@
+<p class="govuk-body">Choose the service you want to sign in to.</p>
+
+<%= render "govuk_publishing_components/components/inset_text", {
+  text: "At the moment, there are separate accounts for signing in to different government services."
+} %>
+
+<%= tag.div class: "govuk-!-margin-bottom-9 govuk-!-margin-top-7" do %>
+  <%= render "govuk_publishing_components/components/heading", {
+    text: "Sign in to one of the most viewed services",
+    heading_level: 2,
+    font_size: "m",
+    margin_bottom: 4,
+  } %>
+  <%
+    items = []
+    links = [{
+      text: "Universal Credit",
+      path: "/sign-in-universal-credit",
+      description: "See and update your Universal credit claim.",
+    },{
+      text: "HMRC services",
+      path: "/log-in-register-hmrc-online-services",
+      description: "Sign in to HMRC services using Government Gateway or GOV.UK Verify.",
+    },{
+      text: "Check your State Pension forecast",
+      path: "/check-state-pension",
+      description: "Find out how much State Pension you could get and when.",
+    },{
+      text: "Childcare account",
+      path: "/sign-in-childcare-account",
+      description: "Get 30 hours free childcare and pay for Tax-Free Childcare.",
+    },{
+      text: "Passenger locator form",
+      path: "/provide-journey-contact-details-before-travel-uk",
+      description: "Edit and submit an unfinished passenger locator form.",
+    },{
+      text: "Manage your student loan balance",
+      path: "/sign-in-to-manage-your-student-loan-balance",
+      description: "See your student loan balance and manage your repayments.",
+    }]
+    links.each_with_index do |link, index|
+      link[:data_attributes] = {
+        module: "gem-track-click",
+        track_category: "DocumentListClicked",
+        track_action: "1.#{index}",
+        track_label: link[:path],
+      }
+      link[:full_size_description] = true
+      items = items.push({ link: link })
+    end
+  %>
+  <%= render "govuk_publishing_components/components/document_list", {
+    items: items
+  } %>
+<% end %>
