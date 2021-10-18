@@ -20,6 +20,7 @@ management. This API is not for other government services.
   - [`DELETE /api/email-subscriptions/:subscription_name`](#delete-apiemail-subscriptionssubscription_name)
   - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
+  - [`GET /api/personalisation/check-email-subscription/:topic_slug`](#get-apipersonalisationcheck-email-subscriptiontopic_slug)
 - [API errors](#api-errors)
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -592,6 +593,55 @@ GdsApi.account_api.delete_user_by_subject_identifier(
 ```
 
 Response is status code only.
+
+### `GET /api/personalisation/check-email-subscription/:topic_slug`
+
+Personalisation endpoint for checking if an email subscription is active.
+
+Currently this returns a simple JSON response.
+
+Future iterations may see this endpoint return rendered HTML to progressively enhance our frontend applications.
+
+See [Progressive enhancement ADR for more details](/docs/adr/002-progressive-enhancement.md)
+
+#### Request parameters
+- `subject_identifier`
+  - the subject identifier from a user session
+
+#### Query parameters
+
+- `topic_slug`
+  - the email-alert-api topic slug
+
+#### JSON response fields
+
+- `topic_slug`
+  - the email-alert-api topic slug (a string)
+- `active`
+  - If the subscription is active (a boolean)
+
+#### Response codes
+
+- 401 if the session identifier is invalid
+- 200 otherwise
+
+#### Example request / response
+
+Note: This endpoint is not included in the GDS API Adaptors wrappers.
+As a personalisation endpoint, it allows us to progressively enhance pages from client side requests.
+
+To test the endpoint with curl:
+
+```
+curl -H "GOVUK-Account-Session={{account_session_header}}" "{{GOV.UK environment}}/api/personalisation/check-email-subscription?topic_slug=example-topic-slug"
+```
+
+```json
+{
+    "topic_slug": "example-topic-slug",
+    "active": true
+}
+```
 
 ## API errors
 

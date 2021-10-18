@@ -28,3 +28,8 @@ special_routes:
     base_path: "/account/cookies-and-feedback"
     title: "Cookie and feedback settings"
     rendering_app: "frontend"
+  - content_id: "f8f91a56-2298-4365-9590-d7e80fe8c066"
+    base_path: "/api/personalisation/check-email-subscription"
+    title: "Account API - Check email Subscription"
+    description: "Personalisation API exposing email subscription data for progressive enhancement of GOV.UK pages"
+    rendering_app: "account-api"
