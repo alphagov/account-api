@@ -9,22 +9,30 @@ class AccountSession
 
   class SessionTooOld < StandardError; end
 
+  class SessionVersionInvalid < StandardError; end
+
+  CURRENT_VERSION = 1
+
   attr_reader :id_token, :user_id, :digital_identity_session
 
   def initialize(session_secret:, **options)
-    if options.key? :level_of_authentication
-      options.merge!(mfa: options[:level_of_authentication] == "level1")
-      options.delete(:level_of_authentication)
-    end
-
     @access_token = options.fetch(:access_token)
     @id_token = options[:id_token]
-    @mfa = options.fetch(:mfa, false)
     @refresh_token = options[:refresh_token]
-    @user_id = options[:user_id] || userinfo["sub"]
-    @digital_identity_session = options.fetch(:digital_identity_session, false)
     @session_secret = session_secret
     @frozen = false
+
+    if options[:version].nil?
+      options.merge!(mfa: options[:level_of_authentication] == "level1") unless options.key?(:mfa)
+      options.merge!(digital_identity_session: false) unless options.key?(:digital_identity_session)
+      options.merge!(user_id: userinfo["sub"]) unless options.key?(:user_id)
+    elsif options[:version] != CURRENT_VERSION
+      raise SessionVersionInvalid
+    end
+
+    @mfa = options.fetch(:mfa, false)
+    @user_id = options.fetch(:user_id)
+    @digital_identity_session = options.fetch(:digital_identity_session)
 
     raise SessionTooOld if using_digital_identity? && !@digital_identity_session
   end
@@ -36,9 +44,11 @@ class AccountSession
     serialised_session = StringEncryptor.new(secret: session_secret).decrypt_string(encoded_session_without_flash)
     return unless serialised_session
 
-    options = JSON.parse(serialised_session).symbolize_keys
-    new(session_secret: session_secret, **options)
-  rescue OidcClient::OAuthFailure, SessionTooOld
+    deserialised_options = JSON.parse(serialised_session).symbolize_keys
+    return if deserialised_options.blank?
+
+    new(session_secret: session_secret, **deserialised_options)
+  rescue OidcClient::OAuthFailure, SessionTooOld, SessionVersionInvalid
     nil
   end
 
@@ -66,6 +76,7 @@ class AccountSession
       mfa: @mfa,
       access_token: @access_token,
       refresh_token: @refresh_token,
+      version: CURRENT_VERSION,
     }
   end
 

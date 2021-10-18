@@ -13,6 +13,7 @@ module GovukAccountSessionHelper
         refresh_token: "refresh-token",
         mfa: false,
         digital_identity_session: true,
+        version: AccountSession::CURRENT_VERSION,
       }.merge(options),
     )
   end
