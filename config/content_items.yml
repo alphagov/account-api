@@ -24,3 +24,7 @@ special_routes:
     base_path: "/account/home"
     title: "Account home page"
     rendering_app: "frontend"
+  - content_id: "19c4cef8-d0ad-483b-93ea-e07f7ed4734a"
+    base_path: "/account/cookies-and-feedback"
+    title: "Cookie and feedback settings"
+    rendering_app: "frontend"
