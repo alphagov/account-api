@@ -13,11 +13,9 @@ has_unconfirmed_email:
 
 cookie_consent:
   type: local
-  writable: false
 
 feedback_consent:
   type: local
-  writable: false
 
 transition_checker_state:
   type: local
