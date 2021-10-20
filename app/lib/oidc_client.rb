@@ -14,7 +14,7 @@ class OidcClient
            to: :discover
 
   def initialize
-    @provider_uri = ENV.fetch("GOVUK_ACCOUNT_OAUTH_PROVIDER_URI", Plek.find("account-manager"))
+    @provider_uri = Rails.application.secrets.oauth_provider_url
     @client_id = Rails.application.secrets.oauth_client_id
     @secret = Rails.application.secrets.oauth_client_secret
 

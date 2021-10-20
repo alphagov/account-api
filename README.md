@@ -3,9 +3,8 @@
 Provides sign in / sign out and attribute storage functionality to
 other GOV.UK applications.
 
-In production this app currently uses the [GOV.UK account manager
-prototype][] as an authentication service and the [GOV.UK attribute
-service prototype][] as a user data store.
+In production this app currently uses the Digital Identity
+authentication service.
 
 This app does not serve any user-facing pages. To see the app working, you
 must run an app which uses it, such as [Finder Frontend][].
@@ -18,13 +17,7 @@ following links:
   answers you give during the Brexit checker journey
 - the [account sign up page][tc-save-results] to save your answers
 
-When you have set up your local account, you can [sign into your
-account][account-manager].
-
-[GOV.UK account manager prototype]: https://github.com/alphagov/govuk-account-manager-prototype
-[GOV.UK attribute service prototype]: https://github.com/alphagov/govuk-attribute-service-prototype
 [Finder Frontend]: https://github.com/alphagov/finder-frontend
-[account-manager]: http://www.login.service.dev.gov.uk/
 [tc-results]: http://finder-frontend.dev.gov.uk/transition-check/results?c[]=living-ie
 [tc-save-results]: http://finder-frontend.dev.gov.uk/transition-check/save-your-results?c%5B%5D=living-ie
 [tc-start]: http://finder-frontend.dev.gov.uk/transition-check/questions

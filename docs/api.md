@@ -29,13 +29,11 @@ management. This API is not for other government services.
 
 ### Identity provider
 
-The service which authenticates a user. Currently we use the [GOV.UK account manager prototype][].
+The service which authenticates a user. Currently we use the Digital Identity authentication service.
 
 ### Session identifier
 
 An opaque token which identifies a user and provides access to their attributes.
-
-[GOV.UK account manager prototype]: https://github.com/alphagov/govuk-account-manager-prototype/
 
 ## Using this API
 
