@@ -73,6 +73,23 @@ RSpec.describe "OIDC Users endpoint" do
         expect(user.feedback_consent).to eq(feedback_consent)
       end
 
+      it "doesn't update nil attributes" do
+        put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil, has_unconfirmed_email: nil, cookie_consent: nil, feedback_consent: nil }.to_json, headers: headers
+        expect(JSON.parse(response.body)["email"]).to eq("new-email@example.com")
+        expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
+        expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
+        expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
+        expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
+
+        user.reload
+        expect(user.email).to eq("new-email@example.com")
+        expect(user.email_verified).to eq(email_verified)
+        expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
+        expect(user.cookie_consent).to eq(cookie_consent)
+        expect(user.feedback_consent).to eq(feedback_consent)
+      end
+
       context "when the user is pre-migration" do
         let(:legacy_sub) { "legacy-subject-identifier" }
         let(:subject_identifier) { "pre-migration-subject-identifier" }

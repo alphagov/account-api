@@ -12,7 +12,7 @@ class OidcUsersController < ApplicationController
     email_changed = params.key?(:email) && (params[:email] != user.email)
     email_verified_changed = params.key?(:email_verified) && params[:email_verified] != user.email_verified
 
-    user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h)
+    user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h.compact)
     user.reload
 
     if (email_changed || email_verified_changed) && user.email && user.email_verified
