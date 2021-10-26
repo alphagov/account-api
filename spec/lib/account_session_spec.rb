@@ -17,6 +17,14 @@ RSpec.describe AccountSession do
 
   let(:account_session) { described_class.new(session_secret: "key", **params) }
 
+  context "when the session is for a user which has been destroyed" do
+    before { Tombstone.create!(sub: user_id) }
+
+    it "throws an error" do
+      expect { described_class.new(session_secret: "secret", **params) }.to raise_error(AccountSession::UserDestroyed)
+    end
+  end
+
   context "when the session version is not a known version" do
     let(:version) { -1 }
 

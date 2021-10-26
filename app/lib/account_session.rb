@@ -9,6 +9,8 @@ class AccountSession
 
   class MissingCachedAttribute < ReauthenticateUserError; end
 
+  class UserDestroyed < ReauthenticateUserError; end
+
   CURRENT_VERSION = 1
 
   attr_reader :id_token, :user_id
@@ -21,6 +23,8 @@ class AccountSession
     @session_secret = session_secret
     @mfa = options.fetch(:mfa, false)
     @user_id = options.fetch(:user_id)
+
+    raise UserDestroyed if Tombstone.where(sub: @user_id).exists?
   end
 
   def self.deserialise(encoded_session:, session_secret:)
