@@ -4,7 +4,7 @@ class UserAttributes
   class UnknownPermission < StandardError; end
 
   def initialize(attributes = nil)
-    @attributes = (attributes || UserAttributes.load_config_file).transform_values do |config|
+    @attributes = (attributes || Rails.configuration.x.user_attributes).transform_values do |config|
       AttributeDefinition.new(
         type: config[:type],
         writable: config.fetch(:writable, true),
@@ -50,9 +50,5 @@ class UserAttributes
 
   def fetch(name)
     attributes.fetch(name.to_sym)
-  end
-
-  def self.load_config_file
-    Rails.application.config_for("user_attributes")
   end
 end
