@@ -1,23 +1,36 @@
----
-email:
-  type: cached
-  writable: false
+shared:
+  email:
+    type: cached
+    writable: false
 
-email_verified:
-  type: cached
-  writable: false
+  email_verified:
+    type: cached
+    writable: false
 
-has_unconfirmed_email:
-  type: cached
-  writable: false
+  has_unconfirmed_email:
+    type: cached
+    writable: false
 
-cookie_consent:
-  type: local
+  cookie_consent:
+    type: local
 
-feedback_consent:
-  type: local
+  feedback_consent:
+    type: local
 
-transition_checker_state:
-  type: local
-  get_requires_mfa: true
-  set_requires_mfa: true
+  transition_checker_state:
+    type: local
+    get_requires_mfa: true
+    set_requires_mfa: true
+
+test:
+  test_attribute_1:
+    type: remote
+
+  test_attribute_2:
+    type: remote
+
+  foo:
+    type: remote
+
+  bar:
+    type: remote

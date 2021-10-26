@@ -88,10 +88,6 @@ Pact.provider_states_for "GDS API Adapters" do
     )
     allow(AccountSession).to receive(:deserialise).and_return(account_session)
 
-    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
-    fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
-
     stub_content_store_has_item(
       "/guidance/some-govuk-guidance",
       content_item_for_base_path("/guidance/some-govuk-guidance").merge("content_id" => SecureRandom.uuid),

@@ -1,11 +1,5 @@
 RSpec.describe AccountSession do
-  before do
-    stub_oidc_discovery
-
-    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
-    fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
-  end
+  before { stub_oidc_discovery }
 
   let(:id_token) { SecureRandom.hex(10) }
   let(:user_id) { SecureRandom.hex(10) }

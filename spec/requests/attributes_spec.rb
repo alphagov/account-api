@@ -2,10 +2,6 @@ RSpec.describe "Attributes" do
   before do
     stub_oidc_discovery
     stub_userinfo
-
-    normal_file = YAML.safe_load(File.read(Rails.root.join("config/user_attributes.yml"))).with_indifferent_access
-    fixture_file = YAML.safe_load(File.read(Rails.root.join("spec/fixtures/user_attributes.yml"))).with_indifferent_access
-    allow(UserAttributes).to receive(:load_config_file).and_return(normal_file.merge(fixture_file))
   end
 
   let(:session_identifier) { account_session.serialise }
