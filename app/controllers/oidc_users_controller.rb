@@ -6,7 +6,7 @@ class OidcUsersController < ApplicationController
   def update
     user = OidcUser.find_or_create_by_sub!(
       params.fetch(:subject_identifier),
-      legacy_sub: using_digital_identity? ? params[:legacy_sub] : params.fetch(:subject_identifier),
+      legacy_sub: params.fetch(:legacy_sub, params.fetch(:subject_identifier)),
     )
 
     email_changed = params.key?(:email) && (params[:email] != user.email)
@@ -58,7 +58,7 @@ class OidcUsersController < ApplicationController
   def destroy
     OidcUser.find_by_sub!(
       params.fetch(:subject_identifier),
-      legacy_sub: using_digital_identity? ? params[:legacy_sub] : nil,
+      legacy_sub: params[:legacy_sub],
     ).destroy!
     head :no_content
   rescue ActiveRecord::RecordNotFound
