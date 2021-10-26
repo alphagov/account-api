@@ -41,7 +41,7 @@ class OidcClient
 
     unless OidcUser.where(sub: tokens[:id_token].sub).exists?
       response = userinfo(access_token: tokens[:access_token], refresh_token: tokens[:refresh_token])
-      OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response.dig(:result, "govuk-account"))
+      OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response.dig(:result, "legacy_subject_id"))
       tokens.merge!(
         access_token: response.fetch(:access_token),
         refresh_token: response[:refresh_token],

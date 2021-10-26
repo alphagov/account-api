@@ -19,7 +19,7 @@ RSpec.describe OidcClient do
     it "calls userinfo to fetch the legacy sub and creates the user model" do
       stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
         .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+        .to_return(status: 200, body: { "legacy_subject_id" => "legacy-sub" }.to_json)
 
       expect { client.callback(AuthRequest.generate!, "code") }.to change(OidcUser, :count).by(1)
 
@@ -33,7 +33,7 @@ RSpec.describe OidcClient do
       it "calls userinfo to fetch the legacy sub and updates the user model" do
         stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
           .with(headers: { Authorization: "Bearer access-token" })
-          .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+          .to_return(status: 200, body: { "legacy_subject_id" => "legacy-sub" }.to_json)
 
         expect { client.callback(AuthRequest.generate!, "code") }.not_to change(OidcUser, :count)
 
@@ -49,7 +49,7 @@ RSpec.describe OidcClient do
       it "does not call userinfo" do
         stub = stub_request(:get, "http://openid-provider/userinfo-endpoint")
           .with(headers: { Authorization: "Bearer access-token" })
-          .to_return(status: 200, body: { "govuk-account" => "legacy-sub" }.to_json)
+          .to_return(status: 200, body: { "legacy_subject_id" => "legacy-sub" }.to_json)
 
         expect { client.callback(AuthRequest.generate!, "code") }.not_to change(OidcUser, :count)
 
