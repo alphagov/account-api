@@ -147,7 +147,12 @@ private
   end
 
   def oidc_client
-    @oidc_client ||= OidcClient.new
+    @oidc_client ||=
+      if Rails.env.development?
+        OidcClient::Fake.new
+      else
+        OidcClient.new
+      end
   end
 
   def user_attributes

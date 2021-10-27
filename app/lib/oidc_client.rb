@@ -158,8 +158,7 @@ private
   end
 
   def redirect_uri
-    host = Rails.env.production? ? ENV["GOVUK_WEBSITE_ROOT"] : Plek.find("frontend")
-    "#{host}/sign-in/callback"
+    "#{ENV['GOVUK_WEBSITE_ROOT']}/sign-in/callback"
   end
 
   def client

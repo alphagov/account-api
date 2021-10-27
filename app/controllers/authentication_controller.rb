@@ -5,7 +5,7 @@ class AuthenticationController < ApplicationController
     mfa = params[:mfa] == "true"
 
     render json: {
-      auth_uri: OidcClient.new.auth_uri(auth_request, mfa: mfa),
+      auth_uri: oidc_client.auth_uri(auth_request, mfa: mfa),
       state: auth_request.to_oauth_state,
     }
   end
@@ -14,7 +14,7 @@ class AuthenticationController < ApplicationController
     auth_request = AuthRequest.from_oauth_state(params.fetch(:state))
     head :unauthorized and return unless auth_request
 
-    details = OidcClient.new.callback(auth_request, params.fetch(:code))
+    details = oidc_client.callback(auth_request, params.fetch(:code))
     redirect_path = auth_request.redirect_path
 
     auth_request.delete
@@ -52,7 +52,7 @@ class AuthenticationController < ApplicationController
 private
 
   def oidc_end_session_url
-    end_session_endpoint = OidcClient.new.end_session_endpoint
+    end_session_endpoint = oidc_client.end_session_endpoint
     id_token = AccountSession.deserialise(
       encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
       session_secret: Rails.application.secrets.session_secret,
@@ -63,6 +63,14 @@ private
       "#{end_session_endpoint}?#{querystring}"
     else
       end_session_endpoint
+    end
+  end
+
+  def oidc_client
+    if Rails.env.development?
+      OidcClient::Fake.new
+    else
+      OidcClient.new
     end
   end
 end

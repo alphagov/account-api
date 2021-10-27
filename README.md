@@ -3,8 +3,11 @@
 Provides sign in / sign out and attribute storage functionality to
 other GOV.UK applications.
 
-In production this app currently uses the Digital Identity
+In production, this app currently uses the Digital Identity
 authentication service.
+
+In development, this app uses a stub OIDC provider which signs you in
+as the first user in the database.
 
 This app does not serve any user-facing pages. To see the app working, you
 must run an app which uses it, such as [Finder Frontend][].
