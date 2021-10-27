@@ -14,6 +14,8 @@ class CheckEmailSubscriptionController < ApplicationController
     unless @govuk_account_session
       logout_and_401
     end
+
+    set_no_cache_headers
   end
 
   rescue_from OidcClient::OAuthFailure do
@@ -31,6 +33,10 @@ class CheckEmailSubscriptionController < ApplicationController
   end
 
 private
+
+  def set_no_cache_headers
+    response.headers["Cache-Control"] = "no-store"
+  end
 
   def logout_and_401
     logout!
