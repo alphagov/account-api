@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class AccountSession
-  include DigitalIdentityHelper
-
   class Frozen < StandardError; end
 
   class CannotSetRemoteDigitalIdentityAttributes < StandardError; end
@@ -34,7 +32,7 @@ class AccountSession
     @user_id = options.fetch(:user_id)
     @digital_identity_session = options.fetch(:digital_identity_session)
 
-    raise SessionTooOld if using_digital_identity? && !@digital_identity_session
+    raise SessionTooOld unless @digital_identity_session
   end
 
   def self.deserialise(encoded_session:, session_secret:)
@@ -53,10 +51,7 @@ class AccountSession
   end
 
   def user
-    @user ||= OidcUser.find_or_create_by_sub!(
-      user_id,
-      legacy_sub: using_digital_identity? ? nil : user_id,
-    )
+    @user ||= OidcUser.find_or_create_by_sub!(user_id)
   end
 
   def mfa?
@@ -107,15 +102,8 @@ class AccountSession
   end
 
   def fetch_cacheable_attributes!(cached_userinfo = nil)
-    if cached_userinfo
-      @userinfo =
-        if using_digital_identity?
-          # TODO: remove the `merge` when we have removed this attribute
-          cached_userinfo.merge("has_unconfirmed_email" => false)
-        else
-          cached_userinfo
-        end
-    end
+    # TODO: remove the `merge` when we have removed this attribute
+    @userinfo = cached_userinfo.merge("has_unconfirmed_email" => false) if cached_userinfo
 
     cacheable_attribute_names = user_attributes.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
     get_attributes(cacheable_attribute_names)
@@ -126,37 +114,15 @@ private
   attr_reader :session_secret
 
   def get_remote_attributes(remote_attributes)
-    values = remote_attributes.index_with do |name|
-      if userinfo.key? name
-        userinfo[name]
-      elsif using_digital_identity?
-        # TODO: Digital Identity currently returns all attributes in
-        # the UserInfo.  We should change this logic so that:
-        #
-        # - if they say that will always be the case, remove the
-        # fallback and always lookup in UserInfo.
-        # - if they say that will change, implement their API.
-        nil
-      else
-        oidc_do :get_attribute, { attribute: name }
-      end
-    end
+    return {} if remote_attributes.empty?
 
-    values.compact
+    userinfo.slice(*remote_attributes)
   end
 
   def set_remote_attributes(remote_attributes)
     return if remote_attributes.empty?
 
-    # TODO: Digital Identity currently have no way to set remote
-    # attributes.  We don't have any writable remote attributes at the
-    # moment so this isn't a problem.  But when they do, implement
-    # their API.
-    if using_digital_identity?
-      raise CannotSetRemoteDigitalIdentityAttributes, remote_attributes
-    else
-      oidc_do :bulk_set_attributes, { attributes: remote_attributes }
-    end
+    raise CannotSetRemoteDigitalIdentityAttributes, remote_attributes
   end
 
   def oidc_do(method, args = {})
@@ -174,26 +140,19 @@ private
   def userinfo
     @userinfo ||= begin
       userinfo_hash = oidc_do :userinfo
-      if using_digital_identity?
-        # TODO: Digital Identity do not have unconfirmed email
-        # addresses, so this attribute is not present.  We only cache
-        # non-nil attribute values, so the effect of this being
-        # missing is that every request to /account/home (or another
-        # page which uses this attribute) makes a userinfo request.
-        # This adds latency, and gives us a 15-minute session timeout
-        # as that's how long the DI access token is valid for.
-        #
-        # We can remove this after we have migrated to DI in
-        # production and removed all use of this attribute.
-        userinfo_hash.merge("has_unconfirmed_email" => false)
-      else
-        userinfo_hash
-      end
+      # TODO: Remove this special case after removing the use of the
+      # has_unconfirmed_email attribute in other apps.
+      userinfo_hash.merge("has_unconfirmed_email" => false)
     end
   end
 
   def oidc_client
-    @oidc_client ||= oidc_client_class.new
+    @oidc_client ||=
+      if Rails.env.development?
+        OidcClient::Fake.new
+      else
+        OidcClient.new
+      end
   end
 
   def user_attributes

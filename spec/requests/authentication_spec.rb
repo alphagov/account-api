@@ -48,34 +48,6 @@ RSpec.describe "Authentication" do
         expect(JSON.parse(response.body)["auth_uri"]).to include(Rack::Utils.escape('"Cl.Cm"'))
       end
     end
-
-    context "when using the account manager" do
-      before do
-        allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
-      end
-
-      it "passes 'level0' to the account manager" do
-        get sign_in_path
-        expect(JSON.parse(response.body)["auth_uri"]).to include("level0")
-        expect(JSON.parse(response.body)["auth_uri"]).not_to include("level1")
-      end
-
-      context "when mfa: false is given" do
-        it "passes 'level0' to the account manager" do
-          get sign_in_path, params: { mfa: false }
-          expect(JSON.parse(response.body)["auth_uri"]).to include("level0")
-          expect(JSON.parse(response.body)["auth_uri"]).not_to include("level1")
-        end
-      end
-
-      context "when mfa: true is given" do
-        it "passes 'level1' to the account manager" do
-          get sign_in_path, params: { mfa: true }
-          expect(JSON.parse(response.body)["auth_uri"]).not_to include("level0")
-          expect(JSON.parse(response.body)["auth_uri"]).to include("level1")
-        end
-      end
-    end
   end
 
   describe "/callback" do
@@ -122,24 +94,6 @@ RSpec.describe "Authentication" do
         stub_userinfo
         post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
         expect(response).to be_successful
-      end
-    end
-
-    context "when using the account manager" do
-      before do
-        FactoryBot.create(:oidc_user, sub: "user-id")
-
-        allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
-
-        stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state")
-          .with(headers: { "Authorization" => "Bearer access-token" })
-          .to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level42" }.to_json)
-      end
-
-      it "fetches the tokens & ephemeral state" do
-        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
-        expect(response).to be_successful
-        expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "ga_client_id" => "ga-client-id")
       end
     end
 
@@ -190,16 +144,6 @@ RSpec.describe "Authentication" do
           expect(response).to be_successful
           expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint")
         end
-      end
-    end
-
-    context "when using the account manager" do
-      before { allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil) }
-
-      it "returns the account-manager sign out URL" do
-        get end_session_path, headers: headers
-        expect(response).to be_successful
-        expect(JSON.parse(response.body)["end_session_uri"]).to eq("#{Plek.find('account-manager')}/sign-out?continue=1")
       end
     end
   end

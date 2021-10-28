@@ -1,12 +1,10 @@
 class OidcUsersController < ApplicationController
-  include DigitalIdentityHelper
-
   OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email cookie_consent feedback_consent].freeze
 
   def update
     user = OidcUser.find_or_create_by_sub!(
       params.fetch(:subject_identifier),
-      legacy_sub: params.fetch(:legacy_sub, params.fetch(:subject_identifier)),
+      legacy_sub: params[:legacy_sub],
     )
 
     email_changed = params.key?(:email) && (params[:email] != user.email)

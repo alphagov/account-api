@@ -147,39 +147,6 @@ RSpec.describe "Attributes" do
       it "throws an error" do
         expect { patch attributes_path, headers: headers, params: params.to_json }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
       end
-
-      context "when using the account manager" do
-        before do
-          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
-        end
-
-        let(:digital_identity_session) { false }
-
-        it "calls the attribute service" do
-          stub = stub_request(:post, "http://openid-provider/v1/attributes")
-            .with(body: { attributes: attributes.transform_values(&:to_json) })
-            .to_return(status: 200)
-
-          patch attributes_path, headers: headers, params: params.to_json
-          expect(response).to be_successful
-          expect(stub).to have_been_made
-        end
-
-        context "when the tokens are rejected" do
-          before do
-            stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
-
-            stub_request(:post, "http://openid-provider/v1/attributes")
-              .with(body: { attributes: attributes.transform_values(&:to_json) })
-              .to_return(status: 401)
-          end
-
-          it "returns a 401" do
-            patch attributes_path, headers: headers, params: params.to_json
-            expect(response).to have_http_status(:unauthorized)
-          end
-        end
-      end
     end
 
     context "with local attributes" do
@@ -203,41 +170,6 @@ RSpec.describe "Attributes" do
 
         get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
         expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
-      end
-
-      context "when using the account manager" do
-        before do
-          allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
-
-          stub_request(:post, "http://openid-provider/v1/attributes")
-            .with(body: { attributes: {} })
-            .to_return(status: 200)
-        end
-
-        let(:digital_identity_session) { false }
-
-        it "doesn't send the local attribute to the attribute service" do
-          patch attributes_path, headers: headers, params: params.to_json
-          expect(response).to be_successful
-        end
-      end
-    end
-
-    context "when using the account manager" do
-      before do
-        allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
-      end
-
-      let(:digital_identity_session) { false }
-
-      it "doesn't call the attribute service" do
-        stub = stub_request(:post, "http://openid-provider/v1/attributes")
-          .with(body: { attributes: {} })
-          .to_return(status: 200)
-
-        patch attributes_path, headers: headers, params: params.to_json
-        expect(response).to be_successful
-        expect(stub).not_to have_been_made
       end
     end
 
