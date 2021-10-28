@@ -88,6 +88,20 @@ RSpec.describe "Authentication" do
       expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "cookie_consent" => nil, "feedback_consent" => nil)
     end
 
+    context "when cacheable attributes are missing" do
+      let!(:user) { FactoryBot.create(:oidc_user, sub: "user-id", email: nil, email_verified: nil, has_unconfirmed_email: nil) }
+
+      it "fetches them from userinfo" do
+        stub = stub_userinfo(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
+        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+        expect(response).to be_successful
+        expect(stub).to have_been_made
+        expect(user.reload.email).to eq("email@example.com")
+        expect(user.reload.email_verified).to be(true)
+        expect(user.reload.has_unconfirmed_email).to be(false)
+      end
+    end
+
     context "when the user exists and has cookie & feedback consents saved" do
       before { FactoryBot.create(:oidc_user, sub: "user-id", cookie_consent: cookie_consent, feedback_consent: feedback_consent) }
 
@@ -113,6 +127,8 @@ RSpec.describe "Authentication" do
 
     context "when using the account manager" do
       before do
+        FactoryBot.create(:oidc_user, sub: "user-id")
+
         allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
 
         stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state")
@@ -141,10 +157,10 @@ RSpec.describe "Authentication" do
       expect(response).to have_http_status(:unauthorized)
     end
 
-    def stub_userinfo
+    def stub_userinfo(attributes = {})
       stub_request(:get, "http://openid-provider/userinfo-endpoint")
         .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 200, body: {}.to_json)
+        .to_return(status: 200, body: attributes.to_json)
     end
   end
 

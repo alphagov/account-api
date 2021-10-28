@@ -106,6 +106,21 @@ class AccountSession
     set_remote_attributes(remote.merge(cached))
   end
 
+  def fetch_cacheable_attributes!(cached_userinfo = nil)
+    if cached_userinfo
+      @userinfo =
+        if using_digital_identity?
+          # TODO: remove the `merge` when we have removed this attribute
+          cached_userinfo.merge("has_unconfirmed_email" => false)
+        else
+          cached_userinfo
+        end
+    end
+
+    cacheable_attribute_names = user_attributes.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
+    get_attributes(cacheable_attribute_names)
+  end
+
 private
 
   attr_reader :session_secret
