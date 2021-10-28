@@ -142,6 +142,13 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  provider_state "there is a valid user session, with an attribute called 'transition_checker_state'" do
+    set_up do
+      oidc_user.update!(transition_checker_state: { array: [1, 2, 3], some: { nested: "json" } })
+    end
+  end
+
+  # TODO: remove when gds-api-adapters PR is merged
   provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
     set_up do
       stub_remote_attributes(test_attribute_1: { bar: "baz" })
