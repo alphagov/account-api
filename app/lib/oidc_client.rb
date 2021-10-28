@@ -45,6 +45,7 @@ class OidcClient
       tokens.merge!(
         access_token: response.fetch(:access_token),
         refresh_token: response[:refresh_token],
+        userinfo: response[:result],
       )
     end
 
