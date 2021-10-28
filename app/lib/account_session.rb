@@ -106,6 +106,11 @@ class AccountSession
     set_remote_attributes(remote.merge(cached))
   end
 
+  def fetch_cacheable_attributes!
+    cacheable_attribute_names = user_attributes.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
+    get_attributes(cacheable_attribute_names)
+  end
+
 private
 
   attr_reader :session_secret

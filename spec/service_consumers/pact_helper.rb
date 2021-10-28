@@ -103,6 +103,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
+      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
 
       stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
@@ -112,6 +113,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
+      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
 
       stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
@@ -121,7 +123,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-      oidc_user.update!(cookie_consent: true)
+      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false, cookie_consent: true)
       stub_request(:get, "#{Plek.find('account-manager')}/api/v1/ephemeral-state").to_return(status: 200, body: { _ga: "ga-client-id", level_of_authentication: "level0" }.to_json)
     end
   end

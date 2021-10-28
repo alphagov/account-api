@@ -31,6 +31,8 @@ class AuthenticationController < ApplicationController
       version: AccountSession::CURRENT_VERSION,
     )
 
+    govuk_account_session.fetch_cacheable_attributes!
+
     render json: {
       govuk_account_session: govuk_account_session.serialise,
       redirect_path: redirect_path,
