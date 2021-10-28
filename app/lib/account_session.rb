@@ -11,9 +11,11 @@ class AccountSession
 
   CURRENT_VERSION = 1
 
-  attr_reader :id_token, :user_id, :digital_identity_session
+  attr_reader :id_token, :user_id
 
   def initialize(session_secret:, **options)
+    raise SessionTooOld unless options[:digital_identity_session]
+
     @access_token = options.fetch(:access_token)
     @id_token = options[:id_token]
     @refresh_token = options[:refresh_token]
@@ -22,7 +24,6 @@ class AccountSession
 
     if options[:version].nil?
       options.merge!(mfa: options[:level_of_authentication] == "level1") unless options.key?(:mfa)
-      options.merge!(digital_identity_session: false) unless options.key?(:digital_identity_session)
       options.merge!(user_id: userinfo["sub"]) unless options.key?(:user_id)
     elsif options[:version] != CURRENT_VERSION
       raise SessionVersionInvalid
@@ -30,9 +31,6 @@ class AccountSession
 
     @mfa = options.fetch(:mfa, false)
     @user_id = options.fetch(:user_id)
-    @digital_identity_session = options.fetch(:digital_identity_session)
-
-    raise SessionTooOld unless @digital_identity_session
   end
 
   def self.deserialise(encoded_session:, session_secret:)
@@ -67,7 +65,7 @@ class AccountSession
     {
       id_token: id_token,
       user_id: user_id,
-      digital_identity_session: digital_identity_session,
+      digital_identity_session: true,
       mfa: @mfa,
       access_token: @access_token,
       refresh_token: @refresh_token,
