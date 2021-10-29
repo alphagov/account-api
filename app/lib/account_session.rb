@@ -3,8 +3,6 @@
 class AccountSession
   class Frozen < StandardError; end
 
-  class CannotSetRemoteDigitalIdentityAttributes < StandardError; end
-
   class SessionTooOld < StandardError; end
 
   class SessionVersionInvalid < StandardError; end
@@ -75,7 +73,6 @@ class AccountSession
 
   def get_attributes(attribute_names)
     local = attribute_names.select { |name| user_attributes.type(name) == "local" }
-    remote = attribute_names.select { |name| user_attributes.type(name) == "remote" }
     cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
 
     if cached
@@ -87,16 +84,11 @@ class AccountSession
       values = {}
     end
 
-    values.merge(user.get_attributes_by_name(local).merge(get_remote_attributes(remote))).compact
+    values.merge(user.get_attributes_by_name(local)).compact
   end
 
   def set_attributes(attributes)
-    local = attributes.select { |name| user_attributes.type(name) == "local" }
-    remote = attributes.select { |name| user_attributes.type(name) == "remote" }
-    cached = attributes.select { |name| user_attributes.type(name) == "cached" }
-
-    user.update!(local.merge(cached))
-    set_remote_attributes(remote.merge(cached))
+    user.update!(attributes)
   end
 
   def fetch_cacheable_attributes!(cached_userinfo = nil)
@@ -115,12 +107,6 @@ private
     return {} if remote_attributes.empty?
 
     userinfo.slice(*remote_attributes)
-  end
-
-  def set_remote_attributes(remote_attributes)
-    return if remote_attributes.empty?
-
-    raise CannotSetRemoteDigitalIdentityAttributes, remote_attributes
   end
 
   def oidc_do(method, args = {})

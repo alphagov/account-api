@@ -10,30 +10,33 @@ RSpec.describe "Attributes" do
   let(:digital_identity_session) { true }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
 
-  # names must be defined in spec/fixtures/user_attributes.yml
-  let(:attribute_name1) { "test_attribute_1" }
-  let(:attribute_name2) { "test_attribute_2" }
+  let(:cached_attribute_name) { "email" }
+  let(:cached_attribute_value) { "email@example.com" }
+
   let(:local_attribute_name) { "transition_checker_state" }
-  let(:unwritable_attribute_name) { "email" }
-  let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
-  let(:attribute_value2) { [1, 2, 3, 4, 5] }
   let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
+
+  let(:protected_attribute_name) { "transition_checker_state" }
+
+  let(:unwritable_attribute_name) { cached_attribute_name }
 
   describe "GET" do
     before do
-      stub_userinfo(attribute_name1 => attribute_value1)
+      stub_userinfo(cached_attribute_name => cached_attribute_value)
     end
 
-    let(:params) { { attributes: [attribute_name1] } }
+    let(:attribute_name) { cached_attribute_name }
+    let(:attribute_value) { cached_attribute_value }
+    let(:params) { { attributes: [attribute_name] } }
 
     it "returns the attribute" do
       get attributes_path, headers: headers, params: params
       expect(response).to be_successful
-      expect(JSON.parse(response.body)["values"]).to eq({ attribute_name1 => attribute_value1 })
+      expect(JSON.parse(response.body)["values"]).to eq({ attribute_name => attribute_value })
     end
 
     context "when the attribute is not found" do
-      let(:attribute_value1) { nil }
+      let(:cached_attribute_value) { nil }
 
       it "returns no value" do
         get attributes_path, headers: headers, params: params
@@ -70,7 +73,7 @@ RSpec.describe "Attributes" do
 
     context "when the user tries to get a protected attribute without having done MFA" do
       let(:mfa) { false }
-      let(:attribute_name1) { "transition_checker_state" }
+      let(:attribute_name) { protected_attribute_name }
 
       it "returns a 403" do
         get attributes_path, headers: headers, params: params
@@ -78,52 +81,41 @@ RSpec.describe "Attributes" do
 
         error = JSON.parse(response.body)
         expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
-        expect(error["attributes"]).to eq([attribute_name1])
+        expect(error["attributes"]).to eq([attribute_name])
       end
     end
 
     context "when multiple attributes are requested" do
       before do
-        stub_userinfo(
-          attribute_name1 => attribute_value1,
-          attribute_name2 => attribute_value2,
-        )
-
         account_session.user.update!(local_attribute_name => local_attribute_value)
       end
 
-      let(:params) { { attributes: [attribute_name1, attribute_name2, local_attribute_name] } }
+      let(:params) { { attributes: [cached_attribute_name, local_attribute_name] } }
 
       it "returns all the attributes" do
         get attributes_path, headers: headers, params: params
         expect(response).to be_successful
         expect(JSON.parse(response.body)["values"]).to eq(
           {
-            attribute_name1 => attribute_value1,
-            attribute_name2 => attribute_value2,
+            cached_attribute_name => cached_attribute_value,
             local_attribute_name => local_attribute_value,
           },
         )
       end
 
       context "when one of the attributes is not found" do
-        before do
-          stub_userinfo(
-            attribute_name1 => nil,
-            attribute_name2 => attribute_value2,
-          )
-        end
+        let(:cached_attribute_value) { nil }
 
         it "returns only the present attribute" do
           get attributes_path, headers: headers, params: params
           expect(response).to be_successful
-          expect(JSON.parse(response.body)["values"]).to eq({ attribute_name2 => attribute_value2, local_attribute_name => local_attribute_value })
+          expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
         end
       end
 
       context "when some of the attributes are undefined" do
         let(:bad_attributes) { %w[bad1 bad2] }
-        let(:params) { { attributes: [attribute_name1, attribute_name2] + bad_attributes } }
+        let(:params) { { attributes: [cached_attribute_name] + bad_attributes } }
 
         it "lists the undefined ones" do
           get attributes_path, headers: headers, params: params
@@ -138,39 +130,27 @@ RSpec.describe "Attributes" do
   end
 
   describe "PATCH" do
-    let(:attributes) { {} }
+    let(:attributes) { { local_attribute_name => local_attribute_value } }
     let(:params) { { attributes: attributes } }
 
-    context "with remote attributes" do
-      let(:attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
-
-      it "throws an error" do
-        expect { patch attributes_path, headers: headers, params: params.to_json }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
-      end
+    it "updates the database" do
+      patch attributes_path, headers: headers, params: params.to_json
+      expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
+      expect(response).to be_successful
     end
 
-    context "with local attributes" do
-      let(:attributes) { { local_attribute_name => local_attribute_value } }
+    it "correctly round-trips local attributes" do
+      old_value = "hello world"
 
-      it "updates the database" do
-        patch attributes_path, headers: headers, params: params.to_json
-        expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
-        expect(response).to be_successful
-      end
+      account_session.user.update!(local_attribute_name => old_value)
 
-      it "correctly round-trips local attributes" do
-        old_value = "hello world"
+      get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
+      expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => old_value })
 
-        account_session.user.update!(local_attribute_name => old_value)
+      patch attributes_path, headers: headers, params: params.to_json
 
-        get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
-        expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => old_value })
-
-        patch attributes_path, headers: headers, params: params.to_json
-
-        get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
-        expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
-      end
+      get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
+      expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
     end
 
     context "when no govuk-account-session is provided" do
@@ -181,7 +161,7 @@ RSpec.describe "Attributes" do
     end
 
     context "when the attribute is unwritable" do
-      let(:attributes) { { unwritable_attribute_name => attribute_value1 } }
+      let(:attributes) { { unwritable_attribute_name => "foo" } }
 
       it "returns a 403" do
         patch attributes_path, headers: headers, params: params.to_json
@@ -195,7 +175,7 @@ RSpec.describe "Attributes" do
 
     context "when the user tries to set a protected attribute without having done MFA" do
       let(:mfa) { false }
-      let(:attributes) { { local_attribute_name => local_attribute_value } }
+      let(:attributes) { { protected_attribute_name => "foo" } }
 
       it "returns a 403" do
         patch attributes_path, headers: headers, params: params.to_json
@@ -203,7 +183,7 @@ RSpec.describe "Attributes" do
 
         error = JSON.parse(response.body)
         expect(error["type"]).to eq(I18n.t("errors.mfa_required.type"))
-        expect(error["attributes"]).to eq([local_attribute_name])
+        expect(error["attributes"]).to eq([protected_attribute_name])
       end
     end
   end

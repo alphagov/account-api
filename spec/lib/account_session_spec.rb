@@ -23,7 +23,7 @@ RSpec.describe AccountSession do
 
   it "throws an error if making an OAuth call after serialising the session" do
     account_session.serialise
-    expect { account_session.get_attributes(%w[foo bar]) }.to raise_error(AccountSession::Frozen)
+    expect { account_session.send(:userinfo) }.to raise_error(AccountSession::Frozen)
   end
 
   context "when the session version is not a known version" do
@@ -138,18 +138,15 @@ RSpec.describe AccountSession do
   end
 
   describe "attributes" do
-    let(:attribute_name1) { "test_attribute_1" }
-    let(:attribute_name2) { "test_attribute_2" }
+    let(:cached_attribute_name) { "email" }
     let(:local_attribute_name) { "transition_checker_state" }
-    let(:attribute_value1) { { "some" => "complex", "value" => 42 } }
-    let(:attribute_value2) { [1, 2, 3, 4, 5] }
     let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
 
     describe "get_attributes" do
       before { stub_userinfo }
 
       it "returns no values" do
-        expect(account_session.get_attributes([attribute_name1])).to eq({})
+        expect(account_session.get_attributes([cached_attribute_name])).to eq({})
       end
 
       it "handles the 'has_unconfirmed_email' attribute as a special case" do
@@ -158,56 +155,26 @@ RSpec.describe AccountSession do
 
       context "when the attribute value is in the userinfo response" do
         before do
-          stub_userinfo(attribute_name1 => value_from_userinfo)
+          stub_userinfo(cached_attribute_name => value_from_userinfo)
         end
 
         let(:value_from_userinfo) { "value-from-userinfo" }
 
         it "uses the value from the userinfo response" do
-          expect(account_session.get_attributes([attribute_name1])).to eq({ attribute_name1 => value_from_userinfo })
+          expect(account_session.get_attributes([cached_attribute_name])).to eq({ cached_attribute_name => value_from_userinfo })
         end
 
-        context "when an attribute is cached_locally" do
-          let(:attribute_name1) { "email" }
-
-          it "fetches the attribute and stores it locally" do
-            account_session.get_attributes([attribute_name1])
-            expect(account_session.user[attribute_name1]).to eq(value_from_userinfo)
-          end
+        it "stores the value locally" do
+          account_session.get_attributes([cached_attribute_name])
+          expect(account_session.user[cached_attribute_name]).to eq(value_from_userinfo)
         end
       end
     end
 
     describe "set_attributes" do
-      let(:remote_attributes) { { attribute_name1 => attribute_value1, attribute_name2 => attribute_value2 } }
-      let(:local_attributes) { { local_attribute_name => local_attribute_value } }
-      let(:attributes) { remote_attributes.merge(local_attributes) }
-
-      it "saves local attributes to the database" do
-        account_session.set_attributes(local_attributes)
+      it "saves attributes to the database" do
+        account_session.set_attributes(local_attribute_name => local_attribute_value)
         expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
-      end
-
-      it "raises an error when saving remote attributes" do
-        expect { account_session.set_attributes(remote_attributes) }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
-      end
-
-      context "when there are no remote attributes" do
-        let(:remote_attributes) { {} }
-
-        it "doesn't raise an error" do
-          expect { account_session.set_attributes(remote_attributes) }.not_to raise_error
-        end
-      end
-
-      context "when an attribute is cached_locally" do
-        let(:attribute_name1) { "has_unconfirmed_email" }
-        let(:attribute_value1) { true }
-        let(:remote_attributes) { { attribute_name1 => attribute_value1 } }
-
-        it "raises an error" do
-          expect { account_session.set_attributes(remote_attributes) }.to raise_error(AccountSession::CannotSetRemoteDigitalIdentityAttributes)
-        end
       end
     end
   end

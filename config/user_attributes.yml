@@ -25,13 +25,13 @@ shared:
 
 test:
   test_attribute_1:
-    type: remote
+    type: local
 
   test_attribute_2:
-    type: remote
+    type: local
 
   foo:
-    type: remote
+    type: local
 
   bar:
-    type: remote
+    type: local
