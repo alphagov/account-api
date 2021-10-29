@@ -91,12 +91,13 @@ class AccountSession
     user.update!(attributes)
   end
 
-  def fetch_cacheable_attributes!(cached_userinfo = nil)
-    # TODO: remove the `merge` when we have removed this attribute
-    @userinfo = cached_userinfo.merge("has_unconfirmed_email" => false) if cached_userinfo
-
-    cacheable_attribute_names = user_attributes.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
-    get_attributes(cacheable_attribute_names)
+  def userinfo
+    @userinfo ||= begin
+      userinfo_hash = oidc_do :userinfo
+      # TODO: Remove this special case after removing the use of the
+      # has_unconfirmed_email attribute in other apps.
+      userinfo_hash.merge("has_unconfirmed_email" => false)
+    end
   end
 
 private
@@ -119,15 +120,6 @@ private
     @access_token = oauth_response[:access_token]
     @refresh_token = oauth_response[:refresh_token]
     oauth_response[:result]
-  end
-
-  def userinfo
-    @userinfo ||= begin
-      userinfo_hash = oidc_do :userinfo
-      # TODO: Remove this special case after removing the use of the
-      # has_unconfirmed_email attribute in other apps.
-      userinfo_hash.merge("has_unconfirmed_email" => false)
-    end
   end
 
   def oidc_client

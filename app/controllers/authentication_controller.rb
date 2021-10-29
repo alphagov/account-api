@@ -29,7 +29,7 @@ class AuthenticationController < ApplicationController
       version: AccountSession::CURRENT_VERSION,
     )
 
-    govuk_account_session.fetch_cacheable_attributes! details[:userinfo]
+    fetch_cacheable_attributes!(govuk_account_session, details)
 
     render json: {
       govuk_account_session: govuk_account_session.serialise,
@@ -64,6 +64,23 @@ private
     else
       end_session_endpoint
     end
+  end
+
+  def fetch_cacheable_attributes!(govuk_account_session, details)
+    cacheable_attribute_names = UserAttributes.new.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
+    attributes_to_cache = cacheable_attribute_names.select { |name| govuk_account_session.user[name].nil? }
+
+    return if attributes_to_cache.empty?
+
+    userinfo =
+      if details[:userinfo]
+        # TODO: remove merge! when this attribute is deleted
+        details[:userinfo].merge("has_unconfirmed_email" => false)
+      else
+        govuk_account_session.userinfo
+      end
+
+    govuk_account_session.set_attributes(userinfo.slice(*attributes_to_cache))
   end
 
   def oidc_client
