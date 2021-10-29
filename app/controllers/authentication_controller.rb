@@ -22,8 +22,6 @@ class AuthenticationController < ApplicationController
     govuk_account_session = AccountSession.new(
       session_secret: Rails.application.secrets.session_secret,
       user_id: details.fetch(:id_token).sub,
-      access_token: details.fetch(:access_token),
-      refresh_token: details[:refresh_token],
       mfa: details.fetch(:mfa),
       digital_identity_session: true,
       version: AccountSession::CURRENT_VERSION,
@@ -72,22 +70,20 @@ private
 
     return if attributes_to_cache.empty?
 
-    userinfo =
-      if details[:userinfo]
-        # TODO: remove merge! when this attribute is deleted
-        details[:userinfo].merge("has_unconfirmed_email" => false)
-      else
-        govuk_account_session.userinfo
-      end
+    userinfo = details[:userinfo] || oidc_client.userinfo(access_token: details[:access_token], refresh_token: details[:refresh_token])[:result]
+
+    # TODO: remove merge! when this attribute is deleted
+    userinfo.merge!("has_unconfirmed_email" => false)
 
     govuk_account_session.set_attributes(userinfo.slice(*attributes_to_cache))
   end
 
   def oidc_client
-    if Rails.env.development?
-      OidcClient::Fake.new
-    else
-      OidcClient.new
-    end
+    @oidc_client ||=
+      if Rails.env.development?
+        OidcClient::Fake.new
+      else
+        OidcClient.new
+      end
   end
 end

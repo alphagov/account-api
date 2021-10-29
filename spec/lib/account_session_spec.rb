@@ -3,16 +3,12 @@ RSpec.describe AccountSession do
 
   let(:id_token) { SecureRandom.hex(10) }
   let(:user_id) { SecureRandom.hex(10) }
-  let(:access_token) { SecureRandom.hex(10) }
-  let(:refresh_token) { SecureRandom.hex(10) }
   let(:mfa) { false }
-  let(:version) { 1 }
+  let(:version) { AccountSession::CURRENT_VERSION }
   let(:params) do
     {
       id_token: id_token,
       user_id: user_id,
-      access_token: access_token,
-      refresh_token: refresh_token,
       mfa: mfa,
       digital_identity_session: true,
       version: version,
@@ -20,11 +16,6 @@ RSpec.describe AccountSession do
   end
 
   let(:account_session) { described_class.new(session_secret: "key", **params) }
-
-  it "throws an error if making an OAuth call after serialising the session" do
-    account_session.serialise
-    expect { account_session.send(:userinfo) }.to raise_error(AccountSession::Frozen)
-  end
 
   context "when the session version is not a known version" do
     let(:version) { -1 }
@@ -37,9 +28,8 @@ RSpec.describe AccountSession do
   context "when the session version is nil" do
     let(:version) { nil }
 
-    it "upgrades session to the current version" do
-      session = described_class.new(session_secret: "secret", **params)
-      expect(session.to_hash[:version]).to eq(AccountSession::CURRENT_VERSION)
+    it "throws an error" do
+      expect { described_class.new(session_secret: "secret", **params) }.to raise_error(AccountSession::SessionVersionInvalid)
     end
   end
 
@@ -67,57 +57,6 @@ RSpec.describe AccountSession do
     it "returns nil on a missing value" do
       expect(described_class.deserialise(encoded_session: nil, session_secret: "secret")).to be_nil
       expect(described_class.deserialise(encoded_session: "", session_secret: "secret")).to be_nil
-    end
-
-    context "when there is a level of authentication, not an mfa flag, in the header and there is no version" do
-      let(:mfa) { nil }
-      let(:version) { nil }
-
-      it "decodes level0 to mfa: false" do
-        encoded = StringEncryptor.new(secret: "secret").encrypt_string(params.merge(level_of_authentication: "level0").to_json)
-        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").mfa?).to be(false)
-      end
-
-      it "decodes level1 to mfa: true" do
-        encoded = StringEncryptor.new(secret: "secret").encrypt_string(params.merge(level_of_authentication: "level1").to_json)
-        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").mfa?).to be(true)
-      end
-    end
-
-    context "when there isn't an ID token in the header" do
-      let(:id_token) { nil }
-      let(:encoded) { StringEncryptor.new(secret: "secret").encrypt_string(params.to_json) }
-
-      it "successfully decodes with a nil token value" do
-        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").to_hash).to eq(params.merge(id_token: nil))
-      end
-    end
-
-    context "when there isn't a user ID in the header and no version" do
-      let(:encoded) { StringEncryptor.new(secret: "secret").encrypt_string(params.to_json) }
-      let(:user_id) { nil }
-      let(:user_id_from_userinfo) { "user-id-from-userinfo" }
-      let(:userinfo_status) { 200 }
-      let(:version) { nil }
-
-      before do
-        stub_request(:get, "http://openid-provider/userinfo-endpoint")
-          .to_return(status: userinfo_status, body: { sub: user_id_from_userinfo }.to_json)
-      end
-
-      it "queries userinfo for the user ID" do
-        expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret").to_hash).to eq(params.merge(user_id: user_id_from_userinfo, version: 1))
-      end
-
-      context "when the userinfo request fails" do
-        let(:userinfo_status) { 401 }
-
-        before { stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401) }
-
-        it "returns nil" do
-          expect(described_class.deserialise(encoded_session: encoded, session_secret: "secret")).to be_nil
-        end
-      end
     end
   end
 
