@@ -9,8 +9,6 @@ module GovukAccountSessionHelper
         session_secret: Rails.application.secrets.session_secret,
         id_token: "id-token",
         user_id: "user-id",
-        access_token: "access-token",
-        refresh_token: "refresh-token",
         mfa: false,
         digital_identity_session: true,
         version: AccountSession::CURRENT_VERSION,

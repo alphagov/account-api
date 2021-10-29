@@ -22,14 +22,12 @@ class AuthenticationController < ApplicationController
     govuk_account_session = AccountSession.new(
       session_secret: Rails.application.secrets.session_secret,
       user_id: details.fetch(:id_token).sub,
-      access_token: details.fetch(:access_token),
-      refresh_token: details[:refresh_token],
       mfa: details.fetch(:mfa),
       digital_identity_session: true,
       version: AccountSession::CURRENT_VERSION,
     )
 
-    govuk_account_session.fetch_cacheable_attributes! details[:userinfo]
+    fetch_cacheable_attributes!(govuk_account_session, details)
 
     render json: {
       govuk_account_session: govuk_account_session.serialise,
@@ -66,11 +64,26 @@ private
     end
   end
 
+  def fetch_cacheable_attributes!(govuk_account_session, details)
+    cacheable_attribute_names = UserAttributes.new.attributes.select { |_, attr| attr[:type] == "cached" }.keys.map(&:to_s)
+    attributes_to_cache = cacheable_attribute_names.select { |name| govuk_account_session.user[name].nil? }
+
+    return if attributes_to_cache.empty?
+
+    userinfo = details[:userinfo] || oidc_client.userinfo(access_token: details[:access_token], refresh_token: details[:refresh_token])[:result]
+
+    # TODO: remove merge! when this attribute is deleted
+    userinfo.merge!("has_unconfirmed_email" => false)
+
+    govuk_account_session.set_attributes(userinfo.slice(*attributes_to_cache))
+  end
+
   def oidc_client
-    if Rails.env.development?
-      OidcClient::Fake.new
-    else
-      OidcClient.new
-    end
+    @oidc_client ||=
+      if Rails.env.development?
+        OidcClient::Fake.new
+      else
+        OidcClient.new
+      end
   end
 end

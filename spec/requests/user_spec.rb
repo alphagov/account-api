@@ -4,8 +4,7 @@ RSpec.describe "User information endpoint" do
   include GdsApi::TestHelpers::ContentStore
 
   before do
-    stub_oidc_discovery
-    stub_userinfo(attributes)
+    session_identifier&.set_attributes(attributes)
   end
 
   let(:session_identifier) { placeholder_govuk_account_session_object(mfa: mfa) }
