@@ -22,7 +22,7 @@ RSpec.describe "Attributes" do
 
   describe "GET" do
     before do
-      stub_userinfo(cached_attribute_name => cached_attribute_value)
+      account_session.set_attributes(cached_attribute_name => cached_attribute_value)
     end
 
     let(:attribute_name) { cached_attribute_name }
@@ -35,21 +35,8 @@ RSpec.describe "Attributes" do
       expect(JSON.parse(response.body)["values"]).to eq({ attribute_name => attribute_value })
     end
 
-    context "when the attribute is not found" do
+    context "when a cached attribute is not found" do
       let(:cached_attribute_value) { nil }
-
-      it "returns no value" do
-        get attributes_path, headers: headers, params: params
-        expect(response).to be_successful
-        expect(JSON.parse(response.body)["values"]).to eq({})
-      end
-    end
-
-    context "when the tokens are rejected" do
-      before do
-        stub_request(:get, "http://openid-provider/userinfo-endpoint").to_return(status: 401)
-        stub_request(:post, "http://openid-provider/token-endpoint").to_return(status: 401)
-      end
 
       it "returns a 401" do
         get attributes_path, headers: headers, params: params
@@ -104,12 +91,12 @@ RSpec.describe "Attributes" do
       end
 
       context "when one of the attributes is not found" do
-        let(:cached_attribute_value) { nil }
+        let(:local_attribute_value) { nil }
 
         it "returns only the present attribute" do
           get attributes_path, headers: headers, params: params
           expect(response).to be_successful
-          expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
+          expect(JSON.parse(response.body)["values"]).to eq({ cached_attribute_name => cached_attribute_value })
         end
       end
 

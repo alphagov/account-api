@@ -9,12 +9,11 @@ Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 module PactStubHelpers
   EMAIL_ADDRESS = "user@example.com".freeze
 
-  def stub_remote_attributes(email_verified: true, has_unconfirmed_email: false, **attributes)
-    stub_userinfo(
+  def stub_cached_attributes(email_verified: true, has_unconfirmed_email: false)
+    oidc_user.update!(
       email: EMAIL_ADDRESS,
       email_verified: email_verified,
       has_unconfirmed_email: has_unconfirmed_email,
-      **attributes,
     )
   end
 
@@ -103,7 +102,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
+      stub_cached_attributes
     end
   end
 
@@ -111,7 +110,7 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
+      stub_cached_attributes
     end
   end
 
@@ -119,13 +118,14 @@ Pact.provider_states_for "GDS API Adapters" do
     set_up do
       auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
       allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-      oidc_user.update!(email: "email@example.com", email_verified: true, has_unconfirmed_email: false, cookie_consent: true)
+      stub_cached_attributes
+      oidc_user.update!(cookie_consent: true)
     end
   end
 
   provider_state "there is a valid user session" do
     set_up do
-      stub_remote_attributes(test_attribute_1: nil)
+      stub_cached_attributes
       stub_will_create_email_subscription "wizard-news-topic-slug"
       # rubocop:disable RSpec/AnyInstance
       allow_any_instance_of(AccountSession).to receive(:set_remote_attributes)
@@ -135,7 +135,7 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session, with a 'wizard-news' email subscription" do
     set_up do
-      stub_remote_attributes
+      stub_cached_attributes
       stub_will_create_email_subscription "wizard-news-topic-slug"
       FactoryBot.create(:email_subscription, name: "wizard-news", oidc_user_id: oidc_user.id)
     end
@@ -143,14 +143,8 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a valid user session, with an attribute called 'transition_checker_state'" do
     set_up do
+      stub_cached_attributes
       oidc_user.update!(transition_checker_state: { array: [1, 2, 3], some: { nested: "json" } })
-    end
-  end
-
-  # TODO: remove when gds-api-adapters PR is merged
-  provider_state "there is a valid user session, with an attribute called 'test_attribute_1'" do
-    set_up do
-      stub_remote_attributes(test_attribute_1: { bar: "baz" })
     end
   end
 

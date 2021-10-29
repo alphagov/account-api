@@ -59,16 +59,12 @@ RSpec.describe "Email subscriptions" do
       expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
     end
 
-    it "fetches the email & email_verified attributes if they aren't cached locally" do
-      stub_oidc_discovery
-      stub = stub_userinfo(email: "email@example.com", email_verified: false)
+    context "when the email and email verified attributes are not cached locally" do
+      it "returns a 401" do
+        expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.not_to change(EmailSubscription, :count)
 
-      expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
-
-      expect(response).to be_successful
-      expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
-
-      expect(stub).to have_been_made
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
 
     context "when the user has verified their email address" do

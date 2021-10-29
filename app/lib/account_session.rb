@@ -3,9 +3,13 @@
 class AccountSession
   class Frozen < StandardError; end
 
-  class SessionTooOld < StandardError; end
+  class ReauthenticateUserError < StandardError; end
 
-  class SessionVersionInvalid < StandardError; end
+  class SessionTooOld < ReauthenticateUserError; end
+
+  class SessionVersionInvalid < ReauthenticateUserError; end
+
+  class MissingCachedAttribute < ReauthenticateUserError; end
 
   CURRENT_VERSION = 1
 
@@ -42,7 +46,7 @@ class AccountSession
     return if deserialised_options.blank?
 
     new(session_secret: session_secret, **deserialised_options)
-  rescue OidcClient::OAuthFailure, SessionTooOld, SessionVersionInvalid
+  rescue OidcClient::OAuthFailure, ReauthenticateUserError
     nil
   end
 
@@ -72,19 +76,10 @@ class AccountSession
   end
 
   def get_attributes(attribute_names)
-    local = attribute_names.select { |name| user_attributes.type(name) == "local" }
-    cached = attribute_names.select { |name| user_attributes.type(name) == "cached" }
+    values_to_cache = attribute_names.select { |name| user_attributes.type(name) == "cached" }.select { |name| user[name].nil? }
+    raise MissingCachedAttribute unless values_to_cache.empty?
 
-    if cached
-      values_already_cached = user.get_attributes_by_name(cached)
-      values_to_cache = get_remote_attributes(cached.reject { |name| values_already_cached.key? name })
-      user.update!(values_to_cache)
-      values = values_already_cached.merge(values_to_cache)
-    else
-      values = {}
-    end
-
-    values.merge(user.get_attributes_by_name(local)).compact
+    user.get_attributes_by_name(attribute_names).compact
   end
 
   def set_attributes(attributes)
@@ -103,12 +98,6 @@ class AccountSession
 private
 
   attr_reader :session_secret
-
-  def get_remote_attributes(remote_attributes)
-    return {} if remote_attributes.empty?
-
-    userinfo.slice(*remote_attributes)
-  end
 
   def oidc_do(method, args = {})
     raise Frozen if @frozen

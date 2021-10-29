@@ -138,40 +138,39 @@ RSpec.describe AccountSession do
   end
 
   describe "attributes" do
+    before do
+      account_session.set_attributes(
+        cached_attribute_name => cached_attribute_value,
+        local_attribute_name => local_attribute_value,
+      )
+    end
+
     let(:cached_attribute_name) { "email" }
+    let(:cached_attribute_value) { nil }
     let(:local_attribute_name) { "transition_checker_state" }
-    let(:local_attribute_value) { [1, 2, { "buckle" => %w[my shoe] }] }
+    let(:local_attribute_value) { nil }
 
     describe "get_attributes" do
-      before { stub_userinfo }
-
-      it "returns no values" do
-        expect(account_session.get_attributes([cached_attribute_name])).to eq({})
+      it "throws an exception for a missing cached attribute" do
+        expect { account_session.get_attributes([cached_attribute_name]) }.to raise_error(AccountSession::MissingCachedAttribute)
       end
 
-      it "handles the 'has_unconfirmed_email' attribute as a special case" do
-        expect(account_session.get_attributes(%w[has_unconfirmed_email])).to eq({ "has_unconfirmed_email" => false })
+      it "returns nil for a missing local attribute" do
+        expect(account_session.get_attributes([local_attribute_name])).to eq({})
       end
 
-      context "when the attribute value is in the userinfo response" do
-        before do
-          stub_userinfo(cached_attribute_name => value_from_userinfo)
-        end
+      context "when the attribute value is cached" do
+        let(:cached_attribute_value) { "email@example.com" }
 
-        let(:value_from_userinfo) { "value-from-userinfo" }
-
-        it "uses the value from the userinfo response" do
-          expect(account_session.get_attributes([cached_attribute_name])).to eq({ cached_attribute_name => value_from_userinfo })
-        end
-
-        it "stores the value locally" do
-          account_session.get_attributes([cached_attribute_name])
-          expect(account_session.user[cached_attribute_name]).to eq(value_from_userinfo)
+        it "returns it" do
+          expect(account_session.get_attributes([cached_attribute_name])).to eq({ cached_attribute_name => cached_attribute_value })
         end
       end
     end
 
     describe "set_attributes" do
+      let(:local_attribute_value) { [1, 2, 3, { "four" => "five" }] }
+
       it "saves attributes to the database" do
         account_session.set_attributes(local_attribute_name => local_attribute_value)
         expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
