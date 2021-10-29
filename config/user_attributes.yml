@@ -22,16 +22,3 @@ shared:
     type: local
     get_requires_mfa: true
     set_requires_mfa: true
-
-test:
-  test_attribute_1:
-    type: local
-
-  test_attribute_2:
-    type: local
-
-  foo:
-    type: local
-
-  bar:
-    type: local
