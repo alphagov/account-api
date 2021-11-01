@@ -21,5 +21,9 @@ Rails.application.routes.draw do
     patch "/attributes", to: "attributes#update"
 
     resources :email_subscriptions, only: %i[show update destroy], param: :subscription_name, path: "email-subscriptions"
+
+    scope :personalisation do
+      get "check-email-subscription", to: "check_email_subscription#show", as: :check_email_subscription
+    end
   end
 end
