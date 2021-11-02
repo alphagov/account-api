@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_13_084845) do
+ActiveRecord::Schema.define(version: 2021_10_26_094310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,13 @@ ActiveRecord::Schema.define(version: 2021_10_13_084845) do
     t.boolean "feedback_consent"
     t.index ["legacy_sub"], name: "index_oidc_users_on_legacy_sub", unique: true
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
+  end
+
+  create_table "tombstones", force: :cascade do |t|
+    t.string "sub", null: false
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.index ["sub"], name: "index_tombstones_on_sub", unique: true
   end
 
   create_table "users", force: :cascade do |t|

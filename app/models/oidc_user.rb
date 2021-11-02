@@ -3,6 +3,8 @@ class OidcUser < ApplicationRecord
 
   validates :sub, presence: true
 
+  before_destroy :create_tombstone
+
   def self.find_by_sub!(sub, legacy_sub: nil)
     if legacy_sub
       find_by(sub: sub) || find_by!(legacy_sub: legacy_sub).tap do |legacy_user|
@@ -23,5 +25,10 @@ class OidcUser < ApplicationRecord
 
   def get_attributes_by_name(names = [])
     names.index_with { |name| self[name] }.compact
+  end
+
+  def create_tombstone
+    Tombstone.create!(sub: sub)
+    Tombstone.create!(sub: legacy_sub) if legacy_sub
   end
 end
