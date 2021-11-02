@@ -45,10 +45,14 @@ class OidcClient::Fake < OidcClient
     raise NoDevelopmentUser unless user
 
     {
-      "sub" => user.sub,
-      "email" => user.email,
-      "email_verified" => user.email_verified,
-      "has_unconfirmed_email" => user.has_unconfirmed_email,
+      access_token: access_token,
+      result:
+        {
+          "sub" => user.sub,
+          "email" => user.email,
+          "email_verified" => user.email_verified,
+          "has_unconfirmed_email" => user.has_unconfirmed_email,
+        },
     }
   end
 

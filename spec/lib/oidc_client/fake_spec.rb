@@ -67,7 +67,7 @@ RSpec.describe OidcClient::Fake do
         "has_unconfirmed_email" => user.has_unconfirmed_email || false,
       }
 
-      expect(client.userinfo(access_token: access_token)).to eq(userinfo)
+      expect(client.userinfo(access_token: access_token)).to eq({ access_token: access_token, result: userinfo })
     end
 
     it "throws an error if the access token doesn't correspond to a user" do
