@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_26_094310) do
+ActiveRecord::Schema.define(version: 2021_11_03_101514) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -56,6 +56,16 @@ ActiveRecord::Schema.define(version: 2021_10_26_094310) do
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
     t.index ["sub"], name: "index_tombstones_on_sub", unique: true
+  end
+
+  create_table "unmigrated_oidc_users", force: :cascade do |t|
+    t.string "sub", null: false
+    t.string "email"
+    t.boolean "email_verified"
+    t.boolean "has_unconfirmed_email"
+    t.jsonb "transition_checker_state"
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
   end
 
   create_table "users", force: :cascade do |t|
