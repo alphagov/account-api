@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     end
 
     get "/user", to: "user#show"
+    get "/user/match-by-email", to: "match_user_by_email#show"
 
     resources :oidc_users, only: %i[update destroy], param: :subject_identifier, path: "oidc-users"
 
