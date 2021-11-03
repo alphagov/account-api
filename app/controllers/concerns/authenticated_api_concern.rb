@@ -1,10 +1,12 @@
 module AuthenticatedApiConcern
   extend ActiveSupport::Concern
 
+  HEADER_NAME = "HTTP_GOVUK_ACCOUNT_SESSION".freeze
+
   included do
     before_action do
       @govuk_account_session = AccountSession.deserialise(
-        encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
+        encoded_session: request.headers[HEADER_NAME],
         session_secret: Rails.application.secrets.session_secret,
       )
 

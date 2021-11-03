@@ -47,6 +47,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_101514) do
     t.string "legacy_sub"
     t.boolean "cookie_consent"
     t.boolean "feedback_consent"
+    t.index ["email"], name: "index_oidc_users_on_email", unique: true
     t.index ["legacy_sub"], name: "index_oidc_users_on_legacy_sub", unique: true
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end
