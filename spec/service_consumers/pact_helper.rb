@@ -153,10 +153,4 @@ Pact.provider_states_for "GDS API Adapters" do
       FactoryBot.create(:oidc_user, sub: "the-subject-identifier")
     end
   end
-
-  provider_state "there is a user with email address 'email@example.com'" do
-    set_up do
-      FactoryBot.create(:oidc_user, email: "email@example.com")
-    end
-  end
 end

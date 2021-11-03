@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_01_130206) do
+ActiveRecord::Schema.define(version: 2021_10_26_094310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,7 +47,6 @@ ActiveRecord::Schema.define(version: 2021_11_01_130206) do
     t.string "legacy_sub"
     t.boolean "cookie_consent"
     t.boolean "feedback_consent"
-    t.index ["email"], name: "index_oidc_users_on_email", unique: true
     t.index ["legacy_sub"], name: "index_oidc_users_on_legacy_sub", unique: true
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
   end

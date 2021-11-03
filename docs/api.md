@@ -13,7 +13,6 @@ management. This API is not for other government services.
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`GET /api/oauth2/end-session`](#get-apioauth2end-session)
   - [`GET /api/user`](#get-apiuser)
-  - [`GET /user/match-by-email`](#get-apiusermatch-by-email)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/email-subscriptions/:subscription_name`](#get-apiemail-subscriptionssubscription_name)
@@ -259,70 +258,6 @@ Response:
     "services": {
         "transition_checker": "yes_but_must_reauthenticate",
     }
-}
-```
-
-### `GET /user/match-by-email`
-
-Checks if a user with the given email address exists and if it is the
-logged-in user (if a session is given).
-
-This is only used by email-alert-frontend, so it can check if an
-address corresponds to an account and either log the user in or show
-an appropriate message with a single API call.
-
-#### Request headers
-
-- `GOVUK-Account-Session` *(optional)*
-  - the user's session identifier, if not given `"match": true` is not a possible response
-
-#### Query parameters
-
-- `email`
-  - the email address to search for
-
-#### JSON response fields
-
-- `match`
-  - `true` if the session has the given email address, or `false` if a different user has that email address
-
-#### Response codes
-
-- 404 if there is no user with that email address
-- 200 otherwise
-
-#### Example request / response
-
-Request (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.match_user_by_email(
-    email: "email@example.com",
-)
-```
-
-Response:
-
-```json
-{
-    "match": false
-}
-```
-
-Request with a session (with gds-api-adapters):
-
-```ruby
-GdsApi.account_api.match_user_by_email(
-    email: "email@example.com",
-    govuk_account_session: "session-identifier",
-)
-```
-
-Response:
-
-```json
-{
-    "match": true
 }
 ```
 
