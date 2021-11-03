@@ -29,6 +29,5 @@ class OidcUser < ApplicationRecord
 
   def create_tombstone
     Tombstone.create!(sub: sub)
-    Tombstone.create!(sub: legacy_sub) if legacy_sub
   end
 end

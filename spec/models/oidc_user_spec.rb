@@ -9,14 +9,6 @@ RSpec.describe OidcUser do
       expect { described_class.create!(sub: sub).destroy! }.to change(Tombstone, :count).by(1)
       expect(Tombstone.find_by(sub: sub)).not_to be_nil
     end
-
-    it "creates a tombstone record for the legacy_sub when destroyed" do
-      sub = "subject-identifier"
-      legacy_sub = "legacy-subject-identifier"
-      expect { described_class.create!(sub: sub, legacy_sub: legacy_sub).destroy! }.to change(Tombstone, :count).by(2)
-      expect(Tombstone.find_by(sub: sub)).not_to be_nil
-      expect(Tombstone.find_by(sub: legacy_sub)).not_to be_nil
-    end
   end
 
   describe "#find_or_create_by_sub!" do
