@@ -27,7 +27,9 @@ class AuthenticationController < ApplicationController
       version: AccountSession::CURRENT_VERSION,
     )
 
-    fetch_cacheable_attributes!(govuk_account_session, details)
+    capture_sensitive_exceptions do
+      fetch_cacheable_attributes!(govuk_account_session, details)
+    end
 
     render json: {
       govuk_account_session: govuk_account_session.serialise,

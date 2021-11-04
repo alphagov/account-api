@@ -1,0 +1,2 @@
+class SensitiveException < ApplicationRecord
+end
