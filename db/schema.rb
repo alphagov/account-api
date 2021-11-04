@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_03_101514) do
+ActiveRecord::Schema.define(version: 2021_11_04_103629) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,6 +50,13 @@ ActiveRecord::Schema.define(version: 2021_11_03_101514) do
     t.index ["email"], name: "index_oidc_users_on_email", unique: true
     t.index ["legacy_sub"], name: "index_oidc_users_on_legacy_sub", unique: true
     t.index ["sub"], name: "index_oidc_users_on_sub", unique: true
+  end
+
+  create_table "sensitive_exceptions", force: :cascade do |t|
+    t.string "message"
+    t.string "full_message"
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
   end
 
   create_table "tombstones", force: :cascade do |t|

@@ -90,6 +90,17 @@ RSpec.describe "OIDC Users endpoint" do
         expect(user.feedback_consent).to eq(feedback_consent)
       end
 
+      context "when a different user tried to use the same email address" do
+        let!(:other_user) { FactoryBot.create(:oidc_user) }
+        let(:email) { user.email }
+
+        it "creates a sensitive exception" do
+          before = SensitiveException.count
+          expect { put oidc_user_path(subject_identifier: other_user.sub), params: params, headers: headers }.to raise_error(ApplicationController::CapturedSensitiveException)
+          expect(SensitiveException.count).to eq(before + 1)
+        end
+      end
+
       context "when the user is pre-migration" do
         let(:legacy_sub) { "legacy-subject-identifier" }
         let(:subject_identifier) { "pre-migration-subject-identifier" }
