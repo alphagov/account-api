@@ -1,9 +1,13 @@
 ---
-special_routes:
-  - content_id: "b6bb372b-3c4e-4a21-98a6-ffbf2ea5dc9e"
+help_pages:
+  sign_in:
+    content_id: "b6bb372b-3c4e-4a21-98a6-ffbf2ea5dc9e"
     base_path: "/sign-in"
-    title: "Sign in to GOV.UK"
+    title: "Sign in to a service"
+    description: "Find the government service you need to sign in to. At the moment, there are separate accounts for different government services."
     rendering_app: "frontend"
+
+special_routes:
   - content_id: "49ecdc1f-c98b-430e-8256-7a402239daf8"
     base_path: "/sign-in/redirect"
     title: "Sign in to GOV.UK (OAuth Redirect)"
