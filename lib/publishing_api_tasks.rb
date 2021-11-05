@@ -44,6 +44,28 @@ class PublishingApiTasks
     publish_content_item(content_id, payload, "major")
   end
 
+  def publish_redirects
+    @content_items[:redirects].each do |redirect|
+      base_path = redirect.fetch(:base_path)
+      payload =
+        {
+          document_type: "redirect",
+          schema_name: "redirect",
+          base_path: base_path,
+          redirects: [
+            {
+              path: base_path,
+              destination: redirect.fetch(:destination),
+              type: "exact",
+            },
+          ],
+        }
+
+      claim_path base_path
+      publish_content_item(redirect.fetch(:content_id), payload, "major")
+    end
+  end
+
   def publish_special_routes
     publisher = GdsApi::PublishingApi::SpecialRoutePublisher.new(
       publishing_api: @publishing_api,

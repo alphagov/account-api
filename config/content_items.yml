@@ -7,6 +7,11 @@ help_pages:
     description: "Find the government service you need to sign in to. At the moment, there are separate accounts for different government services."
     rendering_app: "frontend"
 
+redirects:
+  - content_id: "0833d91b-d772-4144-b81f-e7a42df96d5b"
+    base_path: "/account"
+    destination: "/account/home"
+
 special_routes:
   - content_id: "49ecdc1f-c98b-430e-8256-7a402239daf8"
     base_path: "/sign-in/redirect"

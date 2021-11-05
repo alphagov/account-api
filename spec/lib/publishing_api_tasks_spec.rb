@@ -30,6 +30,25 @@ RSpec.describe PublishingApiTasks do
     end
   end
 
+  describe "#publish_redirects" do
+    before { allow(logger).to receive(:info) }
+
+    let(:redirect) { { content_id: SecureRandom.uuid, base_path: "/foo", destination: "/bar" } }
+    let(:content_items) { { redirects: [redirect] } }
+
+    it "takes ownership of the route and publishes the content item" do
+      stub_claim_path = stub_call_claim_path(redirect[:base_path])
+      stub_put_content = stub_call_put_content(redirect[:content_id], { redirects: [{ path: redirect[:base_path], destination: redirect[:destination], type: "exact" }] }, "major")
+      stub_publish = stub_call_publish(redirect[:content_id], "major")
+
+      tasks.publish_redirects
+
+      expect(stub_claim_path).to have_been_made
+      expect(stub_put_content).to have_been_made
+      expect(stub_publish).to have_been_made
+    end
+  end
+
   describe "#publish_special_routes" do
     before { allow(logger).to receive(:info) }
 
