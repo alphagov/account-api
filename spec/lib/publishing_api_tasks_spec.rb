@@ -10,6 +10,36 @@ RSpec.describe PublishingApiTasks do
   let(:logger) { instance_double("Logger") }
   let(:content_items) { nil }
 
+  describe "content item definitions" do
+    subject(:content_items) { described_class.new.content_items }
+
+    it "all have a unique content ID" do
+      content_ids = {}
+      content_items[:help_pages].each { |_, item| increment(content_ids, item[:content_id]) }
+      content_items[:redirects].each { |item| increment(content_ids, item[:content_id]) }
+      content_items[:special_routes].each { |item| increment(content_ids, item[:content_id]) }
+
+      content_ids.each do |content_id, count|
+        expect("#{content_id}: #{count}").to eq("#{content_id}: 1")
+      end
+    end
+
+    it "all have a unique base path" do
+      base_paths = {}
+      content_items[:help_pages].each { |_, item| increment(base_paths, item[:base_path]) }
+      content_items[:redirects].each { |item| increment(base_paths, item[:base_path]) }
+      content_items[:special_routes].each { |item| increment(base_paths, item[:base_path]) }
+
+      base_paths.each do |base_path, count|
+        expect("#{base_path}: #{count}").to eq("#{base_path}: 1")
+      end
+    end
+
+    def increment(hash, item)
+      hash[item] = hash.fetch(item, 0) + 1
+    end
+  end
+
   describe "#publish_help_page" do
     before { allow(logger).to receive(:info) }
 

@@ -6,6 +6,8 @@ class PublishingApiTasks
   PUBLISHING_APP = "account-api"
   LOCALE = "en"
 
+  attr_reader :content_items
+
   def initialize(publishing_api: nil, logger: nil, content_items: nil)
     @logger = logger || Logger.new($stdout)
     @publishing_api = publishing_api || GdsApi.publishing_api
