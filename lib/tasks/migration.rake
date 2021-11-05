@@ -47,6 +47,7 @@ namespace :migration do
 
     OidcUser.transaction do
       post_migration_user.destroy!
+      Tombstone.where(sub: sub).first.destroy!
       pre_migration_user.update!(sub: sub)
     end
   end
