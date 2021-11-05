@@ -18,15 +18,9 @@ RSpec.describe PublishingApiTasks do
     let(:content_items) { { help_pages: { help_page_name.to_sym => help_page } } }
 
     it "takes ownership of the route and publishes the content item" do
-      stub_claim_path = stub_path_reservation(help_page[:base_path])
-      stub_put_content = stub_publishing_api_put_content(
-        help_page[:content_id],
-        hash_including(help_page.merge(publishing_app: "account-api").except(:content_id)),
-      )
-      stub_publish = stub_publishing_api_publish(
-        help_page[:content_id],
-        hash_including(update_type: "major"),
-      )
+      stub_claim_path = stub_call_claim_path(help_page[:base_path])
+      stub_put_content = stub_call_put_content(help_page[:content_id], help_page.except(:content_id), "major")
+      stub_publish = stub_call_publish(help_page[:content_id], "major")
 
       tasks.publish_help_page(help_page_name)
 
@@ -43,15 +37,9 @@ RSpec.describe PublishingApiTasks do
     let(:content_items) { { special_routes: [special_route] } }
 
     it "takes ownership of the route and publishes the content item" do
-      stub_claim_path = stub_path_reservation(special_route[:base_path])
-      stub_put_content = stub_publishing_api_put_content(
-        special_route[:content_id],
-        hash_including(special_route.merge(publishing_app: "account-api").except(:content_id)),
-      )
-      stub_publish = stub_publishing_api_publish(
-        special_route[:content_id],
-        hash_including(update_type: "major"),
-      )
+      stub_claim_path = stub_call_claim_path(special_route[:base_path])
+      stub_put_content = stub_call_put_content(special_route[:content_id], special_route.except(:content_id), "major")
+      stub_publish = stub_call_publish(special_route[:content_id], "major")
 
       tasks.publish_special_routes
 
@@ -67,13 +55,41 @@ RSpec.describe PublishingApiTasks do
     let(:path) { "/some/page" }
 
     it "takes ownership of the path, overriding any existing ownership" do
-      stub = stub_path_reservation(path)
+      stub = stub_call_claim_path(path)
+
       tasks.claim_path(path)
+
       expect(stub).to have_been_made
     end
   end
 
-  def stub_path_reservation(path)
+  describe "#publish_content_item" do
+    before { allow(logger).to receive(:info).with(/Publishing/) }
+
+    let(:content_id) { SecureRandom.uuid }
+    let(:payload) { { base_path: "/foo", title: "title", description: "description" } }
+    let(:update_type) { "like, super major" }
+
+    it "puts the content and then publishes it" do
+      stub_put_content = stub_call_put_content(content_id, payload, update_type)
+      stub_publish = stub_call_publish(content_id, update_type)
+
+      tasks.publish_content_item(content_id, payload, update_type)
+
+      expect(stub_put_content).to have_been_made
+      expect(stub_publish).to have_been_made
+    end
+  end
+
+  def stub_call_claim_path(path)
     stub_publishing_api_path_reservation(path, publishing_app: "account-api", override_existing: true)
+  end
+
+  def stub_call_put_content(content_id, payload, update_type)
+    stub_publishing_api_put_content(content_id, hash_including(payload.merge(publishing_app: "account-api", locale: "en", update_type: update_type)))
+  end
+
+  def stub_call_publish(content_id, update_type)
+    stub_publishing_api_publish(content_id, { update_type: update_type, locale: "en" })
   end
 end

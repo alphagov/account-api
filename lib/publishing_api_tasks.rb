@@ -1,6 +1,11 @@
+# frozen_string_literal: true
+
 require "gds_api/publishing_api/special_route_publisher"
 
 class PublishingApiTasks
+  PUBLISHING_APP = "account-api"
+  LOCALE = "en"
+
   def initialize(publishing_api: nil, logger: nil, content_items: nil)
     @logger = logger || Logger.new($stdout)
     @publishing_api = publishing_api || GdsApi.publishing_api
@@ -11,17 +16,10 @@ class PublishingApiTasks
     content_item = @content_items[:help_pages].fetch(name.to_sym)
     content_id = content_item.fetch(:content_id)
     base_path = content_item.fetch(:base_path)
-
-    claim_path base_path
-
-    @logger.info("Publishing content for #{base_path}")
-    @publishing_api.put_content(
-      content_id,
+    payload =
       {
-        update_type: "major",
         document_type: "help_page",
         schema_name: "help_page",
-        publishing_app: "account-api",
         rendering_app: content_item.fetch(:rendering_app),
         base_path: base_path,
         title: content_item.fetch(:title),
@@ -40,9 +38,10 @@ class PublishingApiTasks
             type: "exact",
           },
         ],
-      },
-    )
-    @publishing_api.publish(content_id, "major")
+      }
+
+    claim_path base_path
+    publish_content_item(content_id, payload, "major")
   end
 
   def publish_special_routes
@@ -56,7 +55,7 @@ class PublishingApiTasks
 
       publisher.publish(
         special_route.merge(
-          publishing_app: "account-api",
+          publishing_app: PUBLISHING_APP,
           type: "exact",
         ),
       )
@@ -67,8 +66,17 @@ class PublishingApiTasks
     @logger.info("Claiming ownership of route #{base_path}")
     @publishing_api.put_path(
       base_path,
-      publishing_app: "account-api",
+      publishing_app: PUBLISHING_APP,
       override_existing: true,
     )
+  end
+
+  def publish_content_item(content_id, payload, update_type)
+    @logger.info("Publishing content for #{payload.fetch(:base_path)}")
+    @publishing_api.put_content(
+      content_id,
+      payload.merge(publishing_app: PUBLISHING_APP, locale: LOCALE, update_type: update_type),
+    )
+    @publishing_api.publish(content_id, update_type, locale: LOCALE)
   end
 end
