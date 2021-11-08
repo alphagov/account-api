@@ -21,7 +21,7 @@ management. This API is not for other government services.
   - [`DELETE /api/email-subscriptions/:subscription_name`](#delete-apiemail-subscriptionssubscription_name)
   - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
-  - [`GET /api/personalisation/check-email-subscription/:topic_slug`](#get-apipersonalisationcheck-email-subscriptiontopic_slug)
+  - [`GET /api/personalisation/check-email-subscription`](#get-apipersonalisationcheck-email-subscription)
 - [API errors](#api-errors)
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -657,7 +657,7 @@ GdsApi.account_api.delete_user_by_subject_identifier(
 
 Response is status code only.
 
-### `GET /api/personalisation/check-email-subscription/:topic_slug`
+### `GET /api/personalisation/check-email-subscription`
 
 Personalisation endpoint for checking if an email subscription is active.
 
@@ -673,19 +673,26 @@ See [Progressive enhancement ADR for more details](/docs/adr/002-progressive-enh
 
 #### Query parameters
 
-- `topic_slug`
+- `base_path` *(optional)*
+  - the base path of the page (to match against the "url" of an email-alert-api subscriber list)
+- `topic_slug` *(optional)*
   - the email-alert-api topic slug
+
+Exactly one of `base_path` and `topic_slug` must be specified.
 
 #### JSON response fields
 
+- `base_path`
+  - the base_path parameter, if there is one (a string)
 - `topic_slug`
-  - the email-alert-api topic slug (a string)
+  - the topic_slug parameter, if there is one (a string)
 - `active`
-  - If the subscription is active (a boolean)
+  - whether the subscription is active (a boolean)
 
 #### Response codes
 
 - 401 if the session identifier is invalid
+- 422 if neither `base_path` nor `topic_slug` are passed; or if both are
 - 200 otherwise
 
 #### Example request / response
