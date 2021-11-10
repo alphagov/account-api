@@ -1,6 +1,7 @@
 require "gds_api/email_alert_api"
 
 class CheckEmailSubscriptionController < ApplicationController
+  include ActionController::Cookies
   include GovukPersonalisation::ControllerConcern
 
   skip_before_action :authorise_sso_user!
