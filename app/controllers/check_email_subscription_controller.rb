@@ -62,6 +62,14 @@ private
       base_path: @base_path,
       topic_slug: @topic_slug,
       active: active,
+      button_html: render_button_component(active),
     }.compact
+  end
+
+  def render_button_component(active)
+    ActionController::Base.render(
+      partial: "govuk_publishing_components/components/single_page_notification_button",
+      locals: { base_path: @base_path, already_subscribed: active },
+    ).presence
   end
 end
