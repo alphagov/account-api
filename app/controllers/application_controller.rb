@@ -1,7 +1,14 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
 
-  class CapturedSensitiveException < StandardError; end
+  class CapturedSensitiveException < StandardError
+    attr_reader :captured
+
+    def initialize(captured)
+      super()
+      @captured = captured
+    end
+  end
 
   before_action :authorise_sso_user!
 
@@ -13,6 +20,11 @@ class ApplicationController < ActionController::API
     }.merge(error.extra_detail)
   end
 
+  rescue_from CapturedSensitiveException do |error|
+    GovukError.notify("CapturedSensitiveException", { tags: { sensitive_exception_id: error.captured.id } })
+    head :internal_server_error
+  end
+
 private
 
   def authorise_sso_user!
@@ -22,10 +34,10 @@ private
   def capture_sensitive_exceptions
     yield
   rescue StandardError => e
-    SensitiveException.create!(
+    captured = SensitiveException.create!(
       message: e.message,
       full_message: e.full_message,
     )
-    raise CapturedSensitiveException
+    raise CapturedSensitiveException, captured
   end
 end
