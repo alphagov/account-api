@@ -126,15 +126,6 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
         let(:topic_slug) { "topic_slug" }
 
-        context "when a base_path is also passed" do
-          let(:base_path) { "/foo" }
-
-          it "returns a 422" do
-            get check_email_subscription_path, params: params, headers: headers
-            expect(response).to have_http_status(:unprocessable_entity)
-          end
-        end
-
         context "when the user has active subscriptions" do
           before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
 
