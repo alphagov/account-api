@@ -1,4 +1,4 @@
-class AuthenticationController < ApplicationController
+class Internal::AuthenticationController < InternalController
   def sign_in
     auth_request = AuthRequest.generate!(redirect_path: params[:redirect_path])
 

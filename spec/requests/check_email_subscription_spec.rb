@@ -24,7 +24,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
     end
 
     it "returns 401" do
-      get check_email_subscription_path, params: params
+      get personalisation_check_email_subscription_path, params: params
       expect(response).to have_http_status(:unauthorized)
     end
 
@@ -54,7 +54,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
       let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier&.serialise }.compact }
 
       it "returns a 422" do
-        get check_email_subscription_path, params: params, headers: headers
+        get personalisation_check_email_subscription_path, params: params, headers: headers
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
@@ -62,7 +62,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
         let(:headers) { { "GOVUK-Account-Session" => "not-a-base64-string" } }
 
         it "logs the user out" do
-          get check_email_subscription_path, params: params, headers: headers
+          get personalisation_check_email_subscription_path, params: params, headers: headers
           expect(response).to have_http_status(:unauthorized)
         end
       end
@@ -75,7 +75,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           let(:topic_slug) { "topic_slug" }
 
           it "returns a 422" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(response).to have_http_status(:unprocessable_entity)
           end
         end
@@ -87,12 +87,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
 
             it "returns subscription status details as not active" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
 
             it "includes the inactive-state button HTML" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
             end
 
@@ -101,12 +101,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
               let(:active) { true }
 
               it "returns subscription status details as active" do
-                get check_email_subscription_path, params: params, headers: headers
+                get personalisation_check_email_subscription_path, params: params, headers: headers
                 expect(JSON.parse(response.body)).to include(subscription_details)
               end
 
               it "includes the active-state button HTML" do
-                get check_email_subscription_path, params: params, headers: headers
+                get personalisation_check_email_subscription_path, params: params, headers: headers
                 expect(JSON.parse(response.body)["button_html"]).to include("Stop getting emails about this page")
               end
             end
@@ -116,12 +116,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             before { stub_email_alert_api_does_not_have_subscriber_subscriptions(subscriber_id) }
 
             it "returns subscription status details as not active" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
 
             it "includes the inactive-state button HTML" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
             end
 
@@ -129,7 +129,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
               let(:button_location) { "top-of-page" }
 
               it "returns the location in the response" do
-                get check_email_subscription_path, params: params, headers: headers
+                get personalisation_check_email_subscription_path, params: params, headers: headers
                 expect(JSON.parse(response.body)["button_location"]).to eq(button_location)
               end
             end
@@ -140,12 +140,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(oidc_user.id) }
 
           it "returns subscription status details as not active" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
 
           it "includes the inactive-state button HTML" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
           end
         end
@@ -160,12 +160,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
 
           it "returns subscription status details as not active" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
 
           it "does not include button HTML" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(response.body).not_to include("button_html")
           end
 
@@ -174,12 +174,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             let(:active) { true }
 
             it "returns subscription status details as active" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
 
             it "does not include button HTML" do
-              get check_email_subscription_path, params: params, headers: headers
+              get personalisation_check_email_subscription_path, params: params, headers: headers
               expect(response.body).not_to include("button_html")
             end
           end
@@ -189,12 +189,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_does_not_have_subscriber_subscriptions(subscriber_id) }
 
           it "returns subscription status details as not active" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
 
           it "does not include button HTML" do
-            get check_email_subscription_path, params: params, headers: headers
+            get personalisation_check_email_subscription_path, params: params, headers: headers
             expect(response.body).not_to include("button_html")
           end
         end
