@@ -688,6 +688,8 @@ Exactly one of `base_path` and `topic_slug` must be specified.
   - the topic_slug parameter, if there is one (a string)
 - `active`
   - whether the subscription is active (a boolean)
+- `button_html`
+  - the rendered single-page notification button component HTML, if a `base_path` was given (a string)
 
 #### Response codes
 
@@ -703,13 +705,15 @@ As a personalisation endpoint, it allows us to progressively enhance pages from 
 To test the endpoint with curl:
 
 ```
-curl -H "GOVUK-Account-Session={{account_session_header}}" "{{GOV.UK environment}}/api/personalisation/check-email-subscription?topic_slug=example-topic-slug"
+curl -H "GOVUK-Account-Session={{account_session_header}}" \
+  "{{GOV.UK environment}}/api/personalisation/check-email-subscription?base_path=/guidance/keeping-a-pet-pig-or-micropig"
 ```
 
 ```json
 {
-    "topic_slug": "example-topic-slug",
-    "active": true
+    "base_path": "/guidance/keeping-a-pet-pig-or-micropig",
+    "active": true,
+    "button_html": "<form>...</form>"
 }
 ```
 

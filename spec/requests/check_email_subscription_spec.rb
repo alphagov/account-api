@@ -16,10 +16,10 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
     let(:subscription_details) do
       {
-        base_path: base_path,
-        topic_slug: topic_slug,
-        active: active,
-      }.compact.to_json
+        "base_path" => base_path,
+        "topic_slug" => topic_slug,
+        "active" => active,
+      }.compact
     end
 
     it "returns 401" do
@@ -87,7 +87,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
             it "returns subscription status details as not active" do
               get check_email_subscription_path, params: params, headers: headers
-              expect(response.body).to eq(subscription_details)
+              expect(JSON.parse(response.body)).to include(subscription_details)
+            end
+
+            it "includes the inactive-state button HTML" do
+              get check_email_subscription_path, params: params, headers: headers
+              expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
             end
 
             context "when an active subscription has a matching url" do
@@ -96,7 +101,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
               it "returns subscription status details as active" do
                 get check_email_subscription_path, params: params, headers: headers
-                expect(response.body).to eq(subscription_details)
+                expect(JSON.parse(response.body)).to include(subscription_details)
+              end
+
+              it "includes the active-state button HTML" do
+                get check_email_subscription_path, params: params, headers: headers
+                expect(JSON.parse(response.body)["button_html"]).to include("Stop getting emails about this page")
               end
             end
           end
@@ -106,7 +116,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
             it "returns subscription status details as not active" do
               get check_email_subscription_path, params: params, headers: headers
-              expect(response.body).to eq(subscription_details)
+              expect(JSON.parse(response.body)).to include(subscription_details)
+            end
+
+            it "includes the inactive-state button HTML" do
+              get check_email_subscription_path, params: params, headers: headers
+              expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
             end
           end
         end
@@ -116,7 +131,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
           it "returns subscription status details as not active" do
             get check_email_subscription_path, params: params, headers: headers
-            expect(response.body).to eq(subscription_details)
+            expect(JSON.parse(response.body)).to include(subscription_details)
+          end
+
+          it "includes the inactive-state button HTML" do
+            get check_email_subscription_path, params: params, headers: headers
+            expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
           end
         end
       end
@@ -126,21 +146,17 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
         let(:topic_slug) { "topic_slug" }
 
-        context "when a base_path is also passed" do
-          let(:base_path) { "/foo" }
-
-          it "returns a 422" do
-            get check_email_subscription_path, params: params, headers: headers
-            expect(response).to have_http_status(:unprocessable_entity)
-          end
-        end
-
         context "when the user has active subscriptions" do
           before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
 
           it "returns subscription status details as not active" do
             get check_email_subscription_path, params: params, headers: headers
-            expect(response.body).to eq(subscription_details)
+            expect(JSON.parse(response.body)).to include(subscription_details)
+          end
+
+          it "does not include button HTML" do
+            get check_email_subscription_path, params: params, headers: headers
+            expect(response.body).not_to include("button_html")
           end
 
           context "when an active subscription has a matching slug" do
@@ -149,7 +165,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
             it "returns subscription status details as active" do
               get check_email_subscription_path, params: params, headers: headers
-              expect(response.body).to eq(subscription_details)
+              expect(JSON.parse(response.body)).to include(subscription_details)
+            end
+
+            it "does not include button HTML" do
+              get check_email_subscription_path, params: params, headers: headers
+              expect(response.body).not_to include("button_html")
             end
           end
         end
@@ -159,7 +180,12 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
           it "returns subscription status details as not active" do
             get check_email_subscription_path, params: params, headers: headers
-            expect(response.body).to eq(subscription_details)
+            expect(JSON.parse(response.body)).to include(subscription_details)
+          end
+
+          it "does not include button HTML" do
+            get check_email_subscription_path, params: params, headers: headers
+            expect(response.body).not_to include("button_html")
           end
         end
       end
