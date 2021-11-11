@@ -1,5 +1,5 @@
 class PersonalisationController < ApplicationController
-  include ActionController::Cookies
+  include ActionController::Cookies if ENV["RAILS_ENV"] == "development"
   include GovukPersonalisation::ControllerConcern
 
   before_action do
