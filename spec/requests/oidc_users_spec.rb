@@ -95,9 +95,9 @@ RSpec.describe "OIDC Users endpoint" do
         let(:email) { user.email }
 
         it "creates a sensitive exception" do
-          before = SensitiveException.count
-          expect { put oidc_user_path(subject_identifier: other_user.sub), params: params, headers: headers }.to raise_error(ApplicationController::CapturedSensitiveException)
-          expect(SensitiveException.count).to eq(before + 1)
+          expect(GovukError).to receive(:notify)
+          expect { put oidc_user_path(subject_identifier: other_user.sub), params: params, headers: headers }.to change(SensitiveException, :count).by(1)
+          expect(response).to have_http_status(:internal_server_error)
         end
       end
 
