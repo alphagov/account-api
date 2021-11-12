@@ -150,7 +150,8 @@ Pact.provider_states_for "GDS API Adapters" do
 
   provider_state "there is a user with subject identifier 'the-subject-identifier'" do
     set_up do
-      FactoryBot.create(:oidc_user, sub: "the-subject-identifier")
+      user = FactoryBot.create(:oidc_user, sub: "the-subject-identifier")
+      stub_request(:get, "#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/#{user.id}").to_return(status: 404)
     end
   end
 

@@ -56,10 +56,22 @@ class OidcUsersController < ApplicationController
   end
 
   def destroy
-    OidcUser.find_by_sub!(
+    user = OidcUser.find_by_sub!(
       params.fetch(:subject_identifier),
       legacy_sub: params[:legacy_sub],
-    ).destroy!
+    )
+
+    begin
+      subscriber_id = GdsApi.email_alert_api
+        .find_subscriber_by_govuk_account(govuk_account_id: user.id)
+        .dig("subscriber", "id")
+      GdsApi.email_alert_api.unsubscribe_subscriber(subscriber_id)
+    rescue GdsApi::HTTPNotFound
+      nil
+    end
+
+    user.destroy!
+
     head :no_content
   rescue ActiveRecord::RecordNotFound
     head :not_found
