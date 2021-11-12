@@ -235,11 +235,29 @@ RSpec.describe "OIDC Users endpoint" do
     end
 
     context "when the user exists" do
-      before { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
+
+      before do
+        stub_request(:get, "#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/#{user.id}").to_return(status: 404)
+      end
 
       it "deletes the user" do
         expect { delete oidc_user_path(subject_identifier: subject_identifier) }.to change(OidcUser, :count).by(-1)
         expect(response).to be_no_content
+      end
+
+      context "when the user has linked their notifications account" do
+        before do
+          stub_email_alert_api_find_subscriber_by_govuk_account(user.id, subscriber_id, user.email)
+        end
+
+        let(:subscriber_id) { "subscriber-id" }
+
+        it "ends their subscriptions" do
+          stub = stub_email_alert_api_unsubscribes_a_subscriber(subscriber_id)
+          delete oidc_user_path(subject_identifier: subject_identifier)
+          expect(stub).to have_been_made
+        end
       end
 
       context "when the user is pre-migration" do
