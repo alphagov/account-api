@@ -10,7 +10,8 @@ RSpec.describe "Personalisation - Check Email Subscription" do
   describe "GET /api/personalisation/check-email-subscription" do
     let(:base_path) { nil }
     let(:topic_slug) { nil }
-    let(:params) { { base_path: base_path, topic_slug: topic_slug }.compact }
+    let(:button_location) { nil }
+    let(:params) { { base_path: base_path, topic_slug: topic_slug, button_location: button_location }.compact }
 
     let(:active) { false }
 
@@ -122,6 +123,15 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             it "includes the inactive-state button HTML" do
               get check_email_subscription_path, params: params, headers: headers
               expect(JSON.parse(response.body)["button_html"]).to include("Get emails about this page")
+            end
+
+            context "when a button location is passed" do
+              let(:button_location) { "top-of-page" }
+
+              it "returns the location in the response" do
+                get check_email_subscription_path, params: params, headers: headers
+                expect(JSON.parse(response.body)["button_location"]).to eq(button_location)
+              end
             end
           end
         end

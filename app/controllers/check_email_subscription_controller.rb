@@ -18,6 +18,7 @@ class CheckEmailSubscriptionController < ApplicationController
   before_action do
     @base_path = params[:base_path]
     @topic_slug = params[:topic_slug]
+    @button_location = params[:button_location]
 
     head :unprocessable_entity if @base_path && @topic_slug
     head :unprocessable_entity unless @base_path || @topic_slug
@@ -62,6 +63,7 @@ private
     {
       base_path: @base_path,
       topic_slug: @topic_slug,
+      button_location: @button_location,
       active: active,
       button_html: render_button_component(active),
     }.compact
@@ -70,7 +72,7 @@ private
   def render_button_component(active)
     ActionController::Base.render(
       partial: "govuk_publishing_components/components/single_page_notification_button",
-      locals: { base_path: @base_path, already_subscribed: active },
+      locals: { base_path: @base_path, button_location: @button_location, already_subscribed: active },
     ).presence
   end
 end

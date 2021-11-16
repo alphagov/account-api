@@ -677,6 +677,8 @@ See [Progressive enhancement ADR for more details](/docs/adr/002-progressive-enh
   - the base path of the page (to match against the "url" of an email-alert-api subscriber list)
 - `topic_slug` *(optional)*
   - the email-alert-api topic slug
+- `button_location` *(optional)*
+  - the location of the button on the page (`top` or `bottom`). This is passed to the button component to add tracking parameters for Google Analytics
 
 Exactly one of `base_path` and `topic_slug` must be specified.
 
@@ -690,6 +692,8 @@ Exactly one of `base_path` and `topic_slug` must be specified.
   - whether the subscription is active (a boolean)
 - `button_html`
   - the rendered single-page notification button component HTML, if a `base_path` was given (a string)
+- `button_location`
+  - the button_location parameter, if there is one (a string)
 
 #### Response codes
 
