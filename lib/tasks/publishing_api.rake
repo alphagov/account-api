@@ -15,4 +15,9 @@ namespace :publishing_api do
   task :publish_help_page, [:name] => :environment do |_, args|
     PublishingApiTasks.new.publish_help_page args[:name]
   end
+
+  desc "Publish a single special route by content_id"
+  task :publish_special_route, [:content_id] => :environment do |_, args|
+    PublishingApiTasks.new.publish_special_route args[:content_id]
+  end
 end

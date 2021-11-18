@@ -79,6 +79,26 @@ RSpec.describe PublishingApiTasks do
     end
   end
 
+  describe "#publish_special_route" do
+    before { allow(logger).to receive(:info) }
+
+    let(:content_id) { SecureRandom.uuid }
+    let(:special_route) { { content_id: content_id, base_path: "/foo", title: "title", rendering_app: "frontend" } }
+    let(:content_items) { { special_routes: [special_route] } }
+
+    it "takes ownership of the route and publishes the content item" do
+      stub_claim_path = stub_call_claim_path(special_route[:base_path])
+      stub_put_content = stub_call_put_content(special_route[:content_id], special_route.except(:content_id), "major")
+      stub_publish = stub_call_publish(special_route[:content_id], "major")
+
+      tasks.publish_special_route(content_id)
+
+      expect(stub_claim_path).to have_been_made
+      expect(stub_put_content).to have_been_made
+      expect(stub_publish).to have_been_made
+    end
+  end
+
   describe "#publish_special_routes" do
     before { allow(logger).to receive(:info) }
 
