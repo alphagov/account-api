@@ -68,6 +68,30 @@ class PublishingApiTasks
     end
   end
 
+  def publish_special_route(content_id)
+    publisher = GdsApi::PublishingApi::SpecialRoutePublisher.new(
+      publishing_api: @publishing_api,
+      logger: @logger,
+    )
+
+    special_route = @content_items[:special_routes].find { |route| route[:content_id] == content_id }
+
+    if special_route.nil?
+      puts "No special route found with content_id: #{content_id}"
+      puts "Check files stored in: https://github.com/alphagov/account-api/blob/main/config/content_items.yml"
+      return
+    end
+
+    claim_path special_route.fetch(:base_path)
+
+    publisher.publish(
+      special_route.merge(
+        publishing_app: PUBLISHING_APP,
+        type: "exact",
+      ),
+    )
+  end
+
   def publish_special_routes
     publisher = GdsApi::PublishingApi::SpecialRoutePublisher.new(
       publishing_api: @publishing_api,
