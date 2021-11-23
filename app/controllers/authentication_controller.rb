@@ -36,10 +36,6 @@ class AuthenticationController < ApplicationController
       redirect_path: redirect_path,
       cookie_consent: govuk_account_session.user.cookie_consent,
       feedback_consent: govuk_account_session.user.feedback_consent,
-      # TODO: remove `ga_client_id` after we switch to DI, we're using
-      # a different approach there which doesn't go via the
-      # account-api
-      ga_client_id: details[:ga_session_id],
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized
