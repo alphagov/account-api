@@ -1,4 +1,4 @@
-class AttributesController < ApplicationController
+class Internal::AttributesController < InternalController
   include AuthenticatedApiConcern
 
   def show

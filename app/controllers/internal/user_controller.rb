@@ -1,4 +1,4 @@
-class UserController < ApplicationController
+class Internal::UserController < InternalController
   include AuthenticatedApiConcern
 
   HOMEPAGE_ATTRIBUTES = %w[email email_verified has_unconfirmed_email transition_checker_state].freeze

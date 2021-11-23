@@ -7,23 +7,25 @@ Rails.application.routes.draw do
   )
 
   scope :api do
-    scope :oauth2 do
-      get "/sign-in", to: "authentication#sign_in"
-      post "/callback", to: "authentication#callback"
-      get "/end-session", to: "authentication#end_session"
+    scope module: :internal do
+      scope :oauth2 do
+        get "/sign-in", to: "authentication#sign_in"
+        post "/callback", to: "authentication#callback"
+        get "/end-session", to: "authentication#end_session"
+      end
+
+      get "/user", to: "user#show"
+      get "/user/match-by-email", to: "match_user_by_email#show"
+
+      resources :oidc_users, only: %i[update destroy], param: :subject_identifier, path: "oidc-users"
+
+      get "/attributes", to: "attributes#show"
+      patch "/attributes", to: "attributes#update"
+
+      resources :email_subscriptions, only: %i[show update destroy], param: :subscription_name, path: "email-subscriptions"
     end
 
-    get "/user", to: "user#show"
-    get "/user/match-by-email", to: "match_user_by_email#show"
-
-    resources :oidc_users, only: %i[update destroy], param: :subject_identifier, path: "oidc-users"
-
-    get "/attributes", to: "attributes#show"
-    patch "/attributes", to: "attributes#update"
-
-    resources :email_subscriptions, only: %i[show update destroy], param: :subscription_name, path: "email-subscriptions"
-
-    scope :personalisation do
+    namespace :personalisation do
       get "check-email-subscription", to: "check_email_subscription#show", as: :check_email_subscription
     end
   end

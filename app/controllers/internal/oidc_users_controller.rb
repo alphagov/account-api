@@ -1,4 +1,4 @@
-class OidcUsersController < ApplicationController
+class Internal::OidcUsersController < InternalController
   OIDC_USER_ATTRIBUTES = %w[email email_verified has_unconfirmed_email cookie_consent feedback_consent].freeze
 
   def update

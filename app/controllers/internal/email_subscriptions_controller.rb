@@ -1,4 +1,4 @@
-class EmailSubscriptionsController < ApplicationController
+class Internal::EmailSubscriptionsController < InternalController
   include AuthenticatedApiConcern
 
   before_action :check_subscription_exists, only: %i[show destroy]

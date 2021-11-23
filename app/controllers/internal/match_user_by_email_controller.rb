@@ -1,4 +1,4 @@
-class MatchUserByEmailController < ApplicationController
+class Internal::MatchUserByEmailController < InternalController
   before_action :fetch_session_if_present
 
   def show
