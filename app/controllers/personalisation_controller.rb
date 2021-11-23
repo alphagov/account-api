@@ -14,7 +14,6 @@ class PersonalisationController < ApplicationController
   before_action :set_caching_headers
 
   rescue_from AccountSession::ReauthenticateUserError, with: :end_session!
-  rescue_from OidcClient::OAuthFailure, with: :end_session!
 
 private
 

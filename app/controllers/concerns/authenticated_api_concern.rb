@@ -16,10 +16,6 @@ module AuthenticatedApiConcern
     rescue_from AccountSession::ReauthenticateUserError do
       head :unauthorized
     end
-
-    rescue_from OidcClient::OAuthFailure do
-      head :unauthorized
-    end
   end
 
   def render_api_response(options = {})
