@@ -575,8 +575,6 @@ This endpoint requires the `update_protected_attributes` scope.
   - the new email address (a string)
 - `email_verified` *(optional)*
   - whether the new email address is verified (a boolean)
-- `has_unconfirmed_email` *(optional)*
-  - whether the user has a pending email change to confirm (a boolean)
 - `cookie_consent` *(optional)*
   - whether the user has consented to analytics cookies, this is temporary while we import data from the account-manager (a boolean)
 - `feedback_consent` *(optional)*
@@ -588,7 +586,6 @@ This endpoint requires the `update_protected_attributes` scope.
   - the subject identifier
 - `email`
 - `email_verified`
-- `has_unconfirmed_email`
 - `cookie_consent`
 - `feedback_consent`
 
@@ -605,7 +602,6 @@ GdsApi.account_api.update_user_by_subject_identifier(
     subject_identifier: "subject-identifier",
     email: "user@example.com",
     email_verified: true,
-    has_unconfirmed_email: false,
     cookie_consent: true,
     feedback_consent: false,
 )
@@ -618,7 +614,6 @@ Response:
     "sub": "subject-identifier",
     "email": "user@example.com",
     "email_verified": true,
-    "has_unconfirmed_email": false
 }
 ```
 

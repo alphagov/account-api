@@ -12,7 +12,6 @@ RSpec.describe "OIDC Users endpoint" do
       {
         email: email,
         email_verified: email_verified,
-        has_unconfirmed_email: has_unconfirmed_email,
         legacy_sub: legacy_sub,
         cookie_consent: cookie_consent,
         feedback_consent: feedback_consent,
@@ -20,7 +19,6 @@ RSpec.describe "OIDC Users endpoint" do
     end
     let(:email) { "email@example.com" }
     let(:email_verified) { true }
-    let(:has_unconfirmed_email) { false }
     let(:cookie_consent) { true }
     let(:feedback_consent) { false }
 
@@ -42,7 +40,6 @@ RSpec.describe "OIDC Users endpoint" do
       put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-      expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
       expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
       expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
     end
@@ -61,31 +58,27 @@ RSpec.describe "OIDC Users endpoint" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-        expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
         expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
         expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
 
         user.reload
         expect(user.email).to eq(email)
         expect(user.email_verified).to eq(email_verified)
-        expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
         expect(user.cookie_consent).to eq(cookie_consent)
         expect(user.feedback_consent).to eq(feedback_consent)
       end
 
       it "doesn't update nil attributes" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
-        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil, has_unconfirmed_email: nil, cookie_consent: nil, feedback_consent: nil }.to_json, headers: headers
+        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil, cookie_consent: nil, feedback_consent: nil }.to_json, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq("new-email@example.com")
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-        expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
         expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
         expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
 
         user.reload
         expect(user.email).to eq("new-email@example.com")
         expect(user.email_verified).to eq(email_verified)
-        expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
         expect(user.cookie_consent).to eq(cookie_consent)
         expect(user.feedback_consent).to eq(feedback_consent)
       end
@@ -112,13 +105,11 @@ RSpec.describe "OIDC Users endpoint" do
           expect(JSON.parse(response.body)["sub"]).to eq("post-migration-subject-identifier")
           expect(JSON.parse(response.body)["email"]).to eq(email)
           expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-          expect(JSON.parse(response.body)["has_unconfirmed_email"]).to eq(has_unconfirmed_email)
 
           user.reload
           expect(user.sub).to eq("post-migration-subject-identifier")
           expect(user.email).to eq(email)
           expect(user.email_verified).to eq(email_verified)
-          expect(user.has_unconfirmed_email).to eq(has_unconfirmed_email)
         end
       end
 

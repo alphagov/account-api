@@ -70,9 +70,6 @@ private
 
     userinfo = details[:userinfo] || oidc_client.userinfo(access_token: details[:access_token], refresh_token: details[:refresh_token])[:result]
 
-    # TODO: remove merge! when this attribute is deleted
-    userinfo.merge!("has_unconfirmed_email" => false)
-
     govuk_account_session.set_attributes(userinfo.slice(*attributes_to_cache))
   end
 

@@ -9,11 +9,10 @@ Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 module PactStubHelpers
   EMAIL_ADDRESS = "user@example.com".freeze
 
-  def stub_cached_attributes(email_verified: true, has_unconfirmed_email: false)
+  def stub_cached_attributes(email_verified: true)
     oidc_user.update!(
       email: EMAIL_ADDRESS,
       email_verified: email_verified,
-      has_unconfirmed_email: has_unconfirmed_email,
     )
   end
 
