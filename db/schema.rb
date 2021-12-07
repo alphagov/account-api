@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_04_103629) do
+ActiveRecord::Schema.define(version: 2021_12_07_090018) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -41,7 +41,6 @@ ActiveRecord::Schema.define(version: 2021_11_04_103629) do
     t.boolean "has_received_transition_checker_onboarding_email", default: false, null: false
     t.string "email"
     t.boolean "email_verified"
-    t.boolean "has_unconfirmed_email"
     t.boolean "oidc_users"
     t.jsonb "transition_checker_state"
     t.string "legacy_sub"
