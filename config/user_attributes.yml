@@ -7,11 +7,6 @@ shared:
     type: cached
     writable: false
 
-  # TODO: remove this attribute after removing its use from other apps
-  has_unconfirmed_email:
-    type: cached
-    writable: false
-
   cookie_consent:
     type: local
 

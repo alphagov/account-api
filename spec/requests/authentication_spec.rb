@@ -61,16 +61,15 @@ RSpec.describe "Authentication" do
     end
 
     context "when cacheable attributes are missing" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: "user-id", email: nil, email_verified: nil, has_unconfirmed_email: nil) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: "user-id", email: nil, email_verified: nil) }
 
       it "fetches them from userinfo" do
-        stub = stub_userinfo(email: "email@example.com", email_verified: true, has_unconfirmed_email: false)
+        stub = stub_userinfo(email: "email@example.com", email_verified: true)
         post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
         expect(response).to be_successful
         expect(stub).to have_been_made
         expect(user.reload.email).to eq("email@example.com")
         expect(user.reload.email_verified).to be(true)
-        expect(user.reload.has_unconfirmed_email).to be(false)
       end
     end
 

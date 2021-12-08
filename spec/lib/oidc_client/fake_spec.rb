@@ -64,7 +64,6 @@ RSpec.describe OidcClient::Fake do
         "sub" => user.sub,
         "email" => user.email || "email@example.com",
         "email_verified" => user.email_verified || false,
-        "has_unconfirmed_email" => user.has_unconfirmed_email || false,
       }
 
       expect(client.userinfo(access_token: access_token)).to eq({ access_token: access_token, result: userinfo })

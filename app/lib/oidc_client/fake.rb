@@ -51,7 +51,6 @@ class OidcClient::Fake < OidcClient
           "sub" => user.sub,
           "email" => user.email,
           "email_verified" => user.email_verified,
-          "has_unconfirmed_email" => user.has_unconfirmed_email,
         },
     }
   end
@@ -63,7 +62,6 @@ private
       sub: SecureRandom.uuid,
       email: "email@example.com",
       email_verified: true,
-      has_unconfirmed_email: false,
     )
   end
 end
