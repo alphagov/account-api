@@ -13,14 +13,10 @@ RSpec.describe "OIDC Users endpoint" do
         email: email,
         email_verified: email_verified,
         legacy_sub: legacy_sub,
-        cookie_consent: cookie_consent,
-        feedback_consent: feedback_consent,
       }.compact.to_json
     end
     let(:email) { "email@example.com" }
     let(:email_verified) { true }
-    let(:cookie_consent) { true }
-    let(:feedback_consent) { false }
 
     before do
       stub_request(:get, %r{\A#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/\d+\z}).to_return(status: 404)
@@ -40,8 +36,6 @@ RSpec.describe "OIDC Users endpoint" do
       put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-      expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
-      expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
     end
 
     context "when the user already exists" do
@@ -58,29 +52,21 @@ RSpec.describe "OIDC Users endpoint" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-        expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
-        expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
 
         user.reload
         expect(user.email).to eq(email)
         expect(user.email_verified).to eq(email_verified)
-        expect(user.cookie_consent).to eq(cookie_consent)
-        expect(user.feedback_consent).to eq(feedback_consent)
       end
 
       it "doesn't update nil attributes" do
         put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
-        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil, cookie_consent: nil, feedback_consent: nil }.to_json, headers: headers
+        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil }.to_json, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq("new-email@example.com")
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
-        expect(JSON.parse(response.body)["cookie_consent"]).to eq(cookie_consent)
-        expect(JSON.parse(response.body)["feedback_consent"]).to eq(feedback_consent)
 
         user.reload
         expect(user.email).to eq("new-email@example.com")
         expect(user.email_verified).to eq(email_verified)
-        expect(user.cookie_consent).to eq(cookie_consent)
-        expect(user.feedback_consent).to eq(feedback_consent)
       end
 
       context "when a different user tried to use the same email address" do
