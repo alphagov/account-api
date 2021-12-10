@@ -1,5 +1,5 @@
 class Internal::OidcUsersController < InternalController
-  OIDC_USER_ATTRIBUTES = %w[email email_verified cookie_consent feedback_consent].freeze
+  OIDC_USER_ATTRIBUTES = %w[email email_verified].freeze
 
   def update
     user = OidcUser.find_or_create_by_sub!(
