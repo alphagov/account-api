@@ -10,7 +10,7 @@ class Internal::OidcUsersController < InternalController
     email_changed = params.key?(:email) && (params[:email] != user.email)
     email_verified_changed = params.key?(:email_verified) && params[:email_verified] != user.email_verified
 
-    capture_sensitive_exceptions do
+    capture_sensitive_exceptions(user) do
       user.update!(params.permit(OIDC_USER_ATTRIBUTES).to_h.compact)
       user.reload
     end
