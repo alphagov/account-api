@@ -9,7 +9,7 @@ class ApplicationController < ActionController::API
   end
 
   rescue_from CapturedSensitiveException do |error|
-    GovukError.notify("CapturedSensitiveException", { tags: { sensitive_exception_id: error.captured.id } })
+    GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: error.captured.id } })
     head :internal_server_error
   end
 
