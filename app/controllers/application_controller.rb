@@ -1,27 +1,25 @@
 class ApplicationController < ActionController::API
-  class CapturedSensitiveException < StandardError
-    attr_reader :captured
+  class CapturedSensitiveException < StandardError; end
 
-    def initialize(captured)
-      super()
-      @captured = captured
-    end
-  end
-
-  rescue_from CapturedSensitiveException do |error|
-    GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: error.captured.id } })
+  rescue_from CapturedSensitiveException do
     head :internal_server_error
   end
 
 private
 
-  def capture_sensitive_exceptions
+  def capture_sensitive_exceptions(user)
     yield
   rescue StandardError => e
-    captured = SensitiveException.create!(
-      message: e.message,
-      full_message: e.full_message,
-    )
-    raise CapturedSensitiveException, captured
+    Sentry.with_scope do |scope|
+      scope.set_user(id: user.sub)
+
+      captured = SensitiveException.create!(
+        message: e.message,
+        full_message: e.full_message,
+      )
+      GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: captured.id } })
+
+      raise CapturedSensitiveException
+    end
   end
 end

@@ -27,7 +27,7 @@ class Internal::AuthenticationController < InternalController
       version: AccountSession::CURRENT_VERSION,
     )
 
-    capture_sensitive_exceptions do
+    capture_sensitive_exceptions(govuk_account_session.user) do
       fetch_cacheable_attributes!(govuk_account_session, details)
     end
 
