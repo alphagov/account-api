@@ -139,7 +139,7 @@ GEM
     fugit (1.5.0)
       et-orbi (~> 1.1, >= 1.1.8)
       raabro (~> 1.4)
-    gds-api-adapters (76.0.0)
+    gds-api-adapters (77.0.0)
       addressable
       link_header
       null_logger
