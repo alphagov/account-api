@@ -22,6 +22,14 @@
       path: "/log-in-register-hmrc-online-services",
       description: "Sign in to HMRC services using Government Gateway or GOV.UK Verify.",
     },{
+      text: "Report a COVID-19 rapid lateral flow test result",
+      path: "/report-covid19-result",
+      description: "Report your result to the NHS after using a rapid lateral flow test kit.",
+    },{
+      text: "Passenger locator form",
+      path: "/provide-journey-contact-details-before-travel-uk",
+      description: "Edit and submit an unfinished passenger locator form for travelling to the UK.",
+    },{
       text: "Check your State Pension forecast",
       path: "/check-state-pension",
       description: "Find out how much State Pension you could get and when.",
@@ -30,13 +38,9 @@
       path: "/sign-in-childcare-account",
       description: "Get 30 hours free childcare and pay for Tax-Free Childcare.",
     },{
-      text: "Passenger locator form",
-      path: "/provide-journey-contact-details-before-travel-uk",
-      description: "Edit and submit an unfinished passenger locator form.",
-    },{
-      text: "Manage your student loan balance",
-      path: "/sign-in-to-manage-your-student-loan-balance",
-      description: "See your student loan balance and manage your repayments.",
+      text: "Manage your GOV.UK emails",
+      path: "/email/manage",
+      description: "Manage the emails you get about GOV.UK pages you’re interested in.",
     }]
     links.each_with_index do |link, index|
       link[:data_attributes] = {
