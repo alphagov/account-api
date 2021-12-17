@@ -202,7 +202,7 @@ GEM
     httpclient (2.8.3)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
-    json (2.5.1)
+    json (2.6.1)
     json-jwt (1.13.0)
       activesupport (>= 4.2)
       aes_key_wrap
@@ -271,7 +271,7 @@ GEM
       validate_email
       validate_url
       webfinger (>= 1.0.1)
-    pact (1.60.0)
+    pact (1.61.0)
       pact-mock_service (~> 3.0, >= 3.3.1)
       pact-support (~> 1.16, >= 1.16.9)
       rack-test (>= 0.6.3, < 2.0.0)
@@ -396,7 +396,7 @@ GEM
       rspec-expectations (~> 3.10)
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
-    rspec-support (3.10.2)
+    rspec-support (3.10.3)
     rubocop (1.23.0)
       parallel (~> 1.10)
       parser (>= 3.0.0.0)
