@@ -68,7 +68,7 @@ private
 
     return if attributes_to_cache.empty?
 
-    userinfo = details[:userinfo] || oidc_client.userinfo(access_token: details[:access_token], refresh_token: details[:refresh_token])[:result]
+    userinfo = details[:userinfo] || oidc_client.userinfo(access_token: details[:access_token])
 
     govuk_account_session.set_attributes(userinfo.slice(*attributes_to_cache))
   end

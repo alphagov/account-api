@@ -66,7 +66,7 @@ RSpec.describe OidcClient::Fake do
         "email_verified" => user.email_verified || false,
       }
 
-      expect(client.userinfo(access_token: access_token)).to eq({ access_token: access_token, result: userinfo })
+      expect(client.userinfo(access_token: access_token)).to eq(userinfo)
     end
 
     it "throws an error if the access token doesn't correspond to a user" do
