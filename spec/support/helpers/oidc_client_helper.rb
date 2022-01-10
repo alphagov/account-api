@@ -12,10 +12,9 @@ module OidcClientHelper
     # rubocop:enable RSpec/AnyInstance
   end
 
-  def stub_token_response(refresh_token: "refresh-token", vot: "Cl")
+  def stub_token_response(vot: "Cl")
     token_response = {
       access_token: "access-token",
-      refresh_token: refresh_token,
       id_token_jwt: "id-token",
       id_token: instance_double(
         "OpenIDConnect::ResponseObject::IdToken",

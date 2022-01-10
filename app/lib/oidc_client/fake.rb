@@ -34,7 +34,6 @@ class OidcClient::Fake < OidcClient
 
     {
       access_token: user.sub,
-      refresh_token: "refresh-token",
       id_token_jwt: id_token_jwt,
       id_token: id_token,
     }.compact
@@ -45,13 +44,9 @@ class OidcClient::Fake < OidcClient
     raise NoDevelopmentUser unless user
 
     {
-      access_token: access_token,
-      result:
-        {
-          "sub" => user.sub,
-          "email" => user.email,
-          "email_verified" => user.email_verified,
-        },
+      "sub" => user.sub,
+      "email" => user.email,
+      "email_verified" => user.email_verified,
     }
   end
 

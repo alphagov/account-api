@@ -40,13 +40,9 @@ class OidcClient
     end
 
     unless OidcUser.where(sub: tokens[:id_token].sub).exists?
-      response = userinfo(access_token: tokens[:access_token], refresh_token: tokens[:refresh_token])
-      OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response.dig(:result, "legacy_subject_id"))
-      tokens.merge!(
-        access_token: response.fetch(:access_token),
-        refresh_token: response[:refresh_token],
-        userinfo: response[:result],
-      )
+      response = userinfo(access_token: tokens[:access_token])
+      OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response["legacy_subject_id"])
+      tokens.merge!(userinfo: response)
     end
 
     tokens.merge(
@@ -83,7 +79,6 @@ class OidcClient
 
     {
       access_token: response[:access_token],
-      refresh_token: response[:refresh_token],
       id_token_jwt: id_token_jwt,
       id_token: id_token,
     }.compact
@@ -91,57 +86,38 @@ class OidcClient
     raise OAuthFailure
   end
 
-  def userinfo(access_token:, refresh_token:)
+  def userinfo(access_token:)
     response = time_and_return "userinfo" do
       oauth_request(
         access_token: access_token,
-        refresh_token: refresh_token,
         method: :get,
         uri: userinfo_endpoint,
       )
     end
 
-    begin
-      response.merge(result: JSON.parse(response[:result].body))
-    rescue JSON::ParserError
-      raise OAuthFailure
-    end
+    JSON.parse(response.body)
+  rescue JSON::ParserError
+    raise OAuthFailure
   end
 
 private
 
-  class RefreshAndRetry < StandardError; end
+  class Retry < StandardError; end
 
-  class OnlyRetry < StandardError; end
-
-  REFRESH_AND_RETRY_STATUSES = [401, 403].freeze
-  ONLY_RETRY_STATUSES = [500, 501, 502, 503, 504].freeze
+  RETRY_STATUSES = [500, 501, 502, 503, 504].freeze
 
   MAX_OAUTH_RETRIES = 1
 
-  def oauth_request(access_token:, refresh_token:, method:, uri:, arg: nil)
+  def oauth_request(access_token:, method:, uri:, arg: nil)
     args = [uri, arg].compact
     retries = 0
 
     begin
       response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token).public_send(method, *args)
-      raise RefreshAndRetry if REFRESH_AND_RETRY_STATUSES.include? response.status
-      raise OnlyRetry if ONLY_RETRY_STATUSES.include? response.status
+      raise Retry if RETRY_STATUSES.include? response.status
 
-      {
-        access_token: access_token,
-        refresh_token: refresh_token,
-        result: response,
-      }
-    rescue RefreshAndRetry
-      raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
-      raise OAuthFailure unless refresh_token
-
-      access_token, refresh_token = refresh_client_tokens(refresh_token)
-
-      retries += 1
-      retry
-    rescue OnlyRetry, Errno::ECONNRESET, OpenSSL::SSL::SSLError
+      response
+    rescue Retry, Errno::ECONNRESET, OpenSSL::SSL::SSLError
       raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
 
       retries += 1
@@ -149,12 +125,6 @@ private
     end
   rescue AttrRequired::AttrMissing, Rack::OAuth2::Client::Error, URI::InvalidURIError
     raise OAuthFailure
-  end
-
-  def refresh_client_tokens(refresh_token)
-    client.refresh_token = refresh_token
-    refreshed = client.access_token!
-    [refreshed.token_response[:access_token], refreshed.token_response[:refresh_token]]
   end
 
   def redirect_uri
