@@ -253,9 +253,7 @@ Response:
     "mfa": false,
     "email": "email@example.com",
     "email_verified": false,
-    "services": {
-        "transition_checker": "yes_but_must_reauthenticate",
-    }
+    "services": {}
 }
 ```
 
@@ -453,7 +451,7 @@ Request (with gds-api-adapters):
 
 ```ruby
 GdsApi.account_api.get_email_subscription(
-    name: "transition-checker",
+    name: "some-subscription",
     govuk_account_session: "session-identifier",
 )
 ```
@@ -462,8 +460,8 @@ GdsApi.account_api.get_email_subscription(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "email_subscription": {
-      "name": "transition-checker",
-      "topic_slug": "brexit-results-12345",
+      "name": "some-subscription",
+      "topic_slug": "subscriber-list-slug",
       "email_alert_api_subscription_id": "cd5f6972-faf3-4f1c-bb76-3774b0a389f0"
     },
 }
@@ -507,8 +505,8 @@ Request (with gds-api-adapters):
 
 ```ruby
 GdsApi.account_api.put_email_subscription(
-    name: "transition-checker",
-    topic_slug: "brexit-results-12345",
+    name: "some-subscription",
+    topic_slug: "subscriber-list-slug",
     govuk_account_session: "session-identifier",
 )
 ```
@@ -517,8 +515,8 @@ GdsApi.account_api.put_email_subscription(
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "email_subscription": {
-      "name": "transition-checker",
-      "topic_slug": "brexit-results-12345",
+      "name": "some-subscription",
+      "topic_slug": "subscriber-list-slug",
       "email_alert_api_subscription_id": "96ae61d6-c2a1-48cb-8e67-da9d105ae381"
     },
 }
@@ -550,7 +548,7 @@ Request (with gds-api-adapters):
 
 ```ruby
 GdsApi.account_api.delete_email_subscription(
-    name: "transition-checker",
+    name: "some-subscription",
     govuk_account_session: "session-identifier",
 )
 ```

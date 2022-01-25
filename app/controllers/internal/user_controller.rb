@@ -1,7 +1,7 @@
 class Internal::UserController < InternalController
   include AuthenticatedApiConcern
 
-  HOMEPAGE_ATTRIBUTES = %w[email email_verified transition_checker_state].freeze
+  HOMEPAGE_ATTRIBUTES = %w[email email_verified].freeze
 
   def show
     render_api_response(
@@ -10,18 +10,12 @@ class Internal::UserController < InternalController
         mfa: @govuk_account_session.mfa?,
         email: attributes.dig("email", :value),
         email_verified: attributes.dig("email_verified", :value),
-        services: {
-          transition_checker: attribute_service("transition_checker_state"),
-        }.compact,
+        services: {},
       },
     )
   end
 
 private
-
-  def attribute_service(attribute_name)
-    attributes[attribute_name][:state]
-  end
 
   def attributes
     @attributes ||=

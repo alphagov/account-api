@@ -10,20 +10,13 @@ In development, this app uses a stub OIDC provider which signs you in
 as the first user in the database.
 
 This app does not serve any user-facing pages. To see the app working, you
-must run an app which uses it, such as [Finder Frontend][].
+must run an app which uses it, such as [frontend][].
 
-After starting Finder Frontend, you should be able to access the
-following links:
+After starting Frontend, you should be able to access the [account
+dashboard][].
 
-- the [Brexit checker journey start page][tc-start]
-- the [Brexit checker results page][tc-results] that reflects the
-  answers you give during the Brexit checker journey
-- the [account sign up page][tc-save-results] to save your answers
-
-[Finder Frontend]: https://github.com/alphagov/finder-frontend
-[tc-results]: http://finder-frontend.dev.gov.uk/transition-check/results?c[]=living-ie
-[tc-save-results]: http://finder-frontend.dev.gov.uk/transition-check/save-your-results?c%5B%5D=living-ie
-[tc-start]: http://finder-frontend.dev.gov.uk/transition-check/questions
+[frontend]: https://github.com/alphagov/frontend
+[account dashboard]: http://frontend.dev.gov.uk/account/home
 
 
 ## Technical documentation

@@ -13,7 +13,8 @@ shared:
   feedback_consent:
     type: local
 
-  transition_checker_state:
+test:
+  test_mfa_attribute:
     type: local
     get_requires_mfa: true
     set_requires_mfa: true
