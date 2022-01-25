@@ -140,10 +140,18 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  # TODO: remove this state when https://github.com/alphagov/gds-api-adapters/pull/1134 is merged
   provider_state "there is a valid user session, with an attribute called 'transition_checker_state'" do
     set_up do
       stub_cached_attributes
       oidc_user.update!(transition_checker_state: { array: [1, 2, 3], some: { nested: "json" } })
+    end
+  end
+
+  provider_state "there is a valid user session, with an attribute called 'feedback_consent'" do
+    set_up do
+      stub_cached_attributes
+      oidc_user.update!(feedback_consent: true)
     end
   end
 
