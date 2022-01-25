@@ -41,33 +41,6 @@ RSpec.describe "User information endpoint" do
     expect(response_body["email_verified"]).to eq(attributes[:email_verified])
   end
 
-  describe "services.transition_checker" do
-    let(:service_state) { response_body.dig("services", "transition_checker") }
-
-    it "returns 'no'" do
-      get "/api/user", headers: headers
-      expect(service_state).to eq("no")
-    end
-
-    context "when the user has used the checker" do
-      before { session_identifier.user.update!(transition_checker_state: "state") }
-
-      it "returns 'yes_but_must_reauthenticate'" do
-        get "/api/user", headers: headers
-        expect(service_state).to eq("yes_but_must_reauthenticate")
-      end
-
-      context "when the user is logged in with MFA" do
-        let(:mfa) { true }
-
-        it "returns 'yes'" do
-          get "/api/user", headers: headers
-          expect(service_state).to eq("yes")
-        end
-      end
-    end
-  end
-
   context "when the user is not logged in" do
     let(:session_identifier) { nil }
 
