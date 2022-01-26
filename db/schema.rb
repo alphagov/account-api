@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_07_090018) do
+ActiveRecord::Schema.define(version: 2022_01_25_163309) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,11 +38,9 @@ ActiveRecord::Schema.define(version: 2021_12_07_090018) do
     t.string "sub", null: false
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
-    t.boolean "has_received_transition_checker_onboarding_email", default: false, null: false
     t.string "email"
     t.boolean "email_verified"
     t.boolean "oidc_users"
-    t.jsonb "transition_checker_state"
     t.string "legacy_sub"
     t.boolean "cookie_consent"
     t.boolean "feedback_consent"
@@ -63,16 +61,6 @@ ActiveRecord::Schema.define(version: 2021_12_07_090018) do
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
     t.index ["sub"], name: "index_tombstones_on_sub", unique: true
-  end
-
-  create_table "unmigrated_oidc_users", force: :cascade do |t|
-    t.string "sub", null: false
-    t.string "email"
-    t.boolean "email_verified"
-    t.boolean "has_unconfirmed_email"
-    t.jsonb "transition_checker_state"
-    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
-    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
   end
 
   create_table "users", force: :cascade do |t|
