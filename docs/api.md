@@ -653,11 +653,7 @@ Response is status code only.
 
 Personalisation endpoint for checking if an email subscription is active.
 
-Currently this returns a simple JSON response.
-
-Future iterations may see this endpoint return rendered HTML to progressively enhance our frontend applications.
-
-See [Progressive enhancement ADR for more details](/docs/adr/002-progressive-enhancement.md)
+See [Progressive enhancement ADR for more details](adr/002-progressive-enhancement.md)
 
 #### Request parameters
 - `subject_identifier`
