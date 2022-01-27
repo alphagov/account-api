@@ -36,8 +36,6 @@ This repository follows the standards for testing described in the
 - code coverage in excess of 95%
 - API contract tests ("pact tests") between the Account API and its
   consumers
-- a [smoke test][] to check the application is running after a
-  deployment
 
 The default `rake` task runs all the tests and records code coverage:
 
@@ -46,7 +44,6 @@ bundle exec rake
 ```
 
 [GOV.UK RFC on continuous deployment]: https://github.com/alphagov/govuk-rfcs/blob/main/rfc-128-continuous-deployment.md
-[smoke test]: https://github.com/alphagov/smokey/blob/main/features/account_api.feature
 
 #### Changing the Pact tests
 
@@ -73,6 +70,7 @@ See the GOV.UK Developer Docs for [how to update a Pact test][].
 ## Further documentation
 
 - [API documentation](docs/api.md)
+- [Digital Identity](docs/digital-identity.md)
 
 
 ## Licence

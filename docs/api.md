@@ -120,7 +120,11 @@ Response:
 
 Validates an OAuth response from the identity provider.
 
-On a `401: Unauthorized` response, the identity provider has rejected the authentication parameters.
+This is only used by the [`SessionsController` in frontend][], as the
+identity provider redirects the user after signing in to
+`https://www.gov.uk/sign-in/callback`.
+
+[`SessionsController` in frontend]: https://github.com/alphagov/frontend/blob/main/app/controllers/sessions_controller.rb
 
 #### Request parameters
 
@@ -170,7 +174,13 @@ Response:
 
 Generates a sign out URL.
 
-This URL should be served to the user with a 302 response to terminate their session with the identity provider and connected services.  If the session identifier is given, it may be passed to the identity provider to validate the user's session.
+This URL should be served to the user with a 302 response to terminate
+their session with the identity provider and connected services.  If
+the session identifier is given, it may be passed to the identity
+provider to validate the user's session.
+
+This does not invalidate the user's session on www.gov.uk.  You must
+also use the `logout!` method in [govuk_personalisation][] to do that.
 
 #### Request headers
 
@@ -643,11 +653,7 @@ Response is status code only.
 
 Personalisation endpoint for checking if an email subscription is active.
 
-Currently this returns a simple JSON response.
-
-Future iterations may see this endpoint return rendered HTML to progressively enhance our frontend applications.
-
-See [Progressive enhancement ADR for more details](/docs/adr/002-progressive-enhancement.md)
+See [Progressive enhancement ADR for more details](adr/002-progressive-enhancement.md)
 
 #### Request parameters
 - `subject_identifier`
