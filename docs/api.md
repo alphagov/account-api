@@ -120,7 +120,11 @@ Response:
 
 Validates an OAuth response from the identity provider.
 
-On a `401: Unauthorized` response, the identity provider has rejected the authentication parameters.
+This is only used by the [`SessionsController` in frontend][], as the
+identity provider redirects the user after signing in to
+`https://www.gov.uk/sign-in/callback`.
+
+[`SessionsController` in frontend]: https://github.com/alphagov/frontend/blob/main/app/controllers/sessions_controller.rb
 
 #### Request parameters
 
