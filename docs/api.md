@@ -174,7 +174,13 @@ Response:
 
 Generates a sign out URL.
 
-This URL should be served to the user with a 302 response to terminate their session with the identity provider and connected services.  If the session identifier is given, it may be passed to the identity provider to validate the user's session.
+This URL should be served to the user with a 302 response to terminate
+their session with the identity provider and connected services.  If
+the session identifier is given, it may be passed to the identity
+provider to validate the user's session.
+
+This does not invalidate the user's session on www.gov.uk.  You must
+also use the `logout!` method in [govuk_personalisation][] to do that.
 
 #### Request headers
 
