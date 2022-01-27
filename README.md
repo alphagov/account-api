@@ -70,6 +70,7 @@ See the GOV.UK Developer Docs for [how to update a Pact test][].
 ## Further documentation
 
 - [API documentation](docs/api.md)
+- [Digital Identity](docs/digital-identity.md)
 
 
 ## Licence
