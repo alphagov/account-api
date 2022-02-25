@@ -2,6 +2,7 @@
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
 begin
+  ENV["PACT_DO_NOT_TRACK"] = "true"
   require "pact/tasks"
 rescue LoadError
   # Pact isn't available in all environments
