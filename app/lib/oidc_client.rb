@@ -82,7 +82,8 @@ class OidcClient
       id_token_jwt: id_token_jwt,
       id_token: id_token,
     }.compact
-  rescue Rack::OAuth2::Client::Error
+  rescue Rack::OAuth2::Client::Error => e
+    capture_sensitive_exception(e)
     raise OAuthFailure
   end
 
@@ -96,7 +97,8 @@ class OidcClient
     end
 
     JSON.parse(response.body)
-  rescue JSON::ParserError
+  rescue JSON::ParserError => e
+    capture_sensitive_exception(e)
     raise OAuthFailure
   end
 
@@ -123,7 +125,8 @@ private
       retries += 1
       retry
     end
-  rescue AttrRequired::AttrMissing, Rack::OAuth2::Client::Error, URI::InvalidURIError
+  rescue AttrRequired::AttrMissing, Rack::OAuth2::Client::Error, URI::InvalidURIError => e
+    capture_sensitive_exception(e)
     raise OAuthFailure
   end
 
@@ -165,5 +168,13 @@ private
 
   def time_and_return(name, &block)
     GovukStatsd.time("oidc_client.#{name}", &block)
+  end
+
+  def capture_sensitive_exception(error)
+    captured = SensitiveException.create!(
+      message: error.message,
+      full_message: error.full_message,
+    )
+    GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: captured.id } })
   end
 end

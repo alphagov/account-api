@@ -85,6 +85,7 @@ RSpec.describe OidcClient do
       allow(@client_stub).to receive(:access_token!).and_raise(Rack::OAuth2::Client::Error.new(401, { error: "error", error_description: "description" }))
       # rubocop:enable RSpec/InstanceVariable
 
+      expect(GovukError).to receive(:notify)
       expect { client.tokens! }.to raise_error(OidcClient::OAuthFailure)
     end
 
