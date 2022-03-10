@@ -98,7 +98,7 @@ class OidcClient
 
     JSON.parse(response.body)
   rescue JSON::ParserError => e
-    capture_sensitive_exception(e)
+    capture_sensitive_exception(e, response_error_presenter(response, access_token))
     raise OAuthFailure
   end
 
@@ -109,6 +109,14 @@ private
   RETRY_STATUSES = [500, 501, 502, 503, 504].freeze
 
   MAX_OAUTH_RETRIES = 1
+
+  def response_error_presenter(response, access_token)
+    {
+      status_code: response&.status,
+      response_body: response&.body,
+      access_token: access_token,
+    }.compact
+  end
 
   def oauth_request(access_token:, method:, uri:, arg: nil)
     args = [uri, arg].compact
@@ -170,10 +178,11 @@ private
     GovukStatsd.time("oidc_client.#{name}", &block)
   end
 
-  def capture_sensitive_exception(error)
+  def capture_sensitive_exception(error, extra_info = {})
     captured = SensitiveException.create!(
       message: error.message,
       full_message: error.full_message,
+      extra_info: extra_info.to_json,
     )
     GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: captured.id } })
   end
