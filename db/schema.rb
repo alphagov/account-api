@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_25_163309) do
-
+ActiveRecord::Schema[7.0].define(version: 2022_01_25_163309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,8 +18,8 @@ ActiveRecord::Schema.define(version: 2022_01_25_163309) do
     t.string "oauth_state", null: false
     t.string "oidc_nonce", null: false
     t.string "redirect_path"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "email_subscriptions", force: :cascade do |t|
@@ -28,16 +27,16 @@ ActiveRecord::Schema.define(version: 2022_01_25_163309) do
     t.string "name", null: false
     t.string "topic_slug", null: false
     t.string "email_alert_api_subscription_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_user_id", "name"], name: "index_email_subscriptions_on_oidc_user_id_and_name", unique: true
     t.index ["oidc_user_id"], name: "index_email_subscriptions_on_oidc_user_id"
   end
 
   create_table "oidc_users", force: :cascade do |t|
     t.string "sub", null: false
-    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
-    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "created_at", default: -> { "now()" }, null: false
+    t.datetime "updated_at", default: -> { "now()" }, null: false
     t.string "email"
     t.boolean "email_verified"
     t.boolean "oidc_users"
@@ -52,14 +51,14 @@ ActiveRecord::Schema.define(version: 2022_01_25_163309) do
   create_table "sensitive_exceptions", force: :cascade do |t|
     t.string "message"
     t.string "full_message"
-    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
-    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "created_at", default: -> { "now()" }, null: false
+    t.datetime "updated_at", default: -> { "now()" }, null: false
   end
 
   create_table "tombstones", force: :cascade do |t|
     t.string "sub", null: false
-    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
-    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "created_at", default: -> { "now()" }, null: false
+    t.datetime "updated_at", default: -> { "now()" }, null: false
     t.index ["sub"], name: "index_tombstones_on_sub", unique: true
   end
 
@@ -73,8 +72,8 @@ ActiveRecord::Schema.define(version: 2022_01_25_163309) do
     t.text "permissions"
     t.boolean "remotely_signed_out", default: false
     t.boolean "disabled", default: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end
