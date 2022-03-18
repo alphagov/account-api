@@ -9,3 +9,7 @@
   expired_auth_request_worker:
     every: '1h'
     class: ExpiredAuthRequestWorker
+
+  expired_sensitive_exception_worker:
+    every: '1h'
+    class: ExpiredSensitiveExceptionWorker
