@@ -1,4 +1,5 @@
 RSpec.describe OidcClient do
+  include ActiveSupport::Testing::TimeHelpers
   subject(:client) { described_class.new }
 
   before { stub_oidc_discovery }
@@ -69,10 +70,12 @@ RSpec.describe OidcClient do
       # rubocop:disable RSpec/InstanceVariable
       allow(@client_stub).to receive(:access_token!).and_return(access_token)
       # rubocop:enable RSpec/InstanceVariable
+
+      freeze_time
     end
 
     it "doesn't fetch an ID token by default" do
-      expect(client.tokens!).to eq({ access_token: "access-token" })
+      expect(client.tokens!).to eq({ access_token: "access-token", request_time: Time.zone.now.to_s })
     end
 
     it "fetches an ID token if a nonce is provided" do

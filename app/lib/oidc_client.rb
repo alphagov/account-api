@@ -39,6 +39,8 @@ class OidcClient
       tokens!(oidc_nonce: auth_request.oidc_nonce)
     end
 
+    @stored_tokens = tokens
+
     unless OidcUser.where(sub: tokens[:id_token].sub).exists?
       response = userinfo(access_token: tokens[:access_token])
       OidcUser.find_or_create_by_sub!(tokens[:id_token].sub, legacy_sub: response["legacy_subject_id"])
@@ -69,6 +71,7 @@ class OidcClient
         client.access_token!
       end
 
+    request_time = Time.zone.now
     response = access_token.token_response
 
     if oidc_nonce
@@ -81,6 +84,7 @@ class OidcClient
       access_token: response[:access_token],
       id_token_jwt: id_token_jwt,
       id_token: id_token,
+      request_time: request_time,
     }.compact
   rescue Rack::OAuth2::Client::Error => e
     capture_sensitive_exception(e)
@@ -115,6 +119,7 @@ private
       status_code: response&.status,
       response_body: response&.body,
       access_token: access_token,
+      tokens_response: @stored_tokens || {},
     }.compact
   end
 
