@@ -7,6 +7,7 @@ ruby File.read(".ruby-version").strip
 
 gem "rails", "7.0.2.4"
 
+gem "attr_required"
 gem "bootsnap"
 gem "dalli"
 gem "gds-api-adapters"
