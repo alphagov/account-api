@@ -8,6 +8,8 @@ RSpec.describe LogoutToken do
   let(:sid)         { SecureRandom.uuid }
   let(:client_id)   { "client_id" }
   let(:logout_event_name) { "http://schemas.openid.net/event/backchannel-logout" }
+  let(:jwt_signing_key) { "secret" }
+  let(:signed_jwt) { JSON::JWT.new(required_attributes).sign(jwt_signing_key).to_s }
   let(:required_attributes) do
     {
       iss: "https://server.example.com",
@@ -201,6 +203,18 @@ RSpec.describe LogoutToken do
           )
         }.to raise_error LogoutToken::TokenRecentlyUsed
       end
+    end
+  end
+
+  describe "LogoutToken.decode" do
+    it "decodes a signed JWT with a valid signing key" do
+      expect(LogoutToken.decode(signed_jwt, jwt_signing_key)).to be_a LogoutToken
+    end
+
+    it "raises an error if verification fails" do
+      expect {
+        LogoutToken.decode(signed_jwt, "wrong")
+      }.to raise_error JSON::JWS::VerificationFailed
     end
   end
 end
