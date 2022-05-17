@@ -3,6 +3,7 @@ require "openid_connect"
 
 class OidcClient
   class OAuthFailure < RuntimeError; end
+  class BackchannelLogoutFailure < RuntimeError; end
 
   attr_reader :client_id,
               :provider_uri
@@ -104,6 +105,19 @@ class OidcClient
   rescue JSON::ParserError => e
     capture_sensitive_exception(e, response_error_presenter(response, access_token))
     raise OAuthFailure
+  end
+
+  def logout_token(logout_token_jwt)
+    logout_token = LogoutToken.decode logout_token_jwt, discover.jwks
+    logout_token.verify! client_id: client_id, issuer: discover.issuer
+    {
+      logout_token_jwt: logout_token_jwt,
+      logout_token: logout_token,
+      request_time: Time.zone.now,
+    }.compact
+  rescue JSON::JWS::VerificationFailed => e
+    capture_sensitive_exception(e)
+    raise BackchannelLogoutFailure
   end
 
 private
