@@ -121,4 +121,10 @@ private
     Redis.current.set("logout-token/#{jti}", "OK")
     Redis.current.expire("logout-token/#{jti}", 2.minutes)
   end
+
+  class << self
+    def decode(jwt_string, key)
+      new JSON::JWT.decode jwt_string, key
+    end
+  end
 end
