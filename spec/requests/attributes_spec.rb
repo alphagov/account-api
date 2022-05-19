@@ -13,8 +13,8 @@ RSpec.describe "Attributes" do
   let(:cached_attribute_name) { "email" }
   let(:cached_attribute_value) { "email@example.com" }
 
-  let(:local_attribute_name) { "feedback_consent" }
-  let(:local_attribute_value) { true }
+  let(:local_attribute_name) { "local_attribute" }
+  let(:local_attribute_value) { "foo" }
 
   let(:protected_attribute_name) { "test_mfa_attribute" }
 
@@ -127,7 +127,7 @@ RSpec.describe "Attributes" do
     end
 
     it "correctly round-trips local attributes" do
-      old_value = false
+      old_value = "bar"
 
       account_session.user.update!(local_attribute_name => old_value)
 

@@ -34,8 +34,6 @@ class Internal::AuthenticationController < InternalController
     render json: {
       govuk_account_session: govuk_account_session.serialise,
       redirect_path: redirect_path,
-      cookie_consent: govuk_account_session.user.cookie_consent,
-      feedback_consent: govuk_account_session.user.feedback_consent,
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized

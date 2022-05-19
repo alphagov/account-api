@@ -139,10 +139,6 @@ identity provider redirects the user after signing in to
   - a session identifier
 - `redirect_path` *(optional)*
   - the `redirect_path` which was previously passed to `GET /api/oauth2/sign-in`, if given
-- `cookie_consent`
-  - whether the user has accepted or rejected usage cookies (a boolean, or `null` if the user hasn't saved a preference)
-- `feedback_consent`
-  - whether the user has accepted or rejected being contacted for feedback (a boolean, or `null` if the user hasn't saved a preference)
 
 #### Response codes
 
@@ -166,7 +162,6 @@ Response:
 {
     "govuk_account_session": "YWNjZXNzLXRva2Vu.cmVmcmVzaC10b2tlbg==",
     "redirect_path": "/guidance/keeping-a-pet-pig-or-micropig",
-    "cookie_consent": false,
 }
 ```
 

@@ -113,15 +113,6 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  provider_state "there is a valid OAuth response, with cookie consent 'true'" do
-    set_up do
-      auth_request = AuthRequest.generate!(redirect_path: "/some-arbitrary-path")
-      allow(AuthRequest).to receive(:from_oauth_state).and_return(auth_request)
-      stub_cached_attributes
-      oidc_user.update!(cookie_consent: true)
-    end
-  end
-
   provider_state "there is a valid user session" do
     set_up do
       stub_cached_attributes
@@ -137,13 +128,6 @@ Pact.provider_states_for "GDS API Adapters" do
       stub_cached_attributes
       stub_will_create_email_subscription "wizard-news-topic-slug"
       FactoryBot.create(:email_subscription, name: "wizard-news", oidc_user_id: oidc_user.id)
-    end
-  end
-
-  provider_state "there is a valid user session, with an attribute called 'feedback_consent'" do
-    set_up do
-      stub_cached_attributes
-      oidc_user.update!(feedback_consent: true)
     end
   end
 

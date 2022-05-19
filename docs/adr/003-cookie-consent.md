@@ -64,8 +64,8 @@ overhead is worth it.
 
 ### Store the consent in the account
 
-This is what we currently do.  It works for logged-in users, but
+This is what we used to do.  It worked for logged-in users, but
 logged-out users would still see two cookie banners.
 
-So, regardless of whether we persist the consent in the account (which
-we are likely to do), for logged-out users this is not a solution.
+So, regardless of whether we persist the consent in the account, 
+for logged-out users this is not a solution.

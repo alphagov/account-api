@@ -7,13 +7,14 @@ shared:
     type: cached
     writable: false
 
-  cookie_consent:
+  local_attribute:
     type: local
-
-  feedback_consent:
-    type: local
+    writable: true
 
 test:
+  test_local_attribute:
+    type: local
+
   test_mfa_attribute:
     type: local
     get_requires_mfa: true

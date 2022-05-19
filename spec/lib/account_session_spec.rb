@@ -94,7 +94,7 @@ RSpec.describe AccountSession do
 
     let(:cached_attribute_name) { "email" }
     let(:cached_attribute_value) { nil }
-    let(:local_attribute_name) { "feedback_consent" }
+    let(:local_attribute_name) { "local_attribute" }
     let(:local_attribute_value) { nil }
 
     describe "get_attributes" do
@@ -116,7 +116,7 @@ RSpec.describe AccountSession do
     end
 
     describe "set_attributes" do
-      let(:local_attribute_value) { true }
+      let(:local_attribute_value) { "true" }
 
       it "saves attributes to the database" do
         account_session.set_attributes(local_attribute_name => local_attribute_value)
