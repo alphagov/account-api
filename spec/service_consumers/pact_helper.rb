@@ -147,6 +147,13 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
+  provider_state "there is a valid user session, with an attribute called 'local_attribute'" do
+    set_up do
+      stub_cached_attributes
+      oidc_user.update!(local_attribute: true)
+    end
+  end
+
   provider_state "there is a user with subject identifier 'the-subject-identifier'" do
     set_up do
       user = FactoryBot.create(:oidc_user, sub: "the-subject-identifier")

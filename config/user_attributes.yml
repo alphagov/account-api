@@ -13,6 +13,9 @@ shared:
   feedback_consent:
     type: local
 
+  local_attribute:
+    type: local
+
 test:
   test_mfa_attribute:
     type: local

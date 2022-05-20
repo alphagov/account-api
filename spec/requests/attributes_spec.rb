@@ -13,7 +13,7 @@ RSpec.describe "Attributes" do
   let(:cached_attribute_name) { "email" }
   let(:cached_attribute_value) { "email@example.com" }
 
-  let(:local_attribute_name) { "feedback_consent" }
+  let(:local_attribute_name) { "local_attribute" }
   let(:local_attribute_value) { true }
 
   let(:protected_attribute_name) { "test_mfa_attribute" }
