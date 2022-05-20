@@ -28,5 +28,9 @@ Rails.application.routes.draw do
     namespace :personalisation do
       get "check-email-subscription", to: "check_email_subscription#show", as: :check_email_subscription
     end
+
+    namespace :oidc_events do
+      post "backchannel_logout", to: "oidc_events#backchannel_logout", as: :backchannel_logout
+    end
   end
 end

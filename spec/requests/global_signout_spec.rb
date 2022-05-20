@@ -37,7 +37,10 @@ RSpec.describe "Global Signout endpoint" do
 
     context "with a valid logout token" do
       it "records a session expiry notice"
-      it "it returns 200"
+      it "it returns 200" do
+        post backchannel_logout_path, params: {logout_token: "foo"}
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 end

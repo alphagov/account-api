@@ -1,4 +1,4 @@
-class OpenIdEvents < ApplicationController
+class OicdEventsController < ApplicationController
   def back_channel_logout
     logout_token = oidc_client.logout_token(logout_params[:logout_token])
     if logout_token
