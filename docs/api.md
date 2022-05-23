@@ -22,6 +22,7 @@ management. This API is not for other government services.
   - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
   - [`GET /api/personalisation/check-email-subscription`](#get-apipersonalisationcheck-email-subscription)
+  - [`POST /api/oidc_events/backchannel_logout`](#post-apioidc_eventsbackchannel_logout)
 - [API errors](#api-errors)
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -708,6 +709,23 @@ curl -H "GOVUK-Account-Session={{account_session_header}}" \
     "button_html": "<form>...</form>"
 }
 ```
+
+### `POST /api/oidc_events/backchannel_logout`
+
+A public API endpoint that Implements OpenID Connect Back-Channel Logout 1.0 - draft 07.
+
+#### Query parameters
+- `logout_token`
+  - A signed JWT
+
+#### Response codes
+
+- 400 if the Logout Token JWT is invalid or signature cannot be verified
+- 200 otherwise
+
+#### Note
+
+This endpoint is intended for calls to be made exclusively from the Digital Identity OP to the GOV.UK relaying party. As such it will not appear in GDS API Adaptors as it is not intended to be called from another Ruby compatible
 
 ## API errors
 
