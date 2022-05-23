@@ -13,7 +13,7 @@ management. This API is not for other government services.
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`GET /api/oauth2/end-session`](#get-apioauth2end-session)
   - [`GET /api/user`](#get-apiuser)
-  - [`GET /user/match-by-email`](#get-apiusermatch-by-email)
+  - [`GET /user/match-by-email`](#get-usermatch-by-email)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/email-subscriptions/:subscription_name`](#get-apiemail-subscriptionssubscription_name)
@@ -725,7 +725,7 @@ A public API endpoint that Implements OpenID Connect Back-Channel Logout 1.0 - d
 
 #### Note
 
-This endpoint is intended for calls to be made exclusively from the Digital Identity OP to the GOV.UK relaying party. As such it will not appear in GDS API Adaptors as it is not intended to be called from another Ruby compatible
+This endpoint will only ever receive calls from the Oidc OP (Digital Identity), as an OIDC event. Because of that, there is not an GDS API Adaptor for this endpoint, as it will not be called from another Ruby application.
 
 ## API errors
 
