@@ -2,6 +2,23 @@ RSpec.describe OidcClient do
   include ActiveSupport::Testing::TimeHelpers
   subject(:client) { described_class.new }
 
+  let(:jwt_signing_key) { "secret" }
+  let(:signed_jwt) { JSON::JWT.new(required_attributes).sign(jwt_signing_key).to_s }
+  let(:iss) { "https://server.example.com" }
+  let(:required_attributes) do
+    {
+      iss: iss,
+      sub: "user_id",
+      aud: "client-id",
+      iat: Time.zone.now.advance(minutes: -5),
+      sid: SecureRandom.uuid,
+      events: {
+        "http://schemas.openid.net/event/backchannel-logout" => {},
+      }.to_json,
+      jti: SecureRandom.uuid,
+    }
+  end
+
   before { stub_oidc_discovery }
 
   describe "auth_uri" do
@@ -160,6 +177,22 @@ RSpec.describe OidcClient do
     end
   end
 
+  describe "logout_token" do
+    before do
+      stub_jwk_discovery
+      stub_issuer
+    end
+
+    it "returns a hash of jwt payload, jwt and request_time" do
+      expect(client.logout_token(signed_jwt).keys).to eq %i[logout_token_jwt logout_token request_time]
+    end
+
+    it "raises an error if the signature does not match" do
+      signed_jwt = JSON::JWT.new(required_attributes).sign("boop").to_s
+      expect { client.logout_token(signed_jwt) }.to raise_error(OidcClient::BackchannelLogoutFailure)
+    end
+  end
+
   def stub_oidc_client(client = nil)
     oidc_client = instance_double("OpenIDConnect::Client")
 
@@ -172,5 +205,17 @@ RSpec.describe OidcClient do
     end
 
     oidc_client
+  end
+
+  def stub_jwk_discovery
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:jwks).and_return(jwt_signing_key)
+    # rubocop:enable RSpec/AnyInstance
+  end
+
+  def stub_issuer
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:issuer).and_return(iss)
+    # rubocop:enable RSpec/AnyInstance
   end
 end
