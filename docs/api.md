@@ -574,7 +574,7 @@ This endpoint requires the `update_protected_attributes` scope.
 #### Request parameters
 
 - `subject_identifier`
-  - the subject identifier of the user to delete
+  - the subject identifier of the user to update
 
 #### JSON request parameters
 
