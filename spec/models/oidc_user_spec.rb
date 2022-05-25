@@ -9,6 +9,15 @@ RSpec.describe OidcUser do
       expect { described_class.create!(sub: sub).destroy! }.to change(Tombstone, :count).by(1)
       expect(Tombstone.find_by(sub: sub)).not_to be_nil
     end
+
+    it "creates two tombstone records when two accounts with the same sub are deleted" do
+      sub = "subject-identifier"
+      Tombstone.destroy_all
+      2.times do
+        described_class.create!(sub: sub).destroy!
+      end
+      expect(Tombstone.count).to eq(2)
+    end
   end
 
   describe "#find_or_create_by_sub!" do
