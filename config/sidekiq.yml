@@ -13,3 +13,7 @@
   expired_sensitive_exception_worker:
     every: '1h'
     class: ExpiredSensitiveExceptionWorker
+
+  expired_tombstone_worker:
+    every: '1hr'
+    class: ExpiredTombstoneWorker
