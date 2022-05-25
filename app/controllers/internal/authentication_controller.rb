@@ -31,6 +31,8 @@ class Internal::AuthenticationController < InternalController
       fetch_cacheable_attributes!(govuk_account_session, details)
     end
 
+    invalidate_logout_notice(govuk_account_session.user.sub)
+
     render json: {
       govuk_account_session: govuk_account_session.serialise,
       redirect_path: redirect_path,
