@@ -67,6 +67,18 @@ RSpec.describe "Personalisation - Check Email Subscription" do
         end
       end
 
+      context "when a logout notice exists for that sub" do
+        before do
+          Redis.current.flushdb
+          Redis.current.set("logout-notice/#{sub}", Time.zone.now)
+        end
+
+        it "logs the user out" do
+          get personalisation_check_email_subscription_path, params: params, headers: headers
+          expect(response).to have_http_status(:unauthorized)
+        end
+      end
+
       context "when a base_path is passed" do
         let(:base_path) { "/foo" }
         let(:subscription_slug) { "foo" }

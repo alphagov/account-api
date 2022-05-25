@@ -8,7 +8,11 @@ class PersonalisationController < ApplicationController
       session_secret: Rails.application.secrets.session_secret,
     )
 
-    end_session! unless @govuk_account_session
+    if @govuk_account_session
+      end_session! if LogoutNotice.find(@govuk_account_session.user_id)
+    else
+      end_session!
+    end
   end
 
   before_action :set_caching_headers
