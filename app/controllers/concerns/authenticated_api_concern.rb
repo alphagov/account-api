@@ -10,7 +10,11 @@ module AuthenticatedApiConcern
         session_secret: Rails.application.secrets.session_secret,
       )
 
-      head :unauthorized unless @govuk_account_session
+      if @govuk_account_session
+        head :unauthorized if LogoutNotice.find(@govuk_account_session.user_id)
+      else
+        head :unauthorized
+      end
     end
 
     rescue_from AccountSession::ReauthenticateUserError do
