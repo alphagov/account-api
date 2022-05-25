@@ -5,6 +5,7 @@ RSpec.describe "Logout Notice Invalidation" do
   let(:sub) { "user-id" }
   let(:redis_state) { Redis.current.get("logout-notice/#{sub}") }
   let(:redis_formatted_time) { Time.zone.now.strftime("%F %T %z") }
+  let(:headers) { { "Content-Type" => "application/json" } }
 
   before do
     freeze_time
@@ -21,8 +22,18 @@ RSpec.describe "Logout Notice Invalidation" do
       auth_request = AuthRequest.create!(oauth_state: "foo", oidc_nonce: "bar", redirect_path: "/some-path")
       expect {
         post callback_path,
-          headers: { "Content-Type" => "application/json" },
+          headers: headers,
           params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+      }.to change {
+        Redis.current.get("logout-notice/#{sub}")
+      }.from(redis_formatted_time).to(nil)
+    end
+
+    it "invalidates the notice a successful call to destroy a user" do
+      user = FactoryBot.create(:oidc_user, sub: sub, legacy_sub: nil)
+      stub_request(:get, "#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/#{user.id}").to_return(status: 404)
+      expect {
+        delete oidc_user_path(subject_identifier: sub)
       }.to change {
         Redis.current.get("logout-notice/#{sub}")
       }.from(redis_formatted_time).to(nil)
