@@ -7,12 +7,6 @@ shared:
     type: cached
     writable: false
 
-  cookie_consent:
-    type: local
-
-  feedback_consent:
-    type: local
-
   local_attribute:
     type: local
 
