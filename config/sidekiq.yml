@@ -15,5 +15,5 @@
     class: ExpiredSensitiveExceptionWorker
 
   expired_tombstone_worker:
-    every: '1hr'
+    every: '1h'
     class: ExpiredTombstoneWorker
