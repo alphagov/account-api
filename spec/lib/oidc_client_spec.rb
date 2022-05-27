@@ -206,4 +206,16 @@ RSpec.describe OidcClient do
 
     oidc_client
   end
+
+  def stub_jwk_discovery
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:jwks).and_return(jwt_signing_key)
+    # rubocop:enable RSpec/AnyInstance
+  end
+
+  def stub_issuer
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:issuer).and_return(iss)
+    # rubocop:enable RSpec/AnyInstance
+  end
 end
