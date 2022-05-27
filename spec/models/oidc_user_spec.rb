@@ -28,16 +28,6 @@ RSpec.describe OidcUser do
       expect { described_class.find_or_create_by_sub!(sub) }.to change(described_class, :count).by(1)
     end
 
-    it "clears a LogoutNotice if one exists" do
-      time = Time.zone.now
-      Redis.current.set("logout-notice/#{sub}", time)
-      expect {
-        described_class.find_or_create_by_sub!(sub)
-      }.to change {
-        LogoutNotice.find(sub)
-      }.from(time.strftime("%F %T %z")).to(nil)
-    end
-
     it "saves the sub and legacy_sub" do
       user = described_class.find_or_create_by_sub!(sub, legacy_sub: legacy_sub)
       expect(user.sub).to eq(sub)

@@ -7,10 +7,6 @@ class ApplicationController < ActionController::API
 
 private
 
-  def invalidate_logout_notice(sub)
-    LogoutNotice.new(sub).remove
-  end
-
   def capture_sensitive_exceptions(user)
     yield
   rescue StandardError => e

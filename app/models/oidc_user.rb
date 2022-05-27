@@ -19,7 +19,6 @@ class OidcUser < ApplicationRecord
     transaction do
       find_by_sub!(sub, legacy_sub: legacy_sub)
     rescue ActiveRecord::RecordNotFound
-      LogoutNotice.new(sub).remove
       create!(sub: sub, legacy_sub: legacy_sub)
     end
   end

@@ -29,7 +29,6 @@ class Internal::OidcUsersController < InternalController
     )
 
     end_email_alert_api_subscriptions(user)
-    invalidate_logout_notice(params.fetch(:subject_identifier))
 
     user.destroy!
 
