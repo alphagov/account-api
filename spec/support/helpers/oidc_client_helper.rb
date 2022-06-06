@@ -36,6 +36,18 @@ module OidcClientHelper
     stub_request(:get, "http://openid-provider/userinfo-endpoint")
       .to_return(status: 200, body: attributes.to_json)
   end
+
+  def stub_jwk_discovery
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:jwks).and_return(jwt_signing_key)
+    # rubocop:enable RSpec/AnyInstance
+  end
+
+  def stub_issuer
+    # rubocop:disable RSpec/AnyInstance
+    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:issuer).and_return(iss)
+    # rubocop:enable RSpec/AnyInstance
+  end
 end
 
 RSpec.configuration.send :include, OidcClientHelper
