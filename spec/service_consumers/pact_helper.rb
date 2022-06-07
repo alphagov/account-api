@@ -140,13 +140,6 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  provider_state "there is a valid user session, with an attribute called 'feedback_consent'" do
-    set_up do
-      stub_cached_attributes
-      oidc_user.update!(feedback_consent: true)
-    end
-  end
-
   provider_state "there is a valid user session, with an attribute called 'local_attribute'" do
     set_up do
       stub_cached_attributes

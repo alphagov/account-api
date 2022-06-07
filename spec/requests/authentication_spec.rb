@@ -56,7 +56,7 @@ RSpec.describe "Authentication" do
       stub_userinfo
       post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
-      expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path, "cookie_consent" => nil, "feedback_consent" => nil)
+      expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path)
     end
 
     context "when cacheable attributes are missing" do
@@ -69,19 +69,6 @@ RSpec.describe "Authentication" do
         expect(stub).to have_been_made
         expect(user.reload.email).to eq("email@example.com")
         expect(user.reload.email_verified).to be(true)
-      end
-    end
-
-    context "when the user exists and has cookie & feedback consents saved" do
-      before { FactoryBot.create(:oidc_user, sub: "user-id", cookie_consent: cookie_consent, feedback_consent: feedback_consent) }
-
-      let(:cookie_consent) { true }
-      let(:feedback_consent) { false }
-
-      it "returns the consents" do
-        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
-        expect(response).to be_successful
-        expect(JSON.parse(response.body)).to include("cookie_consent" => cookie_consent, "feedback_consent" => feedback_consent)
       end
     end
 
