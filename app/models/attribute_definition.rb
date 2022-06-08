@@ -1,14 +1,11 @@
 class AttributeDefinition < OpenStruct
   include ActiveModel::Validations
 
-  validates :type, presence: true
-  validates :type, inclusion: %w[local cached]
   validates :check_requires_mfa, :get_requires_mfa, :set_requires_mfa, :writable, exclusion: [nil]
   validate :check_mfa_implies_get_mfa
   validate :get_mfa_implies_set_mfa_if_writable
-  validate :writable_implies_type_is_local
 
-  def initialize(type:, writable: true, check_requires_mfa: false, get_requires_mfa: false, set_requires_mfa: false)
+  def initialize(writable: true, check_requires_mfa: false, get_requires_mfa: false, set_requires_mfa: false)
     super
   end
 
@@ -20,11 +17,5 @@ class AttributeDefinition < OpenStruct
     return unless writable
 
     errors.add(:get_requires_mfa, "implies :set_requires_mfa") if get_requires_mfa && !set_requires_mfa
-  end
-
-  def writable_implies_type_is_local
-    return if type == "local"
-
-    errors.add(:writable, "implies :type is local") if writable
   end
 end
