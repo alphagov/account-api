@@ -19,7 +19,7 @@ RSpec.describe LogoutToken do
       sid: sid,
       events: {
         logout_event_name => {},
-      }.to_json,
+      },
       jti: jti,
     }
   end

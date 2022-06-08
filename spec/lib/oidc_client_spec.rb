@@ -14,7 +14,7 @@ RSpec.describe OidcClient do
       sid: SecureRandom.uuid,
       events: {
         "http://schemas.openid.net/event/backchannel-logout" => {},
-      }.to_json,
+      },
       jti: SecureRandom.uuid,
     }
   end
@@ -205,17 +205,5 @@ RSpec.describe OidcClient do
     end
 
     oidc_client
-  end
-
-  def stub_jwk_discovery
-    # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:jwks).and_return(jwt_signing_key)
-    # rubocop:enable RSpec/AnyInstance
-  end
-
-  def stub_issuer
-    # rubocop:disable RSpec/AnyInstance
-    allow_any_instance_of(OpenIDConnect::Discovery::Provider::Config::Response).to receive(:issuer).and_return(iss)
-    # rubocop:enable RSpec/AnyInstance
   end
 end

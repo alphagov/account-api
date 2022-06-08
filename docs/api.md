@@ -13,7 +13,7 @@ management. This API is not for other government services.
   - [`POST /api/oauth2/callback`](#post-apioauth2callback)
   - [`GET /api/oauth2/end-session`](#get-apioauth2end-session)
   - [`GET /api/user`](#get-apiuser)
-  - [`GET /user/match-by-email`](#get-apiusermatch-by-email)
+  - [`GET /user/match-by-email`](#get-usermatch-by-email)
   - [`GET /api/attributes`](#get-apiattributes)
   - [`PATCH /api/attributes`](#patch-apiattributes)
   - [`GET /api/email-subscriptions/:subscription_name`](#get-apiemail-subscriptionssubscription_name)
@@ -22,6 +22,7 @@ management. This API is not for other government services.
   - [`PUT /api/oidc-users/:subject_identifier`](#put-apioidc-userssubject_identifier)
   - [`DELETE /api/oidc-users/:subject_identifier`](#delete-apioidc-userssubject_identifier)
   - [`GET /api/personalisation/check-email-subscription`](#get-apipersonalisationcheck-email-subscription)
+  - [`POST /api/oidc_events/backchannel_logout`](#post-apioidc_eventsbackchannel_logout)
 - [API errors](#api-errors)
   - [MFA required](#mfa-required)
   - [Unknown attribute names](#unknown-attribute-names)
@@ -569,7 +570,7 @@ This endpoint requires the `update_protected_attributes` scope.
 #### Request parameters
 
 - `subject_identifier`
-  - the subject identifier of the user to delete
+  - the subject identifier of the user to update
 
 #### JSON request parameters
 
@@ -704,6 +705,23 @@ curl -H "GOVUK-Account-Session={{account_session_header}}" \
     "button_html": "<form>...</form>"
 }
 ```
+
+### `POST /api/oidc_events/backchannel_logout`
+
+A public API endpoint that Implements OpenID Connect Back-Channel Logout 1.0 - draft 07.
+
+#### Query parameters
+- `logout_token`
+  - A signed JWT
+
+#### Response codes
+
+- 400 if the Logout Token JWT is invalid or signature cannot be verified
+- 200 otherwise
+
+#### Note
+
+This endpoint will only ever receive calls from the Oidc OP (Digital Identity), as an OIDC event. Because of that, there is not an GDS API Adaptor for this endpoint, as it will not be called from another Ruby application.
 
 ## API errors
 
