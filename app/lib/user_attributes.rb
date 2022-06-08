@@ -5,8 +5,8 @@ class UserAttributes
 
   def initialize(attributes = nil)
     @attributes = (attributes || Rails.configuration.x.user_attributes).transform_values do |config|
+      config ||= {}
       AttributeDefinition.new(
-        type: config[:type],
         writable: config.fetch(:writable, true),
         check_requires_mfa: config.fetch(:check_requires_mfa, false),
         get_requires_mfa: config.fetch(:get_requires_mfa, false),
@@ -17,10 +17,6 @@ class UserAttributes
 
   def defined?(name)
     attributes.key? name.to_sym
-  end
-
-  def type(name)
-    fetch(name)[:type]
   end
 
   def is_writable?(name)
