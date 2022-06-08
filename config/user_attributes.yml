@@ -5,8 +5,6 @@ shared:
   email_verified:
     writable: false
 
-  local_attribute:
-
 test:
   test_mfa_attribute:
     get_requires_mfa: true
