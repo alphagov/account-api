@@ -59,6 +59,19 @@ RSpec.describe "Authentication" do
       expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path)
     end
 
+    context "when cacheable attributes are missing" do
+      let!(:user) { FactoryBot.create(:oidc_user, sub: "user-id", email: nil, email_verified: nil) }
+
+      it "fetches them from userinfo" do
+        stub = stub_userinfo(email: "email@example.com", email_verified: true)
+        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+        expect(response).to be_successful
+        expect(stub).to have_been_made
+        expect(user.reload.email).to eq("email@example.com")
+        expect(user.reload.email_verified).to be(true)
+      end
+    end
+
     it "returns a 401 if there is no matching AuthRequest" do
       post callback_path, headers: headers, params: { state: "something-else" }.to_json
       expect(response).to have_http_status(:unauthorized)

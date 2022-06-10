@@ -51,7 +51,7 @@ RSpec.describe "Email subscriptions" do
     let(:email_verified) { false }
 
     it "creates a new subscription record if one doesn't already exist" do
-      stub_attributes
+      stub_local_attributes
 
       expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
 
@@ -59,12 +59,20 @@ RSpec.describe "Email subscriptions" do
       expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
     end
 
+    context "when the email and email verified attributes are not cached locally" do
+      it "returns a 401" do
+        expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.not_to change(EmailSubscription, :count)
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
     context "when the user has verified their email address" do
       let(:email_verified) { true }
 
       it "calls email-alert-api to create the subscription" do
         expect_activate_email_subscription do
-          stub_attributes
+          stub_local_attributes
 
           expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
 
@@ -79,7 +87,7 @@ RSpec.describe "Email subscriptions" do
         FactoryBot.create(:email_subscription, oidc_user: session_identifier.user, email_alert_api_subscription_id: "prior-subscription-id")
       end
 
-      before { stub_attributes }
+      before { stub_local_attributes }
 
       it "calls email-alert-api to deactivate the old subscription" do
         stub_cancel_old = stub_email_alert_api_unsubscribes_a_subscription(email_subscription.email_alert_api_subscription_id)
@@ -107,7 +115,7 @@ RSpec.describe "Email subscriptions" do
       end
     end
 
-    def stub_attributes
+    def stub_local_attributes
       session_identifier.user.update!(
         email: email,
         email_verified: email_verified,

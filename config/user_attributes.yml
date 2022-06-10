@@ -1,11 +1,17 @@
 shared:
   email:
+    type: cached
     writable: false
 
   email_verified:
+    type: cached
     writable: false
+
+  local_attribute:
+    type: local
 
 test:
   test_mfa_attribute:
+    type: local
     get_requires_mfa: true
     set_requires_mfa: true

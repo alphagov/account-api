@@ -87,25 +87,40 @@ RSpec.describe AccountSession do
   describe "attributes" do
     before do
       account_session.set_attributes(
-        attribute_name => attribute_value,
+        cached_attribute_name => cached_attribute_value,
+        local_attribute_name => local_attribute_value,
       )
     end
 
-    let(:attribute_name) { "email" }
-    let(:attribute_value) { nil }
+    let(:cached_attribute_name) { "email" }
+    let(:cached_attribute_value) { nil }
+    let(:local_attribute_name) { "local_attribute" }
+    let(:local_attribute_value) { nil }
 
     describe "get_attributes" do
-      it "returns nil for a missing attribute" do
-        expect(account_session.get_attributes([attribute_name])).to eq({})
+      it "throws an exception for a missing cached attribute" do
+        expect { account_session.get_attributes([cached_attribute_name]) }.to raise_error(AccountSession::MissingCachedAttribute)
+      end
+
+      it "returns nil for a missing local attribute" do
+        expect(account_session.get_attributes([local_attribute_name])).to eq({})
+      end
+
+      context "when the attribute value is cached" do
+        let(:cached_attribute_value) { "email@example.com" }
+
+        it "returns it" do
+          expect(account_session.get_attributes([cached_attribute_name])).to eq({ cached_attribute_name => cached_attribute_value })
+        end
       end
     end
 
     describe "set_attributes" do
-      let(:attribute_value) { "email@example.com" }
+      let(:local_attribute_value) { true }
 
       it "saves attributes to the database" do
-        account_session.set_attributes(attribute_name => attribute_value)
-        expect(account_session.user[attribute_name]).to eq(attribute_value)
+        account_session.set_attributes(local_attribute_name => local_attribute_value)
+        expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
       end
     end
   end

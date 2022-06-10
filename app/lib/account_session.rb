@@ -7,6 +7,8 @@ class AccountSession
 
   class SessionVersionInvalid < ReauthenticateUserError; end
 
+  class MissingCachedAttribute < ReauthenticateUserError; end
+
   class UserDestroyed < ReauthenticateUserError; end
 
   CURRENT_VERSION = 1
@@ -63,6 +65,9 @@ class AccountSession
   end
 
   def get_attributes(attribute_names)
+    values_to_cache = attribute_names.select { |name| user_attributes.type(name) == "cached" }.select { |name| user[name].nil? }
+    raise MissingCachedAttribute unless values_to_cache.empty?
+
     user.get_attributes_by_name(attribute_names).compact
   end
 
