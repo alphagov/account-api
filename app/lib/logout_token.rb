@@ -61,7 +61,7 @@ private
     end
     self.iat = Time.zone.at(iat.to_i) unless iat.nil?
     self.auth_time = auth_time.to_i unless auth_time.nil?
-    self.events = events unless events.nil?
+    self.events = JSON.parse(events) unless events.nil?
   end
 
   def validate_prohibited_attribtues(attributes)
