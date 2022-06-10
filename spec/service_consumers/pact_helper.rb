@@ -140,10 +140,10 @@ Pact.provider_states_for "GDS API Adapters" do
     end
   end
 
-  provider_state "there is a valid user session, with an attribute called 'local_attribute'" do
+  provider_state "there is a valid user session, with an attribute called 'email'" do
     set_up do
       stub_cached_attributes
-      oidc_user.update!(local_attribute: true)
+      oidc_user.update!(email: "email@example.com")
     end
   end
 
