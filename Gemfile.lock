@@ -156,7 +156,7 @@ GEM
     govuk_personalisation (0.12.0)
       plek (>= 1.9.0)
       rails (>= 6, < 8)
-    govuk_publishing_components (29.15.0)
+    govuk_publishing_components (29.15.1)
       govuk_app_config
       govuk_personalisation (>= 0.7.0)
       kramdown
@@ -187,7 +187,7 @@ GEM
       mime-types (~> 3.0)
       multi_xml (>= 0.5.2)
     httpclient (2.8.3)
-    i18n (1.11.0)
+    i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.6.1)
     json-jwt (1.14.0)
@@ -483,7 +483,7 @@ GEM
     timeout (0.3.0)
     tins (1.31.1)
       sync
-    tzinfo (2.0.4)
+    tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unf (0.1.4)
       unf_ext
