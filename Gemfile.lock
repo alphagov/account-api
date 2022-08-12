@@ -190,10 +190,11 @@ GEM
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.6.1)
-    json-jwt (1.14.0)
+    json-jwt (1.15.1)
       activesupport (>= 4.2)
       aes_key_wrap
       bindata
+      httpclient
     json-schema (2.8.1)
       addressable (>= 2.4)
     jwt (2.4.1)
