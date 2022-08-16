@@ -128,7 +128,7 @@ GEM
     fugit (1.5.3)
       et-orbi (~> 1, >= 1.2.7)
       raabro (~> 1.4)
-    gds-api-adapters (81.0.3)
+    gds-api-adapters (81.0.4)
       addressable
       link_header
       null_logger
@@ -145,7 +145,7 @@ GEM
       warden-oauth2 (~> 0.0.1)
     globalid (1.0.0)
       activesupport (>= 5.0)
-    govuk_app_config (4.6.3)
+    govuk_app_config (4.7.0)
       logstasher (~> 2.1)
       prometheus_exporter (~> 2.0)
       puma (~> 5.6)
