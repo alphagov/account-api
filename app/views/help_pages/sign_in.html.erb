@@ -14,29 +14,29 @@
   <%
     items = []
     links = [{
+      text: "HMRC services",
+      path: "/log-in-register-hmrc-online-services",
+      description: "Sign in using Government Gateway for tax services including self-assessment.",
+    },{
       text: "Universal Credit",
       path: "/sign-in-universal-credit",
       description: "See and update your Universal credit claim.",
     },{
-      text: "HMRC services",
-      path: "/log-in-register-hmrc-online-services",
-      description: "Sign in to HMRC services using Government Gateway.",
+      text: "View and prove your immigration status",
+      path: "/view-prove-immigration-status",
+      description: "View your immigration status online or prove your status to others.",
     },{
-      text: "Report a COVID-19 rapid lateral flow test result",
-      path: "/report-covid19-result",
-      description: "Report your result to the NHS after using a rapid lateral flow test kit.",
+      text: "Manage your GOV.UK email subscriptions",
+      path: "/email/manage",
+      description: "Sign in to manage the emails you get about GOV.UK pages you’re interested in.",
+    },{
+      text: "Student finance login",
+      path: "/student-finance-register-login",
+      description: "Manage your student finance and account details.",
     },{
       text: "Check your State Pension forecast",
       path: "/check-state-pension",
       description: "Find out how much State Pension you could get and when.",
-    },{
-      text: "Childcare account",
-      path: "/sign-in-childcare-account",
-      description: "Get 30 hours free childcare and pay for Tax-Free Childcare.",
-    },{
-      text: "Manage your GOV.UK email subscriptions",
-      path: "/email/manage",
-      description: "Manage the emails you get about GOV.UK pages you’re interested in.",
     }]
     links.each_with_index do |link, index|
       link[:data_attributes] = {
