@@ -1,6 +1,6 @@
 class LogoutNotice
   def self.find(sub)
-    Redis.current.get("logout-notice/#{sub}")
+    Redis.new.get("logout-notice/#{sub}")
   end
 
   def initialize(sub)
@@ -8,11 +8,11 @@ class LogoutNotice
   end
 
   def persist
-    Redis.current.set("logout-notice/#{sub}", Time.zone.now)
+    Redis.new.set("logout-notice/#{sub}", Time.zone.now)
   end
 
   def remove
-    Redis.current.del("logout-notice/#{sub}")
+    Redis.new.del("logout-notice/#{sub}")
   end
 
 private

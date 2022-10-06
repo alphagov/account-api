@@ -30,7 +30,7 @@ RSpec.describe OidcUser do
 
     it "clears a LogoutNotice if one exists" do
       time = Time.zone.now
-      Redis.current.set("logout-notice/#{sub}", time)
+      Redis.new.set("logout-notice/#{sub}", time)
       expect {
         described_class.find_or_create_by_sub!(sub)
       }.to change {

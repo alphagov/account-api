@@ -7,7 +7,7 @@ RSpec.describe LogoutNotice do
 
   before do
     freeze_time
-    Redis.current.flushdb
+    Redis.new.flushdb
   end
 
   describe ".find" do
@@ -16,7 +16,7 @@ RSpec.describe LogoutNotice do
     end
 
     it "returns the created at timestamp if a Notice has been persisted" do
-      Redis.current.set("logout-notice/#{sub}", Time.zone.now)
+      Redis.new.set("logout-notice/#{sub}", Time.zone.now)
       expect(described_class.find(sub)).to eq(redis_formatted_time)
     end
   end
@@ -28,13 +28,13 @@ RSpec.describe LogoutNotice do
 
     it "persists a sub with in a logout notice timespace with a timestamp" do
       instance.persist
-      expect(Redis.current.get("logout-notice/#{sub}")).to eq(redis_formatted_time)
+      expect(Redis.new.get("logout-notice/#{sub}")).to eq(redis_formatted_time)
     end
   end
 
   describe "#remove" do
     it "returns 1 if the record was removed" do
-      Redis.current.set("logout-notice/#{sub}", Time.zone.now)
+      Redis.new.set("logout-notice/#{sub}", Time.zone.now)
       expect(instance.remove).to eq(1)
     end
 
