@@ -112,14 +112,14 @@ private
   end
 
   def is_recent_jti?(jti)
-    return true if Redis.current.get("logout-token/#{jti}") == "OK"
+    return true if Redis.new.get("logout-token/#{jti}") == "OK"
 
     false
   end
 
   def record_jti_as_recently_verified(jti)
-    Redis.current.set("logout-token/#{jti}", "OK")
-    Redis.current.expire("logout-token/#{jti}", 2.minutes)
+    Redis.new.set("logout-token/#{jti}", "OK")
+    Redis.new.expire("logout-token/#{jti}", 2.minutes)
   end
 
   class << self

@@ -27,7 +27,7 @@ RSpec.describe LogoutToken do
   let(:required_attribute_keys) { %i[iss aud iat jti events] }
   let(:optional_attribute_keys) { %i[sub sid auth_time] }
 
-  before { Redis.current.flushdb }
+  before { Redis.new.flushdb }
 
   describe "attributes" do
     it "validates required attributes" do
@@ -194,8 +194,8 @@ RSpec.describe LogoutToken do
 
     context "when a JTI is already in the cache" do
       it "raises an error" do
-        Redis.current.set("logout-token/#{jti}", "OK")
-        Redis.current.expire("logout-token/#{jti}", 2.minutes)
+        Redis.new.set("logout-token/#{jti}", "OK")
+        Redis.new.expire("logout-token/#{jti}", 2.minutes)
         expect {
           logout_token.verify!(
             issuer: attributes[:iss],

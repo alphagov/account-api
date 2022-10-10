@@ -25,7 +25,7 @@ RSpec.describe "OIDC Backchannel Logout" do
     allow(oidc_client).to receive(:logout_token).and_return(oidc_client_logout_token)
     allow(logout_token).to receive(:sub).and_return(sub)
     freeze_time
-    Redis.current.flushdb
+    Redis.new.flushdb
   end
 
   describe "POST" do
@@ -43,7 +43,7 @@ RSpec.describe "OIDC Backchannel Logout" do
     context "with a valid logout token" do
       it "records a session expiry notice" do
         post backchannel_logout_path, params: params
-        expect(Redis.current.get("logout-notice/#{sub}")).to eq(redis_formatted_time)
+        expect(Redis.new.get("logout-notice/#{sub}")).to eq(redis_formatted_time)
       end
 
       it "returns 200" do
