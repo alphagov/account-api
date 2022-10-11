@@ -22,7 +22,7 @@ gem "openid_connect"
 gem "pg"
 
 # https://github.com/moove-it/sidekiq-scheduler/issues/345
-gem "sidekiq-scheduler", "4.0.2"
+gem "sidekiq-scheduler", "4.0.3"
 
 group :development, :test do
   gem "awesome_print"
