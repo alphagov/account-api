@@ -10,8 +10,8 @@ RSpec.describe "OIDC Backchannel Logout" do
 
   let(:oidc_client_logout_token) do
     {
-      logout_token_jwt: logout_token_jwt,
-      logout_token: logout_token,
+      logout_token_jwt:,
+      logout_token:,
       request_time: Time.zone.now,
     }
   end

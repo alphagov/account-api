@@ -12,7 +12,7 @@ module PactStubHelpers
   def stub_cached_attributes(email_verified: true)
     oidc_user.update!(
       email: EMAIL_ADDRESS,
-      email_verified: email_verified,
+      email_verified:,
     )
   end
 
@@ -23,7 +23,7 @@ module PactStubHelpers
     )
 
     stub_email_alert_api_creates_a_subscription(
-      subscriber_list_id: subscriber_list_id,
+      subscriber_list_id:,
       address: EMAIL_ADDRESS,
       frequency: "daily",
       returned_subscription_id: "subscription-id",

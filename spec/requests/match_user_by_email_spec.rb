@@ -4,7 +4,7 @@ RSpec.describe "Matching users by email address" do
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_header_value }.compact }
 
   let(:email) { "no-such-email@example.com" }
-  let(:params) { { email: email } }
+  let(:params) { { email: } }
 
   it "returns 404 Not Found" do
     get "/api/user/match-by-email", params: params, headers: headers
@@ -57,7 +57,7 @@ RSpec.describe "Matching users by email address" do
       end
 
       context "when the address matches the session" do
-        before { session_identifier.user.update!(email: email) }
+        before { session_identifier.user.update!(email:) }
 
         let(:email) { "user-from-session@example.com" }
 

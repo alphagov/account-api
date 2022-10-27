@@ -38,7 +38,7 @@ RSpec.describe "Email subscriptions" do
 
         it "deletes the subscription here and returns a 404" do
           stub_email_alert_api_unsubscribes_a_subscription(email_subscription.email_alert_api_subscription_id)
-          expect { get email_subscription_path(subscription_name: email_subscription.name), headers: headers }.to change(EmailSubscription, :count).by(-1)
+          expect { get email_subscription_path(subscription_name: email_subscription.name), headers: }.to change(EmailSubscription, :count).by(-1)
           expect(response).to have_http_status(:not_found)
         end
       end
@@ -53,7 +53,7 @@ RSpec.describe "Email subscriptions" do
     it "creates a new subscription record if one doesn't already exist" do
       stub_local_attributes
 
-      expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
+      expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: }.to change(EmailSubscription, :count).by(1)
 
       expect(response).to be_successful
       expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
@@ -61,7 +61,7 @@ RSpec.describe "Email subscriptions" do
 
     context "when the email and email verified attributes are not cached locally" do
       it "returns a 401" do
-        expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.not_to change(EmailSubscription, :count)
+        expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: }.not_to change(EmailSubscription, :count)
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -74,7 +74,7 @@ RSpec.describe "Email subscriptions" do
         expect_activate_email_subscription do
           stub_local_attributes
 
-          expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: headers }.to change(EmailSubscription, :count).by(1)
+          expect { put email_subscription_path(subscription_name: "name"), params: params.to_json, headers: }.to change(EmailSubscription, :count).by(1)
 
           expect(response).to be_successful
           expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
@@ -117,8 +117,8 @@ RSpec.describe "Email subscriptions" do
 
     def stub_local_attributes
       session_identifier.user.update!(
-        email: email,
-        email_verified: email_verified,
+        email:,
+        email_verified:,
       )
     end
 
@@ -157,7 +157,7 @@ RSpec.describe "Email subscriptions" do
       it "deletes it, calls email-alert-api to cancel the old subscription, and returns a 204" do
         stub_cancel_old = stub_email_alert_api_unsubscribes_a_subscription(email_subscription.email_alert_api_subscription_id)
 
-        expect { delete email_subscription_path(subscription_name: email_subscription.name), headers: headers }.to change(EmailSubscription, :count).by(-1)
+        expect { delete email_subscription_path(subscription_name: email_subscription.name), headers: }.to change(EmailSubscription, :count).by(-1)
 
         expect(response).to have_http_status(:no_content)
         expect(stub_cancel_old).to have_been_made

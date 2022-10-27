@@ -5,7 +5,7 @@ RSpec.describe "Attributes" do
   end
 
   let(:session_identifier) { account_session.serialise }
-  let(:account_session) { placeholder_govuk_account_session_object(mfa: mfa, digital_identity_session: digital_identity_session) }
+  let(:account_session) { placeholder_govuk_account_session_object(mfa:, digital_identity_session:) }
   let(:mfa) { true }
   let(:digital_identity_session) { true }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier } }
@@ -118,7 +118,7 @@ RSpec.describe "Attributes" do
 
   describe "PATCH" do
     let(:attributes) { { local_attribute_name => local_attribute_value } }
-    let(:params) { { attributes: attributes } }
+    let(:params) { { attributes: } }
 
     it "updates the database" do
       patch attributes_path, headers: headers, params: params.to_json

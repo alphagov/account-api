@@ -10,7 +10,7 @@ class AuthRequest < ApplicationRecord
     create!(
       oauth_state: SecureRandom.hex(16),
       oidc_nonce: SecureRandom.hex(16),
-      redirect_path: redirect_path,
+      redirect_path:,
     )
   end
 

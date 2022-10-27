@@ -34,8 +34,8 @@ class OidcClient::Fake < OidcClient
 
     {
       access_token: user.sub,
-      id_token_jwt: id_token_jwt,
-      id_token: id_token,
+      id_token_jwt:,
+      id_token:,
     }.compact
   end
 

@@ -9,7 +9,7 @@ class Internal::MatchUserByEmailController < InternalController
       return
     end
 
-    if OidcUser.where(email: email).exists?
+    if OidcUser.where(email:).exists?
       render json: { match: false }
     else
       head :not_found
@@ -23,7 +23,7 @@ private
     return unless encoded_session
 
     @govuk_account_session = AccountSession.deserialise(
-      encoded_session: encoded_session,
+      encoded_session:,
       session_secret: Rails.application.secrets.session_secret,
     )
   rescue AccountSession::ReauthenticateUserError

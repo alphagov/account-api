@@ -15,12 +15,12 @@ RSpec.describe LogoutToken do
       iss: "https://server.example.com",
       sub: "user_id",
       aud: client_id,
-      iat: iat,
-      sid: sid,
+      iat:,
+      sid:,
       events: {
         logout_event_name => {},
       },
-      jti: jti,
+      jti:,
     }
   end
 

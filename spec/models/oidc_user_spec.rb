@@ -6,15 +6,15 @@ RSpec.describe OidcUser do
   describe "callbacks" do
     it "creates a tombstone record for the sub when destroyed" do
       sub = "subject-identifier"
-      expect { described_class.create!(sub: sub).destroy! }.to change(Tombstone, :count).by(1)
-      expect(Tombstone.find_by(sub: sub)).not_to be_nil
+      expect { described_class.create!(sub:).destroy! }.to change(Tombstone, :count).by(1)
+      expect(Tombstone.find_by(sub:)).not_to be_nil
     end
 
     it "creates two tombstone records when two accounts with the same sub are deleted" do
       sub = "subject-identifier"
       Tombstone.destroy_all
       2.times do
-        described_class.create!(sub: sub).destroy!
+        described_class.create!(sub:).destroy!
       end
       expect(Tombstone.count).to eq(2)
     end
@@ -39,13 +39,13 @@ RSpec.describe OidcUser do
     end
 
     it "saves the sub and legacy_sub" do
-      user = described_class.find_or_create_by_sub!(sub, legacy_sub: legacy_sub)
+      user = described_class.find_or_create_by_sub!(sub, legacy_sub:)
       expect(user.sub).to eq(sub)
       expect(user.legacy_sub).to eq(legacy_sub)
     end
 
     context "when the user already exists" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub:) }
 
       it "returns the existing model" do
         expect { described_class.find_or_create_by_sub!(sub) }.not_to change(described_class, :count)
@@ -59,14 +59,14 @@ RSpec.describe OidcUser do
     end
 
     context "when the sub does not match but the legacy sub does" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: "foo", legacy_sub: legacy_sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: "foo", legacy_sub:) }
 
       it "finds the user by legacy sub" do
-        expect(described_class.find_or_create_by_sub!("bar", legacy_sub: legacy_sub).id).to eq(user.id)
+        expect(described_class.find_or_create_by_sub!("bar", legacy_sub:).id).to eq(user.id)
       end
 
       it "updates the sub" do
-        expect(described_class.find_or_create_by_sub!("bar", legacy_sub: legacy_sub).sub).to eq("bar")
+        expect(described_class.find_or_create_by_sub!("bar", legacy_sub:).sub).to eq("bar")
       end
     end
   end

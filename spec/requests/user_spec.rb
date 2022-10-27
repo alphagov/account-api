@@ -7,7 +7,7 @@ RSpec.describe "User information endpoint" do
     session_identifier&.set_attributes(attributes)
   end
 
-  let(:session_identifier) { placeholder_govuk_account_session_object(mfa: mfa) }
+  let(:session_identifier) { placeholder_govuk_account_session_object(mfa:) }
   let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier&.serialise }.compact }
   let(:mfa) { false }
 

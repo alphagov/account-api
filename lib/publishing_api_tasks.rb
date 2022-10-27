@@ -23,7 +23,7 @@ class PublishingApiTasks
         document_type: "help_page",
         schema_name: "help_page",
         rendering_app: content_item.fetch(:rendering_app),
-        base_path: base_path,
+        base_path:,
         title: content_item.fetch(:title),
         description: content_item.fetch(:description),
         details: {
@@ -53,7 +53,7 @@ class PublishingApiTasks
         {
           document_type: "redirect",
           schema_name: "redirect",
-          base_path: base_path,
+          base_path:,
           redirects: [
             {
               path: base_path,
@@ -123,7 +123,7 @@ class PublishingApiTasks
     @logger.info("Publishing content for #{payload.fetch(:base_path)}")
     @publishing_api.put_content(
       content_id,
-      payload.merge(publishing_app: PUBLISHING_APP, locale: LOCALE, update_type: update_type),
+      payload.merge(publishing_app: PUBLISHING_APP, locale: LOCALE, update_type:),
     )
     @publishing_api.publish(content_id, update_type, locale: LOCALE)
   end

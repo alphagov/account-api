@@ -7,7 +7,7 @@ RSpec.describe OidcClient do
   let(:iss) { "https://server.example.com" }
   let(:required_attributes) do
     {
-      iss: iss,
+      iss:,
       sub: "user_id",
       aud: "client-id",
       iat: Time.zone.now.advance(minutes: -5),

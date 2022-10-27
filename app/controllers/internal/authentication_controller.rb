@@ -5,7 +5,7 @@ class Internal::AuthenticationController < InternalController
     mfa = params[:mfa] == "true"
 
     render json: {
-      auth_uri: oidc_client.auth_uri(auth_request, mfa: mfa),
+      auth_uri: oidc_client.auth_uri(auth_request, mfa:),
       state: auth_request.to_oauth_state,
     }
   end
@@ -35,7 +35,7 @@ class Internal::AuthenticationController < InternalController
 
     render json: {
       govuk_account_session: govuk_account_session.serialise,
-      redirect_path: redirect_path,
+      redirect_path:,
     }
   rescue OidcClient::OAuthFailure
     head :unauthorized

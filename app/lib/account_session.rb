@@ -37,7 +37,7 @@ class AccountSession
     deserialised_options = JSON.parse(serialised_session).symbolize_keys
     return if deserialised_options.blank?
 
-    new(session_secret: session_secret, **deserialised_options)
+    new(session_secret:, **deserialised_options)
   rescue ReauthenticateUserError
     nil
   end
@@ -56,8 +56,8 @@ class AccountSession
 
   def to_hash
     {
-      id_token: id_token,
-      user_id: user_id,
+      id_token:,
+      user_id:,
       digital_identity_session: true,
       mfa: @mfa,
       version: CURRENT_VERSION,

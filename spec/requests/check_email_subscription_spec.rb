@@ -11,7 +11,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
     let(:base_path) { nil }
     let(:topic_slug) { nil }
     let(:button_location) { nil }
-    let(:params) { { base_path: base_path, topic_slug: topic_slug, button_location: button_location }.compact }
+    let(:params) { { base_path:, topic_slug:, button_location: }.compact }
 
     let(:active) { false }
 
@@ -84,7 +84,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_find_subscriber_by_govuk_account(oidc_user.id, subscriber_id, "test@example.com") }
 
           context "when the user has active subscriptions" do
-            before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
+            before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions:) }
 
             it "returns subscription status details as not active" do
               get personalisation_check_email_subscription_path, params: params, headers: headers
@@ -157,7 +157,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
         let(:topic_slug) { "topic_slug" }
 
         context "when the user has active subscriptions" do
-          before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions: subscriptions) }
+          before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions:) }
 
           it "returns subscription status details as not active" do
             get personalisation_check_email_subscription_path, params: params, headers: headers
