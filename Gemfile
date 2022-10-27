@@ -20,6 +20,7 @@ gem "json-jwt"
 gem "notifications-ruby-client"
 gem "openid_connect"
 gem "pg"
+gem "sentry-sidekiq"
 
 # https://github.com/moove-it/sidekiq-scheduler/issues/345
 gem "sidekiq-scheduler", "4.0.3"
