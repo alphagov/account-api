@@ -5,7 +5,7 @@ require "gds_api/test_helpers/publishing_api"
 RSpec.describe PublishingApiTasks do
   include GdsApi::TestHelpers::PublishingApi
 
-  subject(:tasks) { described_class.new(logger: logger, content_items: content_items) }
+  subject(:tasks) { described_class.new(logger:, content_items:) }
 
   let(:logger) { instance_double("Logger") }
   let(:content_items) { nil }
@@ -83,7 +83,7 @@ RSpec.describe PublishingApiTasks do
     before { allow(logger).to receive(:info) }
 
     let(:content_id) { SecureRandom.uuid }
-    let(:special_route) { { content_id: content_id, base_path: "/foo", title: "title", rendering_app: "frontend" } }
+    let(:special_route) { { content_id:, base_path: "/foo", title: "title", rendering_app: "frontend" } }
     let(:content_items) { { special_routes: [special_route] } }
 
     it "takes ownership of the route and publishes the content item" do
@@ -155,10 +155,10 @@ RSpec.describe PublishingApiTasks do
   end
 
   def stub_call_put_content(content_id, payload, update_type)
-    stub_publishing_api_put_content(content_id, hash_including(payload.merge(publishing_app: "account-api", locale: "en", update_type: update_type)))
+    stub_publishing_api_put_content(content_id, hash_including(payload.merge(publishing_app: "account-api", locale: "en", update_type:)))
   end
 
   def stub_call_publish(content_id, update_type)
-    stub_publishing_api_publish(content_id, { update_type: update_type, locale: "en" })
+    stub_publishing_api_publish(content_id, { update_type:, locale: "en" })
   end
 end

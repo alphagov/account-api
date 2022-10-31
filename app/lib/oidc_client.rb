@@ -57,7 +57,7 @@ class OidcClient
     access_token =
       if use_client_private_key_auth?
         client.access_token!(
-          client_id: client_id,
+          client_id:,
           client_auth_method: "jwt_bearer",
           client_assertion: JSON::JWT.new(
             iss: client_id,
@@ -78,14 +78,14 @@ class OidcClient
     if oidc_nonce
       id_token_jwt = access_token.id_token
       id_token = OpenIDConnect::ResponseObject::IdToken.decode id_token_jwt, discover.jwks
-      id_token.verify! client_id: client_id, issuer: discover.issuer, nonce: oidc_nonce
+      id_token.verify! client_id:, issuer: discover.issuer, nonce: oidc_nonce
     end
 
     {
       access_token: response[:access_token],
-      id_token_jwt: id_token_jwt,
-      id_token: id_token,
-      request_time: request_time,
+      id_token_jwt:,
+      id_token:,
+      request_time:,
     }.compact
   rescue Rack::OAuth2::Client::Error => e
     capture_sensitive_exception(e)
@@ -95,7 +95,7 @@ class OidcClient
   def userinfo(access_token:)
     response = time_and_return "userinfo" do
       oauth_request(
-        access_token: access_token,
+        access_token:,
         method: :get,
         uri: userinfo_endpoint,
       )
@@ -111,8 +111,8 @@ class OidcClient
     logout_token = LogoutToken.decode logout_token_jwt, discover.jwks
     logout_token.verify! client_id: client_id, issuer: discover.issuer
     {
-      logout_token_jwt: logout_token_jwt,
-      logout_token: logout_token,
+      logout_token_jwt:,
+      logout_token:,
       request_time: Time.zone.now,
     }.compact
   rescue JSON::JWS::VerificationFailed => e
@@ -132,7 +132,7 @@ private
     {
       status_code: response&.status,
       response_body: response&.body,
-      access_token: access_token,
+      access_token:,
       tokens_response: @stored_tokens || {},
     }.compact
   end
@@ -142,7 +142,7 @@ private
     retries = 0
 
     begin
-      response = Rack::OAuth2::AccessToken::Bearer.new(access_token: access_token).public_send(method, *args)
+      response = Rack::OAuth2::AccessToken::Bearer.new(access_token:).public_send(method, *args)
       raise Retry if RETRY_STATUSES.include? response.status
 
       response
@@ -166,10 +166,10 @@ private
       begin
         client_options = {
           identifier: client_id,
-          redirect_uri: redirect_uri,
-          authorization_endpoint: authorization_endpoint,
-          token_endpoint: token_endpoint,
-          userinfo_endpoint: userinfo_endpoint,
+          redirect_uri:,
+          authorization_endpoint:,
+          token_endpoint:,
+          userinfo_endpoint:,
         }
 
         client_options.merge!(secret: @secret) unless use_client_private_key_auth?

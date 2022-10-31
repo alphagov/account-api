@@ -7,11 +7,11 @@ RSpec.describe AccountSession do
   let(:version) { AccountSession::CURRENT_VERSION }
   let(:params) do
     {
-      id_token: id_token,
-      user_id: user_id,
-      mfa: mfa,
+      id_token:,
+      user_id:,
+      mfa:,
       digital_identity_session: true,
-      version: version,
+      version:,
     }.compact
   end
 

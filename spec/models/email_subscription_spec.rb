@@ -6,9 +6,9 @@ RSpec.describe EmailSubscription do
   subject(:email_subscription) do
     FactoryBot.create(
       :email_subscription,
-      oidc_user: oidc_user,
-      name: name,
-      email_alert_api_subscription_id: email_alert_api_subscription_id,
+      oidc_user:,
+      name:,
+      email_alert_api_subscription_id:,
     )
   end
 
@@ -31,7 +31,7 @@ RSpec.describe EmailSubscription do
     let(:email) { "email@example.com" }
     let(:email_verified) { false }
 
-    before { email_subscription.oidc_user.update!(email: email, email_verified: email_verified) }
+    before { email_subscription.oidc_user.update!(email:, email_verified:) }
 
     it "doesn't call email-alert-api if the user is not confirmed" do
       stub = stub_subscriber_list

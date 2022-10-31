@@ -33,7 +33,7 @@ private
       base_path: @base_path,
       topic_slug: @topic_slug,
       button_location: @button_location,
-      active: active,
+      active:,
       button_html: render_button_component(active),
     }.compact
   end

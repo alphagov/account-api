@@ -7,20 +7,20 @@ class OidcUser < ApplicationRecord
 
   def self.find_by_sub!(sub, legacy_sub: nil)
     if legacy_sub
-      find_by(sub: sub) || find_by!(legacy_sub: legacy_sub).tap do |legacy_user|
-        legacy_user.update!(sub: sub)
+      find_by(sub:) || find_by!(legacy_sub:).tap do |legacy_user|
+        legacy_user.update!(sub:)
       end
     else
-      find_by!(sub: sub)
+      find_by!(sub:)
     end
   end
 
   def self.find_or_create_by_sub!(sub, legacy_sub: nil)
     transaction do
-      find_by_sub!(sub, legacy_sub: legacy_sub)
+      find_by_sub!(sub, legacy_sub:)
     rescue ActiveRecord::RecordNotFound
       LogoutNotice.new(sub).remove
-      create!(sub: sub, legacy_sub: legacy_sub)
+      create!(sub:, legacy_sub:)
     end
   end
 
@@ -29,6 +29,6 @@ class OidcUser < ApplicationRecord
   end
 
   def create_tombstone
-    Tombstone.create!(sub: sub)
+    Tombstone.create!(sub:)
   end
 end

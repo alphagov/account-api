@@ -102,7 +102,7 @@ RSpec.describe "Authentication" do
 
     context "when a session is given" do
       let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier.serialise } }
-      let(:session_identifier) { placeholder_govuk_account_session_object(id_token: id_token) }
+      let(:session_identifier) { placeholder_govuk_account_session_object(id_token:) }
       let(:id_token) { "id-token" }
 
       it "includes an id_token_hint" do

@@ -10,9 +10,9 @@ RSpec.describe "OIDC Users endpoint" do
     let(:headers) { { "Content-Type" => "application/json" } }
     let(:params) do
       {
-        email: email,
-        email_verified: email_verified,
-        legacy_sub: legacy_sub,
+        email:,
+        email_verified:,
+        legacy_sub:,
       }.compact.to_json
     end
     let(:email) { "email@example.com" }
@@ -23,33 +23,33 @@ RSpec.describe "OIDC Users endpoint" do
     end
 
     it "creates the user if they do not exist" do
-      expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(OidcUser, :count).by(1)
+      expect { put oidc_user_path(subject_identifier:), params:, headers: }.to change(OidcUser, :count).by(1)
       expect(response).to be_successful
     end
 
     it "returns the subject identifier" do
-      put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+      put oidc_user_path(subject_identifier:), params: params, headers: headers
       expect(JSON.parse(response.body)["sub"]).to eq(subject_identifier)
     end
 
     it "returns the new attribute values" do
-      put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+      put oidc_user_path(subject_identifier:), params: params, headers: headers
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
     end
 
     context "when the user already exists" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub:) }
 
       it "does not create a new user" do
-        expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.not_to change(OidcUser, :count)
+        expect { put oidc_user_path(subject_identifier:), params:, headers: }.not_to change(OidcUser, :count)
         expect(response).to be_successful
       end
 
       it "updates the attribute values" do
         user.update!(email: "old-email@example.com", email_verified: false)
 
-        put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+        put oidc_user_path(subject_identifier:), params: params, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
 
@@ -59,8 +59,8 @@ RSpec.describe "OIDC Users endpoint" do
       end
 
       it "doesn't update nil attributes" do
-        put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
-        put oidc_user_path(subject_identifier: subject_identifier), params: { email: "new-email@example.com", email_verified: nil }.to_json, headers: headers
+        put oidc_user_path(subject_identifier:), params: params, headers: headers
+        put oidc_user_path(subject_identifier:), params: { email: "new-email@example.com", email_verified: nil }.to_json, headers: headers
         expect(JSON.parse(response.body)["email"]).to eq("new-email@example.com")
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
 
@@ -75,7 +75,7 @@ RSpec.describe "OIDC Users endpoint" do
 
         it "creates a sensitive exception" do
           expect(GovukError).to receive(:notify)
-          expect { put oidc_user_path(subject_identifier: other_user.sub), params: params, headers: headers }.to change(SensitiveException, :count).by(1)
+          expect { put oidc_user_path(subject_identifier: other_user.sub), params:, headers: }.to change(SensitiveException, :count).by(1)
           expect(response).to have_http_status(:internal_server_error)
         end
       end
@@ -108,7 +108,7 @@ RSpec.describe "OIDC Users endpoint" do
 
         it "updates the subscriber" do
           stub = stub_email_alert_api_has_updated_subscriber(subscriber_id, email, govuk_account_id: user.id)
-          put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+          put oidc_user_path(subject_identifier:), params: params, headers: headers
           expect(response).to be_successful
           expect(stub).to have_been_made
         end
@@ -129,7 +129,7 @@ RSpec.describe "OIDC Users endpoint" do
             skip_confirmation_email: true,
           )
 
-          put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+          put oidc_user_path(subject_identifier:), params: params, headers: headers
 
           expect(stub_fetch_topic).to have_been_made
           expect(stub_create_new).to have_been_made
@@ -140,7 +140,7 @@ RSpec.describe "OIDC Users endpoint" do
           let(:email_verified) { user.email_verified }
 
           it "does not make any requests to email-alert-api" do
-            put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+            put oidc_user_path(subject_identifier:), params:, headers:
           end
         end
 
@@ -150,7 +150,7 @@ RSpec.describe "OIDC Users endpoint" do
           end
 
           it "deletes the subscription" do
-            expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(EmailSubscription, :count).by(-1)
+            expect { put oidc_user_path(subject_identifier:), params:, headers: }.to change(EmailSubscription, :count).by(-1)
           end
         end
 
@@ -169,7 +169,7 @@ RSpec.describe "OIDC Users endpoint" do
               skip_confirmation_email: true,
             )
 
-            put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers
+            put oidc_user_path(subject_identifier:), params: params, headers: headers
 
             expect(stub_cancel_old).to have_been_made
             expect(stub_fetch_topic).to have_been_made
@@ -183,7 +183,7 @@ RSpec.describe "OIDC Users endpoint" do
 
             it "deletes the subscription" do
               stub_email_alert_api_unsubscribes_a_subscription(prior_subscription_id)
-              expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(EmailSubscription, :count).by(-1)
+              expect { put oidc_user_path(subject_identifier:), params:, headers: }.to change(EmailSubscription, :count).by(-1)
             end
           end
 
@@ -195,7 +195,7 @@ RSpec.describe "OIDC Users endpoint" do
             it "deletes the subscription" do
               stub_email_alert_api_has_subscription(prior_subscription_id, "daily")
               stub_email_alert_api_unsubscribes_a_subscription(prior_subscription_id)
-              expect { put oidc_user_path(subject_identifier: subject_identifier), params: params, headers: headers }.to change(EmailSubscription, :count).by(-1)
+              expect { put oidc_user_path(subject_identifier:), params:, headers: }.to change(EmailSubscription, :count).by(-1)
             end
           end
         end
@@ -206,20 +206,20 @@ RSpec.describe "OIDC Users endpoint" do
   describe "DELETE" do
     it "does not change the count of users and returns not found" do
       without_detailed_exceptions do
-        expect { delete oidc_user_path(subject_identifier: subject_identifier) }.not_to change(OidcUser, :count)
+        expect { delete oidc_user_path(subject_identifier:) }.not_to change(OidcUser, :count)
       end
       expect(response).to be_not_found
     end
 
     context "when the user exists" do
-      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub: legacy_sub) }
+      let!(:user) { FactoryBot.create(:oidc_user, sub: subject_identifier, legacy_sub:) }
 
       before do
         stub_request(:get, "#{GdsApi::TestHelpers::EmailAlertApi::EMAIL_ALERT_API_ENDPOINT}/subscribers/govuk-account/#{user.id}").to_return(status: 404)
       end
 
       it "deletes the user" do
-        expect { delete oidc_user_path(subject_identifier: subject_identifier) }.to change(OidcUser, :count).by(-1)
+        expect { delete oidc_user_path(subject_identifier:) }.to change(OidcUser, :count).by(-1)
         expect(response).to be_no_content
       end
 
@@ -232,7 +232,7 @@ RSpec.describe "OIDC Users endpoint" do
 
         it "ends their subscriptions" do
           stub = stub_email_alert_api_unsubscribes_a_subscriber(subscriber_id)
-          delete oidc_user_path(subject_identifier: subject_identifier)
+          delete oidc_user_path(subject_identifier:)
           expect(stub).to have_been_made
         end
       end
@@ -242,7 +242,7 @@ RSpec.describe "OIDC Users endpoint" do
         let(:subject_identifier) { "pre-migration-subject-identifier" }
 
         it "deletes the user by legacy_sub" do
-          expect { delete oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: { legacy_sub: legacy_sub } }.to change(OidcUser, :count).by(-1)
+          expect { delete oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: { legacy_sub: } }.to change(OidcUser, :count).by(-1)
           expect(response).to be_no_content
         end
       end

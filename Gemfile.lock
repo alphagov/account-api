@@ -75,7 +75,7 @@ GEM
     bindata (2.4.13)
     bootsnap (1.13.0)
       msgpack (~> 1.2)
-    brakeman (5.2.1)
+    brakeman (5.3.1)
     builder (3.2.4)
     bullet (7.0.3)
       activesupport (>= 3.0.0)
@@ -241,6 +241,12 @@ GEM
     nio4r (2.5.8)
     nokogiri (1.13.9)
       mini_portile2 (~> 2.8.0)
+      racc (~> 1.4)
+    nokogiri (1.13.9-aarch64-linux)
+      racc (~> 1.4)
+    nokogiri (1.13.9-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.13.9-x86_64-linux)
       racc (~> 1.4)
     notifications-ruby-client (5.4.0)
       jwt (>= 1.5, < 3)
@@ -444,6 +450,9 @@ GEM
       sentry-ruby (~> 5.5.0)
     sentry-ruby (5.5.0)
       concurrent-ruby (~> 1.0, >= 1.0.2)
+    sentry-sidekiq (5.5.0)
+      sentry-ruby (~> 5.5.0)
+      sidekiq (>= 3.0)
     shoulda-matchers (5.2.0)
       activesupport (>= 5.2.0)
     sidekiq (5.2.10)
@@ -521,7 +530,10 @@ GEM
     zeitwerk (2.6.1)
 
 PLATFORMS
+  aarch64-linux
+  arm64-darwin
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   attr_required
@@ -551,13 +563,14 @@ DEPENDENCIES
   rails (= 7.0.4)
   rspec-rails
   rubocop-govuk
+  sentry-sidekiq
   shoulda-matchers
   sidekiq-scheduler (= 4.0.3)
   simplecov
   webmock
 
 RUBY VERSION
-   ruby 2.7.6
+   ruby 3.1.2
 
 BUNDLED WITH
-   2.1.4
+   2.3.24
