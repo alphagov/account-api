@@ -146,7 +146,7 @@ private
       raise Retry if RETRY_STATUSES.include? response.status
 
       response
-    rescue Retry, Errno::ECONNRESET, OpenSSL::SSL::SSLError
+    rescue Retry, Faraday::ConnectionFailed, Faraday::SSLError
       raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
 
       retries += 1
