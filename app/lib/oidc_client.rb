@@ -101,8 +101,8 @@ class OidcClient
       )
     end
 
-    JSON.parse(response.body)
-  rescue JSON::ParserError => e
+    response.body
+  rescue Faraday::ParsingError => e
     capture_sensitive_exception(e, response_error_presenter(response, access_token))
     raise OAuthFailure
   end
