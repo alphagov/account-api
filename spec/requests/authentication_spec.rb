@@ -89,7 +89,7 @@ RSpec.describe "Authentication" do
     def stub_userinfo(attributes = {})
       stub_request(:get, "http://openid-provider/userinfo-endpoint")
         .with(headers: { Authorization: "Bearer access-token" })
-        .to_return(status: 200, body: attributes.to_json)
+        .to_return(status: 200, headers: { "Content-Type" => "application/json" }, body: attributes.to_json)
     end
   end
 

@@ -101,8 +101,8 @@ class OidcClient
       )
     end
 
-    JSON.parse(response.body)
-  rescue JSON::ParserError => e
+    response.body
+  rescue Faraday::ParsingError => e
     capture_sensitive_exception(e, response_error_presenter(response, access_token))
     raise OAuthFailure
   end
@@ -146,7 +146,7 @@ private
       raise Retry if RETRY_STATUSES.include? response.status
 
       response
-    rescue Retry, Errno::ECONNRESET, OpenSSL::SSL::SSLError
+    rescue Retry, Faraday::ConnectionFailed, Faraday::SSLError
       raise OAuthFailure unless retries < MAX_OAUTH_RETRIES
 
       retries += 1
