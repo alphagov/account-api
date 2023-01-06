@@ -6,7 +6,8 @@ FROM $builder_image AS builder
 
 WORKDIR $APP_HOME
 COPY Gemfile Gemfile.lock .ruby-version ./
-RUN bundle install
+# TODO: remove chmod workaround once https://www.github.com/mikel/mail/issues/1489 is fixed.
+RUN bundle install && chmod -R o+r "${BUNDLE_PATH}"
 
 COPY . ./
 
