@@ -23,7 +23,7 @@ gem "pg"
 gem "sentry-sidekiq"
 
 # https://github.com/moove-it/sidekiq-scheduler/issues/345
-gem "sidekiq-scheduler", "4.0.3"
+gem "sidekiq-scheduler", "5.0.0"
 
 group :development, :test do
   gem "awesome_print"
