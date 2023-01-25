@@ -1,5 +1,4 @@
 RSpec.describe OidcClient do
-  include ActiveSupport::Testing::TimeHelpers
   subject(:client) { described_class.new }
 
   let(:jwt_signing_key) { "secret" }

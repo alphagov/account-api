@@ -1,6 +1,4 @@
 RSpec.describe "OIDC Backchannel Logout" do
-  include ActiveSupport::Testing::TimeHelpers
-
   let(:logout_token_jwt) { "pretend_this_is_a_jwt" }
   let(:sub) { "user_id " }
 

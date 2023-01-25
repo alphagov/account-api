@@ -1,6 +1,4 @@
 RSpec.describe ExpiredSensitiveExceptionWorker do
-  include ActiveSupport::Testing::TimeHelpers
-
   before { freeze_time }
 
   it "deletes old exceptions" do

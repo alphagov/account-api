@@ -1,6 +1,4 @@
 RSpec.describe LogoutNotice do
-  include ActiveSupport::Testing::TimeHelpers
-
   let(:sub) { "sub" }
   let(:instance) { described_class.new(sub) }
   let(:redis_formatted_time) { Time.zone.now.strftime("%F %T %z") }
