@@ -62,4 +62,24 @@ RSpec.describe "Support tasks" do
       end
     end
   end
+
+  describe ":find_deleted_user_by_oicd_sub" do
+    subject(:task) { Rake.application["support:find_deleted_user_by_oicd_sub"] }
+
+    context "when a user with sub 'user-id-123' previously existed" do
+      before do
+        user = FactoryBot.create(:oidc_user, email: "foo@example.gov.uk", sub: "user-id-123")
+        freeze_time
+        user.destroy!
+      end
+
+      it "can find that user's tombstone by sub" do
+        expect { task.execute({ sub: "user-id-123" }) }.to output("User was deleted at #{Time.zone.now.to_formatted_s(:db)}\n").to_stdout
+      end
+
+      it "outputs other users did not exist" do
+        expect { task.execute({ sub: "user-id-456" }) }.to output("No deleted user for sub 'user-id-456' found\n").to_stdout
+      end
+    end
+  end
 end

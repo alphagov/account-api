@@ -1,6 +1,4 @@
 RSpec.describe ExpiredAuthRequestWorker do
-  include ActiveSupport::Testing::TimeHelpers
-
   before { freeze_time }
 
   it "deletes old state" do

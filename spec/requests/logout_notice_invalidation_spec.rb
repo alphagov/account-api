@@ -1,7 +1,6 @@
 require "gds_api/test_helpers/email_alert_api"
 
 RSpec.describe "Logout Notice Invalidation" do
-  include ActiveSupport::Testing::TimeHelpers
   let(:sub) { "user-id" }
   let(:redis_state) { Redis.new.get("logout-notice/#{sub}") }
   let(:redis_formatted_time) { Time.zone.now.strftime("%F %T %z") }

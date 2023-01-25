@@ -32,6 +32,7 @@ RSpec.configure do |config|
     Sidekiq::Worker.clear_all
   end
 
+  config.include ActiveSupport::Testing::TimeHelpers
   config.expose_dsl_globally = false
   config.use_transactional_fixtures = true
   config.infer_spec_type_from_file_location!

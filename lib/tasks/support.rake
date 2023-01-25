@@ -32,4 +32,14 @@ namespace :support do
       end
     end
   end
+
+  desc "Check if a user previously existed for a given OICD sub"
+  task :find_deleted_user_by_oicd_sub, [:sub] => :environment do |_, args|
+    tombstone = Tombstone.find_by(sub: args[:sub])
+    if tombstone
+      puts "User was deleted at #{tombstone.created_at.to_formatted_s(:db)}"
+    else
+      puts "No deleted user for sub '#{args[:sub]}' found"
+    end
+  end
 end

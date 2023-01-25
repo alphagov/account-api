@@ -1,6 +1,4 @@
 RSpec.describe ExpiredTombstoneWorker do
-  include ActiveSupport::Testing::TimeHelpers
-
   before { freeze_time }
 
   it "deletes old tombstones" do
