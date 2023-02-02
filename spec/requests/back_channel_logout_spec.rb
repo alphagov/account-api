@@ -33,19 +33,19 @@ RSpec.describe "OIDC Backchannel Logout" do
       end
 
       it "returns 400" do
-        post backchannel_logout_path, params: params
+        post(backchannel_logout_path, params:)
         expect(response).to have_http_status(:bad_request)
       end
     end
 
     context "with a valid logout token" do
       it "records a session expiry notice" do
-        post backchannel_logout_path, params: params
+        post(backchannel_logout_path, params:)
         expect(Redis.new.get("logout-notice/#{sub}")).to eq(redis_formatted_time)
       end
 
       it "returns 200" do
-        post backchannel_logout_path, params: params
+        post(backchannel_logout_path, params:)
         expect(response).to have_http_status(:ok)
       end
     end

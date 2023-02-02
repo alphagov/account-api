@@ -30,7 +30,7 @@ RSpec.describe "Attributes" do
     let(:params) { { attributes: [attribute_name] } }
 
     it "returns the attribute" do
-      get attributes_path, headers: headers, params: params
+      get(attributes_path, headers:, params:)
       expect(response).to be_successful
       expect(JSON.parse(response.body)["values"]).to eq({ attribute_name => attribute_value })
     end
@@ -39,21 +39,21 @@ RSpec.describe "Attributes" do
       let(:cached_attribute_value) { nil }
 
       it "returns a 401" do
-        get attributes_path, headers: headers, params: params
+        get(attributes_path, headers:, params:)
         expect(response).to have_http_status(:unauthorized)
       end
     end
 
     context "when no govuk-account-session is provided" do
       it "returns a 401" do
-        get attributes_path, params: params
+        get(attributes_path, params:)
         expect(response).to have_http_status(:unauthorized)
       end
     end
 
     context "when an invalid govuk-account-session is provided" do
       it "returns a 401" do
-        get attributes_path, headers: { "GOVUK-Account-Session" => "not-a-base64-string" }, params: params
+        get(attributes_path, headers: { "GOVUK-Account-Session" => "not-a-base64-string" }, params:)
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -63,7 +63,7 @@ RSpec.describe "Attributes" do
       let(:attribute_name) { protected_attribute_name }
 
       it "returns a 403" do
-        get attributes_path, headers: headers, params: params
+        get(attributes_path, headers:, params:)
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
@@ -80,7 +80,7 @@ RSpec.describe "Attributes" do
       let(:params) { { attributes: [cached_attribute_name, local_attribute_name] } }
 
       it "returns all the attributes" do
-        get attributes_path, headers: headers, params: params
+        get(attributes_path, headers:, params:)
         expect(response).to be_successful
         expect(JSON.parse(response.body)["values"]).to eq(
           {
@@ -94,7 +94,7 @@ RSpec.describe "Attributes" do
         let(:local_attribute_value) { nil }
 
         it "returns only the present attribute" do
-          get attributes_path, headers: headers, params: params
+          get(attributes_path, headers:, params:)
           expect(response).to be_successful
           expect(JSON.parse(response.body)["values"]).to eq({ cached_attribute_name => cached_attribute_value })
         end
@@ -105,7 +105,7 @@ RSpec.describe "Attributes" do
         let(:params) { { attributes: [cached_attribute_name] + bad_attributes } }
 
         it "lists the undefined ones" do
-          get attributes_path, headers: headers, params: params
+          get(attributes_path, headers:, params:)
           expect(response).to have_http_status(:unprocessable_entity)
 
           error = JSON.parse(response.body)
@@ -121,7 +121,7 @@ RSpec.describe "Attributes" do
     let(:params) { { attributes: } }
 
     it "updates the database" do
-      patch attributes_path, headers: headers, params: params.to_json
+      patch attributes_path, headers:, params: params.to_json
       expect(account_session.user[local_attribute_name]).to eq(local_attribute_value)
       expect(response).to be_successful
     end
@@ -131,12 +131,12 @@ RSpec.describe "Attributes" do
 
       account_session.user.update!(local_attribute_name => old_value)
 
-      get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
+      get attributes_path, headers:, params: { attributes: [local_attribute_name] }
       expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => old_value })
 
-      patch attributes_path, headers: headers, params: params.to_json
+      patch attributes_path, headers:, params: params.to_json
 
-      get attributes_path, headers: headers, params: { attributes: [local_attribute_name] }
+      get attributes_path, headers:, params: { attributes: [local_attribute_name] }
       expect(JSON.parse(response.body)["values"]).to eq({ local_attribute_name => local_attribute_value })
     end
 
@@ -151,7 +151,7 @@ RSpec.describe "Attributes" do
       let(:attributes) { { unwritable_attribute_name => "foo" } }
 
       it "returns a 403" do
-        patch attributes_path, headers: headers, params: params.to_json
+        patch attributes_path, headers:, params: params.to_json
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)
@@ -165,7 +165,7 @@ RSpec.describe "Attributes" do
       let(:attributes) { { protected_attribute_name => "foo" } }
 
       it "returns a 403" do
-        patch attributes_path, headers: headers, params: params.to_json
+        patch attributes_path, headers:, params: params.to_json
         expect(response).to have_http_status(:forbidden)
 
         error = JSON.parse(response.body)

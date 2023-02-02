@@ -54,7 +54,7 @@ RSpec.describe "Authentication" do
 
     it "fetches the tokens" do
       stub_userinfo
-      post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+      post callback_path, headers:, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to be_successful
       expect(JSON.parse(response.body)).to include("govuk_account_session", "redirect_path" => auth_request.redirect_path)
     end
@@ -64,7 +64,7 @@ RSpec.describe "Authentication" do
 
       it "fetches them from userinfo" do
         stub = stub_userinfo(email: "email@example.com", email_verified: true)
-        post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+        post callback_path, headers:, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
         expect(response).to be_successful
         expect(stub).to have_been_made
         expect(user.reload.email).to eq("email@example.com")
@@ -73,7 +73,7 @@ RSpec.describe "Authentication" do
     end
 
     it "returns a 401 if there is no matching AuthRequest" do
-      post callback_path, headers: headers, params: { state: "something-else" }.to_json
+      post callback_path, headers:, params: { state: "something-else" }.to_json
       expect(response).to have_http_status(:unauthorized)
     end
 
@@ -82,7 +82,7 @@ RSpec.describe "Authentication" do
       allow_any_instance_of(OidcClient).to receive(:tokens!).and_raise(OidcClient::OAuthFailure)
       # rubocop:enable RSpec/AnyInstance
 
-      post callback_path, headers: headers, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
+      post callback_path, headers:, params: { state: auth_request.to_oauth_state, code: "12345" }.to_json
       expect(response).to have_http_status(:unauthorized)
     end
 
@@ -95,7 +95,7 @@ RSpec.describe "Authentication" do
 
   describe "/end-session" do
     it "returns the end_session_endpoint for the identity provider" do
-      get end_session_path, headers: headers
+      get(end_session_path, headers:)
       expect(response).to be_successful
       expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint")
     end
@@ -106,7 +106,7 @@ RSpec.describe "Authentication" do
       let(:id_token) { "id-token" }
 
       it "includes an id_token_hint" do
-        get end_session_path, headers: headers
+        get(end_session_path, headers:)
         expect(response).to be_successful
         expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint?id_token_hint=#{id_token}")
       end
@@ -115,7 +115,7 @@ RSpec.describe "Authentication" do
         let(:id_token) { nil }
 
         it "does not include an id_token_hint" do
-          get end_session_path, headers: headers
+          get(end_session_path, headers:)
           expect(response).to be_successful
           expect(JSON.parse(response.body)["end_session_uri"]).to eq("http://openid-provider/end-session-endpoint")
         end

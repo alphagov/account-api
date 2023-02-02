@@ -28,12 +28,12 @@ RSpec.describe "OIDC Users endpoint" do
     end
 
     it "returns the subject identifier" do
-      put oidc_user_path(subject_identifier:), params: params, headers: headers
+      put(oidc_user_path(subject_identifier:), params:, headers:)
       expect(JSON.parse(response.body)["sub"]).to eq(subject_identifier)
     end
 
     it "returns the new attribute values" do
-      put oidc_user_path(subject_identifier:), params: params, headers: headers
+      put(oidc_user_path(subject_identifier:), params:, headers:)
       expect(JSON.parse(response.body)["email"]).to eq(email)
       expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
     end
@@ -49,7 +49,7 @@ RSpec.describe "OIDC Users endpoint" do
       it "updates the attribute values" do
         user.update!(email: "old-email@example.com", email_verified: false)
 
-        put oidc_user_path(subject_identifier:), params: params, headers: headers
+        put(oidc_user_path(subject_identifier:), params:, headers:)
         expect(JSON.parse(response.body)["email"]).to eq(email)
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
 
@@ -59,8 +59,8 @@ RSpec.describe "OIDC Users endpoint" do
       end
 
       it "doesn't update nil attributes" do
-        put oidc_user_path(subject_identifier:), params: params, headers: headers
-        put oidc_user_path(subject_identifier:), params: { email: "new-email@example.com", email_verified: nil }.to_json, headers: headers
+        put(oidc_user_path(subject_identifier:), params:, headers:)
+        put(oidc_user_path(subject_identifier:), params: { email: "new-email@example.com", email_verified: nil }.to_json, headers:)
         expect(JSON.parse(response.body)["email"]).to eq("new-email@example.com")
         expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
 
@@ -87,7 +87,7 @@ RSpec.describe "OIDC Users endpoint" do
         it "updates and migrates the user by legacy_sub" do
           user.update!(email: "old-email@example.com", email_verified: false)
 
-          put oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params: params, headers: headers
+          put(oidc_user_path(subject_identifier: "post-migration-subject-identifier"), params:, headers:)
           expect(JSON.parse(response.body)["sub"]).to eq("post-migration-subject-identifier")
           expect(JSON.parse(response.body)["email"]).to eq(email)
           expect(JSON.parse(response.body)["email_verified"]).to eq(email_verified)
@@ -108,7 +108,7 @@ RSpec.describe "OIDC Users endpoint" do
 
         it "updates the subscriber" do
           stub = stub_email_alert_api_has_updated_subscriber(subscriber_id, email, govuk_account_id: user.id)
-          put oidc_user_path(subject_identifier:), params: params, headers: headers
+          put(oidc_user_path(subject_identifier:), params:, headers:)
           expect(response).to be_successful
           expect(stub).to have_been_made
         end
@@ -129,7 +129,7 @@ RSpec.describe "OIDC Users endpoint" do
             skip_confirmation_email: true,
           )
 
-          put oidc_user_path(subject_identifier:), params: params, headers: headers
+          put(oidc_user_path(subject_identifier:), params:, headers:)
 
           expect(stub_fetch_topic).to have_been_made
           expect(stub_create_new).to have_been_made
@@ -169,7 +169,7 @@ RSpec.describe "OIDC Users endpoint" do
               skip_confirmation_email: true,
             )
 
-            put oidc_user_path(subject_identifier:), params: params, headers: headers
+            put(oidc_user_path(subject_identifier:), params:, headers:)
 
             expect(stub_cancel_old).to have_been_made
             expect(stub_fetch_topic).to have_been_made

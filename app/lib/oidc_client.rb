@@ -109,7 +109,7 @@ class OidcClient
 
   def logout_token(logout_token_jwt)
     logout_token = LogoutToken.decode logout_token_jwt, discover.jwks
-    logout_token.verify! client_id: client_id, issuer: discover.issuer
+    logout_token.verify! client_id:, issuer: discover.issuer
     {
       logout_token_jwt:,
       logout_token:,

@@ -21,22 +21,22 @@ RSpec.describe "User information endpoint" do
   let(:response_body) { JSON.parse(response.body) }
 
   it "returns 200 OK" do
-    get "/api/user", headers: headers
+    get("/api/user", headers:)
     expect(response).to be_successful
   end
 
   it "returns the user's ID" do
-    get "/api/user", headers: headers
+    get("/api/user", headers:)
     expect(response_body["id"]).to eq(session_identifier.user.id.to_s)
   end
 
   it "returns whether the user has done MFA" do
-    get "/api/user", headers: headers
+    get("/api/user", headers:)
     expect(response_body["mfa"]).to eq(session_identifier.mfa?)
   end
 
   it "returns the user's email attributes" do
-    get "/api/user", headers: headers
+    get("/api/user", headers:)
     expect(response_body["email"]).to eq(attributes[:email])
     expect(response_body["email_verified"]).to eq(attributes[:email_verified])
   end
@@ -45,7 +45,7 @@ RSpec.describe "User information endpoint" do
     let(:session_identifier) { nil }
 
     it "returns a 401" do
-      get "/api/user", headers: headers
+      get("/api/user", headers:)
       expect(response).to have_http_status(:unauthorized)
     end
   end
