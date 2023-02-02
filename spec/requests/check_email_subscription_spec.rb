@@ -23,7 +23,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
     end
 
     it "returns 401" do
-      get personalisation_check_email_subscription_path, params: params
+      get(personalisation_check_email_subscription_path, params:)
       expect(response).to have_http_status(:unauthorized)
     end
 
@@ -53,7 +53,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
       let(:headers) { { "Content-Type" => "application/json", "GOVUK-Account-Session" => session_identifier&.serialise }.compact }
 
       it "returns a 422" do
-        get personalisation_check_email_subscription_path, params: params, headers: headers
+        get(personalisation_check_email_subscription_path, params:, headers:)
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
@@ -61,7 +61,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
         let(:headers) { { "GOVUK-Account-Session" => "not-a-base64-string" } }
 
         it "logs the user out" do
-          get personalisation_check_email_subscription_path, params: params, headers: headers
+          get(personalisation_check_email_subscription_path, params:, headers:)
           expect(response).to have_http_status(:unauthorized)
         end
       end
@@ -74,7 +74,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           let(:topic_slug) { "topic_slug" }
 
           it "returns a 422" do
-            get personalisation_check_email_subscription_path, params: params, headers: headers
+            get(personalisation_check_email_subscription_path, params:, headers:)
             expect(response).to have_http_status(:unprocessable_entity)
           end
         end
@@ -86,7 +86,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions:) }
 
             it "returns subscription status details as not active" do
-              get personalisation_check_email_subscription_path, params: params, headers: headers
+              get(personalisation_check_email_subscription_path, params:, headers:)
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
 
@@ -95,7 +95,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
               let(:active) { true }
 
               it "returns subscription status details as active" do
-                get personalisation_check_email_subscription_path, params: params, headers: headers
+                get(personalisation_check_email_subscription_path, params:, headers:)
                 expect(JSON.parse(response.body)).to include(subscription_details)
               end
             end
@@ -105,7 +105,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             before { stub_email_alert_api_does_not_have_subscriber_subscriptions(subscriber_id) }
 
             it "returns subscription status details as not active" do
-              get personalisation_check_email_subscription_path, params: params, headers: headers
+              get(personalisation_check_email_subscription_path, params:, headers:)
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
           end
@@ -115,7 +115,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(oidc_user.id) }
 
           it "returns subscription status details as not active" do
-            get personalisation_check_email_subscription_path, params: params, headers: headers
+            get(personalisation_check_email_subscription_path, params:, headers:)
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
         end
@@ -130,7 +130,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_has_subscriber_subscriptions(subscriber_id, "test@example.com", subscriptions:) }
 
           it "returns subscription status details as not active" do
-            get personalisation_check_email_subscription_path, params: params, headers: headers
+            get(personalisation_check_email_subscription_path, params:, headers:)
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
 
@@ -139,7 +139,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
             let(:active) { true }
 
             it "returns subscription status details as active" do
-              get personalisation_check_email_subscription_path, params: params, headers: headers
+              get(personalisation_check_email_subscription_path, params:, headers:)
               expect(JSON.parse(response.body)).to include(subscription_details)
             end
           end
@@ -149,7 +149,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
           before { stub_email_alert_api_does_not_have_subscriber_subscriptions(subscriber_id) }
 
           it "returns subscription status details as not active" do
-            get personalisation_check_email_subscription_path, params: params, headers: headers
+            get(personalisation_check_email_subscription_path, params:, headers:)
             expect(JSON.parse(response.body)).to include(subscription_details)
           end
         end

@@ -7,7 +7,7 @@ RSpec.describe "Matching users by email address" do
   let(:params) { { email: } }
 
   it "returns 404 Not Found" do
-    get "/api/user/match-by-email", params: params, headers: headers
+    get("/api/user/match-by-email", params:, headers:)
     expect(response).to have_http_status(:not_found)
   end
 
@@ -15,7 +15,7 @@ RSpec.describe "Matching users by email address" do
     let(:session_identifier) { placeholder_govuk_account_session_object }
 
     it "returns 404 Not Found" do
-      get "/api/user/match-by-email", params: params, headers: headers
+      get("/api/user/match-by-email", params:, headers:)
       expect(response).to have_http_status(:not_found)
     end
   end
@@ -25,17 +25,17 @@ RSpec.describe "Matching users by email address" do
     let(:email) { user.email }
 
     it "returns 200 OK" do
-      get "/api/user/match-by-email", params: params, headers: headers
+      get("/api/user/match-by-email", params:, headers:)
       expect(response).to be_successful
     end
 
     it "returns `match: false`" do
-      get "/api/user/match-by-email", params: params, headers: headers
+      get("/api/user/match-by-email", params:, headers:)
       expect(JSON.parse(response.body)).to eq({ "match" => false })
     end
 
     it "does a case-insensitive match of the address" do
-      get "/api/user/match-by-email", params: { email: user.email.upcase }, headers: headers
+      get("/api/user/match-by-email", params: { email: user.email.upcase }, headers:)
       expect(response).to be_successful
     end
 
@@ -43,7 +43,7 @@ RSpec.describe "Matching users by email address" do
       let(:session_identifier) { placeholder_govuk_account_session_object }
 
       it "returns `match: false`" do
-        get "/api/user/match-by-email", params: params, headers: headers
+        get("/api/user/match-by-email", params:, headers:)
         expect(JSON.parse(response.body)).to eq({ "match" => false })
       end
 
@@ -51,7 +51,7 @@ RSpec.describe "Matching users by email address" do
         let(:session_header_value) { "." }
 
         it "treats it as nonexistent" do
-          get "/api/user/match-by-email", params: params, headers: headers
+          get("/api/user/match-by-email", params:, headers:)
           expect(JSON.parse(response.body)).to eq({ "match" => false })
         end
       end
@@ -62,7 +62,7 @@ RSpec.describe "Matching users by email address" do
         let(:email) { "user-from-session@example.com" }
 
         it "returns `match: true`" do
-          get "/api/user/match-by-email", params: params, headers: headers
+          get("/api/user/match-by-email", params:, headers:)
           expect(JSON.parse(response.body)).to eq({ "match" => true })
         end
       end

@@ -8,7 +8,7 @@ RSpec.describe "Email subscriptions" do
 
   describe "GET /api/email-subscriptions/:subscription_name" do
     it "returns a 404" do
-      get email_subscription_path(subscription_name: "foo"), headers: headers
+      get(email_subscription_path(subscription_name: "foo"), headers:)
       expect(response).to have_http_status(:not_found)
     end
 
@@ -28,7 +28,7 @@ RSpec.describe "Email subscriptions" do
       let(:subscription_ended) { false }
 
       it "returns the subscription details" do
-        get email_subscription_path(subscription_name: email_subscription.name), headers: headers
+        get(email_subscription_path(subscription_name: email_subscription.name), headers:)
         expect(response).to be_successful
         expect(JSON.parse(response.body)["email_subscription"]).to eq(email_subscription.to_hash)
       end
@@ -92,7 +92,7 @@ RSpec.describe "Email subscriptions" do
       it "calls email-alert-api to deactivate the old subscription" do
         stub_cancel_old = stub_email_alert_api_unsubscribes_a_subscription(email_subscription.email_alert_api_subscription_id)
 
-        put email_subscription_path(subscription_name: email_subscription.name), params: params.to_json, headers: headers
+        put(email_subscription_path(subscription_name: email_subscription.name), params: params.to_json, headers:)
 
         expect(response).to be_successful
         expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
@@ -106,7 +106,7 @@ RSpec.describe "Email subscriptions" do
           expect_activate_email_subscription do
             stub_email_alert_api_unsubscribes_a_subscription(email_subscription.email_alert_api_subscription_id)
 
-            put email_subscription_path(subscription_name: email_subscription.name), params: params.to_json, headers: headers
+            put(email_subscription_path(subscription_name: email_subscription.name), params: params.to_json, headers:)
 
             expect(response).to be_successful
             expect(JSON.parse(response.body)["email_subscription"]).to eq(EmailSubscription.last.to_hash)
@@ -145,7 +145,7 @@ RSpec.describe "Email subscriptions" do
 
   describe "DELETE /api/email-subscriptions/:subscription_name" do
     it "returns a 404" do
-      delete email_subscription_path(subscription_name: "foo"), headers: headers
+      delete(email_subscription_path(subscription_name: "foo"), headers:)
       expect(response).to have_http_status(:not_found)
     end
 
