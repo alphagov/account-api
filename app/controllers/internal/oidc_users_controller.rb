@@ -45,34 +45,14 @@ private
   end
 
   def update_email_alert_api_address(user)
-    # if the user has linked their notifications account to their
-    # GOV.UK account we don't need to update their
-    # `user.email_subscriptions`, because we can update the subscriber
-    # directly.
     GdsApi.email_alert_api.change_subscriber(
       id: email_alert_api_subscriber_id(user),
       new_address: user.email,
       on_conflict: "merge",
     )
   rescue GdsApi::HTTPNotFound
-    # but for users who haven't linked their notifications account to
-    # their GOV.UK account, we do need to update any account-linked
-    # subscriptions they have (eg, brexit checker users who haven't
-    # touched notifications since registering through the checker).
-    #
-    # this branch can be removed once we have no GOV.UK accounts which
-    # have subscriptions but are *not* linked to the corresponding
-    # notifications account.
-    user.email_subscriptions.find_each do |subscription|
-      if subscription.activated? && !subscription.check_if_still_active!
-        subscription.destroy!
-        next
-      end
-
-      subscription.reactivate_if_confirmed!
-    rescue EmailSubscription::SubscriberListNotFound
-      subscription.destroy!
-    end
+    # No linked email-alert-api account, nothing to do
+    nil
   end
 
   def end_email_alert_api_subscriptions(user)
@@ -80,8 +60,7 @@ private
       email_alert_api_subscriber_id(user),
     )
   rescue GdsApi::HTTPNotFound
-    # if there is no linked notifications account, there is nothing to
-    # do
+    # No linked email-alert-api account, nothing to do
     nil
   end
 
