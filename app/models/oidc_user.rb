@@ -1,6 +1,4 @@
 class OidcUser < ApplicationRecord
-  has_many :email_subscriptions, dependent: :destroy
-
   validates :sub, presence: true
 
   before_destroy :create_tombstone
