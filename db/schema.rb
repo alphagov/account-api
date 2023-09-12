@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_06_10_101751) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_24_083133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,17 +20,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_10_101751) do
     t.string "redirect_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "email_subscriptions", force: :cascade do |t|
-    t.bigint "oidc_user_id", null: false
-    t.string "name", null: false
-    t.string "topic_slug", null: false
-    t.string "email_alert_api_subscription_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["oidc_user_id", "name"], name: "index_email_subscriptions_on_oidc_user_id_and_name", unique: true
-    t.index ["oidc_user_id"], name: "index_email_subscriptions_on_oidc_user_id"
   end
 
   create_table "oidc_users", force: :cascade do |t|
