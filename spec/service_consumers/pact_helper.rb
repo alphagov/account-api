@@ -15,21 +15,6 @@ module PactStubHelpers
       email_verified:,
     )
   end
-
-  def stub_will_create_email_subscription(topic_slug, subscriber_list_id: "list-id")
-    stub_email_alert_api_has_subscriber_list_by_slug(
-      slug: topic_slug,
-      returned_attributes: { id: subscriber_list_id },
-    )
-
-    stub_email_alert_api_creates_a_subscription(
-      subscriber_list_id:,
-      address: EMAIL_ADDRESS,
-      frequency: "daily",
-      returned_subscription_id: "subscription-id",
-      skip_confirmation_email: true,
-    )
-  end
 end
 
 def oidc_user
@@ -125,18 +110,9 @@ Pact.provider_states_for "GDS API Adapters" do
   provider_state "there is a valid user session" do
     set_up do
       stub_cached_attributes
-      stub_will_create_email_subscription "wizard-news-topic-slug"
       # rubocop:disable RSpec/AnyInstance
       allow_any_instance_of(AccountSession).to receive(:set_remote_attributes)
       # rubocop:enable RSpec/AnyInstance
-    end
-  end
-
-  provider_state "there is a valid user session, with a 'wizard-news' email subscription" do
-    set_up do
-      stub_cached_attributes
-      stub_will_create_email_subscription "wizard-news-topic-slug"
-      FactoryBot.create(:email_subscription, name: "wizard-news", oidc_user_id: oidc_user.id)
     end
   end
 
