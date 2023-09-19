@@ -1,7 +1,7 @@
-# Digital Identity
+# One Login
 
 This document gets into some of the details of the integration with
-Digital Identity, and where it can go wrong.  For a high-level
+One Login, and where it can go wrong.  For a high-level
 overview, see [the developer docs][].
 
 [the developer docs]: https://docs.publishing.service.gov.uk/manual/govuk-account.html
@@ -9,58 +9,62 @@ overview, see [the developer docs][].
 ## Big picture
 
 The [`OidcUser` model][], which represents a user who has
-authenticated via Digital Identity, holds four special pieces of data:
+authenticated via One Login, holds four special pieces of data:
 
 - The `sub`, or "subject identifier", is a unique identifier assigned
-  by Digital Identity when the account is created, and never changes.
+  by One Login when the account is created, and never changes.
   Other data, like an email address, can change: so this is what we
   use to identify users.
 
 - The `legacy_sub` is the user's subject identifier from the old
   [account manager prototype][].  Only accounts which were created
-  before the Digital Identity migration have this set.  We use this to
+  before the One Login migration have this set.  We use this to
   join up old data.
 
 - The `email` is the user's current email address.  It is set by
-  Digital Identity calling the `/api/oidc-users/:subject_identifier`
+  One Login calling the `/api/oidc-users/:subject_identifier`
   endpoint.
 
 - The `email_verified` is a boolean denoting whether the user's email
-  address is verified.  It is set by Digital Identity calling the
-  `/api/oidc-users/:subject_identifier` endpoint.  As Digital Identity
+  address is verified.  It is set by One Login calling the
+  `/api/oidc-users/:subject_identifier` endpoint.  As One Login
   require immediate verification of email addresses, this is always
   true.
 
 Communication flows in both directions between account-api and Digital
 Identity:
 
-- When a user is updated or deleted, Digital Identity call the
+- When a user is updated or deleted, One Login call the
   endpoints in [`Internal::OidcUsersController`][].
 
-- When a user logs in, we call Digital Identity from the
+- When a user logs in, we call One Login from the
   [`Internal::AuthenticationController`][].
+
+These calls can affect both Account API and Email Alert API, read
+more about the [One Login to GOV.UK pipeline][one-login-pipeline].
 
 [`OidcUser` model]: https://github.com/alphagov/account-api/blob/main/app/models/oidc_user.rb
 [`Internal::OidcUsersController`]: https://github.com/alphagov/account-api/blob/main/app/controllers/internal/oidc_users_controller.rb
 [`Internal::AuthenticationController`]: https://github.com/alphagov/account-api/blob/main/app/controllers/internal/authentication_controller.rb
 [account manager prototype]: https://github.com/alphagov/govuk-account-manager-prototype/
+[One Login to GOV.UK pipeline]: /
 
 ## Errors
 
 This is a non-exhaustive list of problems that could be due to
-something breaking with the Digital Identity integration.
+something breaking with the One Login integration.
 
-Firstly, check if the problem is on the Digital Identity side:
+Firstly, check if the problem is on the One Login side:
 
 - If the user got the problem on `https://account.gov.uk` (or some
-  subdomain of that), then it's Digital Identity.
+  subdomain of that), then it's One Login.
 - If account-api is persistently unable to connect to
-  `https://oidc.account.gov.uk`, then it's Digital Identity.
+  `https://oidc.account.gov.uk`, then it's One Login.
 
-If the problem is on the Digital Identity side, or if you need support
+If the problem is on the One Login side, or if you need support
 from them, ask for help in `#di-authentication` on Slack.
 
-If the problem is not clearly to do with Digital Identity, read on.
+If the problem is not clearly to do with One Login, read on.
 
 ### Email address out of date
 
@@ -80,7 +84,7 @@ trying to change to:
 other_user = OidcUser.find_by(email: "desired new email address")
 ```
 
-Digital Identity enforces that email addresses are unique, so we
+One Login enforces that email addresses are unique, so we
 shouldn't ever have two users with the same email address.
 
 If there is another user with the desired email address, something may
@@ -118,12 +122,12 @@ DETAIL:  Key (email)=(email@example.com) already exists.
 #### There is no relevant error
 
 If a user has the wrong email address and there is no relevant error,
-then Digital Identity may not have called the
+then One Login may not have called the
 `/api/oidc-users/:subject_identifier` endpoint, or their call may have
 failed due to some error which wasn't reported.
 
 Check Kibana to see if the call was made and what the response code
-was.  If the call wasn't made at all, contact Digital Identity for
+was.  If the call wasn't made at all, contact One Login for
 support.
 
 ### Can't log in
@@ -140,7 +144,7 @@ user = OidcUser.find_by(email: "address")
 #### Can't log in for the first time
 
 When a user first logs in, we create an `OidcUser` record just holding
-their subject identifier, and query Digital Identity for their email
+their subject identifier, and query One Login for their email
 address.
 
 So if there is no `OidcUser` record with the email address, this
@@ -158,7 +162,7 @@ DETAIL:  Key (sub)=(foo) already exists.
 
 This should never happen in production.
 
-As subject identifiers come from Digital Identity, contact them for
+As subject identifiers come from One Login, contact them for
 support and give the duplicate subject identifier (`foo` in the
 example above).
 
@@ -187,7 +191,7 @@ destroyed.  This record holds the subject identifier, and we use it to
 end any active sessions that user still has.
 
 If a user logs into an account that has a subject identifier with a
-corresponding `Tombstone` record, Digital Identity have re-used a
+corresponding `Tombstone` record, One Login have re-used a
 subject identifier, or un-deleted the account.  We currently assume
 this does not happen.
 
@@ -201,12 +205,12 @@ Ask the `#di-authentication` channel in Slack whether their service is
 up, and ask if they are seeing an elevated rate of invalid
 authorization codes or access tokens from GOV.UK.
 
-If Digital Identity are experiencing a problem, we just have to wait
+If One Login are experiencing a problem, we just have to wait
 for them to fix it.
 
 Otherwise, we have a bug in account-api, or perhaps elsewhere in the
 GOV.UK stack.  One thing to try would be to clear our cached copy of
-the Digital Identity OIDC configuration:
+the One Login OIDC configuration:
 
 ```ruby
 Rails.cache.clear
