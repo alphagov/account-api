@@ -20,7 +20,7 @@ class Internal::AuthenticationController < InternalController
     auth_request.delete
 
     govuk_account_session = AccountSession.new(
-      session_secret: Rails.application.secrets.session_secret,
+      session_secret: Rails.application.credentials.session_secret,
       user_id: details.fetch(:id_token).sub,
       mfa: details.fetch(:mfa),
       digital_identity_session: true,
@@ -51,7 +51,7 @@ private
     end_session_endpoint = oidc_client.end_session_endpoint
     id_token = AccountSession.deserialise(
       encoded_session: request.headers["HTTP_GOVUK_ACCOUNT_SESSION"],
-      session_secret: Rails.application.secrets.session_secret,
+      session_secret: Rails.application.credentials.session_secret,
     )&.id_token
 
     if id_token

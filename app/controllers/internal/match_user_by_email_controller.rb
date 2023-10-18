@@ -24,7 +24,7 @@ private
 
     @govuk_account_session = AccountSession.deserialise(
       encoded_session:,
-      session_secret: Rails.application.secrets.session_secret,
+      session_secret: Rails.application.credentials.session_secret,
     )
   rescue AccountSession::ReauthenticateUserError
     @govuk_account_session = nil

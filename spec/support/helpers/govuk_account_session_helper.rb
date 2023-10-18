@@ -6,7 +6,7 @@ module GovukAccountSessionHelper
   def placeholder_govuk_account_session_object(options = {})
     AccountSession.new(
       **{
-        session_secret: Rails.application.secrets.session_secret,
+        session_secret: Rails.application.credentials.session_secret,
         id_token: "id-token",
         user_id: "user-id",
         mfa: false,
