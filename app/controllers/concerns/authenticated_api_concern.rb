@@ -7,7 +7,7 @@ module AuthenticatedApiConcern
     before_action do
       @govuk_account_session = AccountSession.deserialise(
         encoded_session: request.headers[HEADER_NAME],
-        session_secret: Rails.application.secrets.session_secret,
+        session_secret: Rails.application.credentials.session_secret,
       )
 
       head :unauthorized unless @govuk_account_session

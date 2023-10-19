@@ -59,7 +59,7 @@ Pact.provider_states_for "GDS API Adapters" do
     WebMock.enable!
     WebMock.reset!
 
-    allow(Rails.application.secrets).to receive(:oauth_client_private_key).and_return(nil)
+    allow(Rails.application.credentials).to receive(:oauth_client_private_key).and_return(nil)
 
     stub_oidc_discovery
     stub_token_response

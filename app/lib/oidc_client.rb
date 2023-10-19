@@ -15,12 +15,12 @@ class OidcClient
            to: :discover
 
   def initialize
-    @provider_uri = Rails.application.secrets.oauth_provider_url
-    @client_id = Rails.application.secrets.oauth_client_id
-    @secret = Rails.application.secrets.oauth_client_secret
+    @provider_uri = Rails.application.credentials.oauth_provider_url
+    @client_id = Rails.application.credentials.oauth_client_id
+    @secret = Rails.application.credentials.oauth_client_secret
 
-    if Rails.application.secrets.oauth_client_private_key.present?
-      @private_key = OpenSSL::PKey::RSA.new Rails.application.secrets.oauth_client_private_key
+    if Rails.application.credentials.oauth_client_private_key.present?
+      @private_key = OpenSSL::PKey::RSA.new Rails.application.credentials.oauth_client_private_key
     end
   end
 

@@ -5,7 +5,7 @@ class PersonalisationController < ApplicationController
   before_action do
     @govuk_account_session = AccountSession.deserialise(
       encoded_session: @account_session_header,
-      session_secret: Rails.application.secrets.session_secret,
+      session_secret: Rails.application.credentials.session_secret,
     )
 
     end_session! unless @govuk_account_session
