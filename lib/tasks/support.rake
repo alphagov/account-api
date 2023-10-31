@@ -24,7 +24,21 @@ namespace :support do
     task :real, [:email] => :environment do |_, args|
       user = OidcUser.find_by("lower(email) = ?", args[:email].downcase)
       if user
+        begin
+          subscriber = GdsApi.email_alert_api.find_subscriber_by_govuk_account(
+            govuk_account_id: user.id,
+          )
+
+          GdsApi.email_alert_api.unsubscribe_subscriber(
+            subscriber.dig("subscriber", "id"),
+          )
+        rescue GdsApi::HTTPNotFound
+          # No linked email-alert-api account, nothing to do
+          nil
+        end
+
         user.destroy!
+
         puts "User '#{user.email}' deleted"
         puts "User sub: #{user.sub}"
       else
