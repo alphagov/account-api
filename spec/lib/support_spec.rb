@@ -1,6 +1,10 @@
+require "gds_api/test_helpers/email_alert_api"
+
 Rails.application.load_tasks
 
 RSpec.describe "Support tasks" do
+  include GdsApi::TestHelpers::EmailAlertApi
+
   describe ":find_user" do
     subject(:task) { Rake.application["support:find_user"] }
 
@@ -24,9 +28,7 @@ RSpec.describe "Support tasks" do
   end
 
   describe ":delete_user" do
-    before do
-      FactoryBot.create(:oidc_user, email: "foo@example.gov.uk", sub: "123")
-    end
+    let!(:user) { FactoryBot.create(:oidc_user, email: "foo@example.gov.uk", sub: "123") }
 
     context "when a dry run" do
       subject(:task) { Rake.application["support:delete_user:dry_run"] }
@@ -47,17 +49,32 @@ RSpec.describe "Support tasks" do
 
       context "when a user with email exists" do
         it "reports that the user has been deleted" do
+          stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(user.id)
+
           expect { task.execute({ email: "foo@example.gov.uk" }) }.to output("User 'foo@example.gov.uk' deleted\nUser sub: 123\n").to_stdout
         end
 
         it "deletes the user" do
+          stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(user.id)
+
           count = OidcUser.count
           task.execute({ email: "foo@example.gov.uk" })
           expect(OidcUser.count).to eq count - 1
         end
 
-        it "outputs other users don't exist" do
+        it "outputs if user doesn't exist" do
+          stub_email_alert_api_find_subscriber_by_govuk_account_no_subscriber(user.id)
+
           expect { task.execute({ email: "bar@example.com" }) }.to output("User 'bar@example.com' does not exist\n").to_stdout
+        end
+
+        it "deletes email subscriptions if present" do
+          stub_email_alert_api_find_subscriber_by_govuk_account(user.id, "iddddd", user.email)
+          request = stub_email_alert_api_unsubscribes_a_subscriber("iddddd")
+
+          task.execute({ email: user.email })
+
+          expect(request).to have_been_requested
         end
       end
     end
