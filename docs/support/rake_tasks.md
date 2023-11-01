@@ -49,8 +49,8 @@ support:delete_user:dry_run[email_address]
 ```
 
 ### Deleting a user
-This will delete the user, and confirm the user's
-OICD sub
+This will delete the user, and confirm the user's OICD sub. Deleting a user
+will also remove any email subscriptions they may have in Email Alert API.
 ```ruby
 support:delete_user:real[email_address]
 ```
