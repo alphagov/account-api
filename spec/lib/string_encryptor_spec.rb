@@ -1,6 +1,6 @@
 RSpec.describe StringEncryptor do
   let(:key) { "encryption-key" }
-  let(:plaintext) { SecureRandom.bytes(32) }
+  let(:plaintext) { SecureRandom.hex(32) }
   let(:ciphertext) { described_class.new(secret: key).encrypt_string(plaintext) }
 
   it "round-trips" do
