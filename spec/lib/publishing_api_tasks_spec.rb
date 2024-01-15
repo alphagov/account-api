@@ -15,7 +15,7 @@ RSpec.describe PublishingApiTasks do
 
     it "all have a unique content ID" do
       content_ids = {}
-      content_items[:help_pages].each { |_, item| increment(content_ids, item[:content_id]) }
+      content_items[:help_pages].each_value { |item| increment(content_ids, item[:content_id]) }
       content_items[:redirects].each { |item| increment(content_ids, item[:content_id]) }
       content_items[:special_routes].each { |item| increment(content_ids, item[:content_id]) }
 
@@ -26,7 +26,7 @@ RSpec.describe PublishingApiTasks do
 
     it "all have a unique base path" do
       base_paths = {}
-      content_items[:help_pages].each { |_, item| increment(base_paths, item[:base_path]) }
+      content_items[:help_pages].each_value { |item| increment(base_paths, item[:base_path]) }
       content_items[:redirects].each { |item| increment(base_paths, item[:base_path]) }
       content_items[:special_routes].each { |item| increment(base_paths, item[:base_path]) }
 
