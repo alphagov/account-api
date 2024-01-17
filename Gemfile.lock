@@ -79,7 +79,7 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     aes_key_wrap (1.1.0)
     ast (2.4.2)
-    attr_required (1.0.1)
+    attr_required (1.0.2)
     awesome_print (1.9.2)
     base64 (0.2.0)
     bigdecimal (3.1.5)
