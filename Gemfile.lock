@@ -83,7 +83,7 @@ GEM
     awesome_print (1.9.2)
     base64 (0.2.0)
     bigdecimal (3.1.6)
-    bindata (2.4.15)
+    bindata (2.5.0)
     bootsnap (1.18.3)
       msgpack (~> 1.2)
     brakeman (6.1.0)
@@ -118,8 +118,7 @@ GEM
     dig_rb (1.0.1)
     docile (1.4.0)
     domain_name (0.6.20240107)
-    drb (2.2.0)
-      ruby2_keywords
+    drb (2.2.1)
     email_validator (2.2.4)
       activemodel
     erubi (1.12.0)
@@ -216,7 +215,7 @@ GEM
       rdoc
       reline (>= 0.4.2)
     json (2.7.1)
-    json-jwt (1.16.5)
+    json-jwt (1.16.6)
       activesupport (>= 4.2)
       aes_key_wrap
       base64
