@@ -20,6 +20,18 @@ RSpec.describe "User information endpoint" do
 
   let(:response_body) { JSON.parse(response.body) }
 
+  context "when a logout notice exists for that sub" do
+    before do
+      Redis.current.flushdb
+      Redis.current.set("logout-notice/#{session_identifier.user_id}", Time.zone.now)
+    end
+
+    it "logs the user out" do
+      get("/api/user", headers:)
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
   it "returns 200 OK" do
     get("/api/user", headers:)
     expect(response).to be_successful
