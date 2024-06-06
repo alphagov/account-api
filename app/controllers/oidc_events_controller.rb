@@ -7,7 +7,7 @@ class OidcEventsController < ApplicationController
       head :ok
     end
   rescue OidcClient::BackchannelLogoutFailure => e
-    capture_sensitive_exception(e, { parameters: params.hash })
+    capture_sensitive_exception(e, { parameters: params.to_unsafe_hash })
     head :bad_request
   end
 
