@@ -118,6 +118,9 @@ class OidcClient
   rescue JSON::JWS::VerificationFailed => e
     capture_sensitive_exception(e)
     raise BackchannelLogoutFailure
+  rescue NoMethodError => e
+    capture_sensitive_exception(e, { logout_token_jwt: })
+    raise BackchannelLogoutFailure
   end
 
 private
