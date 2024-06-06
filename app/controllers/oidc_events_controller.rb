@@ -6,7 +6,8 @@ class OidcEventsController < ApplicationController
       LogoutNotice.new(user_id).persist
       head :ok
     end
-  rescue OidcClient::BackchannelLogoutFailure
+  rescue OidcClient::BackchannelLogoutFailure => e
+    capture_sensitive_exception(e, { parameters: params.hash })
     head :bad_request
   end
 
@@ -23,5 +24,14 @@ private
       else
         OidcClient.new
       end
+  end
+
+  def capture_sensitive_exception(error, extra_info = {})
+    captured = SensitiveException.create!(
+      message: error.message,
+      full_message: error.full_message,
+      extra_info: extra_info.to_json,
+    )
+    GovukError.notify("CapturedSensitiveException", { extra: { sensitive_exception_id: captured.id } })
   end
 end
