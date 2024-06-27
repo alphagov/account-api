@@ -7,7 +7,7 @@ RSpec.describe PublishingApiTasks do
 
   subject(:tasks) { described_class.new(logger:, content_items:) }
 
-  let(:logger) { instance_double("Logger") }
+  let(:logger) { instance_double(Logger) }
   let(:content_items) { nil }
 
   describe "content item definitions" do

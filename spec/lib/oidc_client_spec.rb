@@ -193,7 +193,7 @@ RSpec.describe OidcClient do
   end
 
   def stub_oidc_client(client = nil)
-    oidc_client = instance_double("OpenIDConnect::Client")
+    oidc_client = instance_double(OpenIDConnect::Client)
 
     if client
       allow(client).to receive(:client).and_return(oidc_client)
