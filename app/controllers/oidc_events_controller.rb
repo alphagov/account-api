@@ -1,6 +1,6 @@
 class OidcEventsController < ApplicationController
   def backchannel_logout
-    logout_token = oidc_client.logout_token(logout_token)
+    logout_token = oidc_client.logout_token(logout_token_jwt)
     if logout_token
       user_id = logout_token[:logout_token].sub
       LogoutNotice.new(user_id).persist
@@ -13,7 +13,7 @@ class OidcEventsController < ApplicationController
 
 private
 
-  def logout_token
+  def logout_token_jwt
     params.require(:logout_token)
   end
 
