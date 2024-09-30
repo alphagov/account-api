@@ -1,36 +1,6 @@
 # Rake Tasks
 
-There are a number of Rake tasks available to help with
-sending content to the Publishing API and administrating users.
-
-## Publishing API Tasks
-
-All content items are found in `config/content_items.yml`
-
-### Publish redirects
-Publishes all routes in the `redirects` array
-```ruby
-publishing_api:publish_redirects
-```
-
-### Publish_all special_routes
-Publishes all routes in the `special_routes` array
-
-```ruby
-publishing_api:publish_special_routes
-```
-
-### Publish a help page by name
-Publishes a single help page from the help_pages hash, the name
-being the first key for the required help page.
-```ruby
-publishing_api:publish_help_page[name]
-```
-
-### Publish single special route by content_id
-```ruby
-publishing_api:publish_special_route[content_id]
-```
+There are a number of Rake tasks available to help with administering users.
 
 ## User Support Tasks
 
