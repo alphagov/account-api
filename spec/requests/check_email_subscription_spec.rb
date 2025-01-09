@@ -68,8 +68,9 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
       context "when a logout notice exists for that sub" do
         before do
-          Redis.current.flushdb
-          Redis.current.set("logout-notice/#{sub}", Time.zone.now)
+          redis = Redis.new
+          redis.flushdb
+          redis.set("logout-notice/#{sub}", Time.zone.now)
         end
 
         it "logs the user out" do
