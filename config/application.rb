@@ -21,7 +21,7 @@ Bundler.require(*Rails.groups)
 module AccountApi
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.1
+    config.load_defaults 8.0
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -42,5 +42,8 @@ module AccountApi
     config.api_only = true
 
     config.x.user_attributes = config_for("user_attributes")
+
+    # Opt-in to timezone preservation - remove in 8.1, when it will be the default
+    config.active_support.to_time_preserves_timezone = :zone
   end
 end

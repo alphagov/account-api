@@ -22,8 +22,9 @@ RSpec.describe "User information endpoint" do
 
   context "when a logout notice exists for that sub" do
     before do
-      Redis.current.flushdb
-      Redis.current.set("logout-notice/#{session_identifier.user_id}", Time.zone.now)
+      redis = Redis.new
+      redis.flushdb
+      redis.set("logout-notice/#{session_identifier.user_id}", Time.zone.now)
     end
 
     it "logs the user out" do
