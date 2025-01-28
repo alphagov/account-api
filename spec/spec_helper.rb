@@ -30,7 +30,7 @@ RSpec.configure do |config|
 
   config.before do
     Rails.application.load_seed
-    Sidekiq::Worker.clear_all
+    Sidekiq::Job.clear_all
   end
 
   config.include ActiveSupport::Testing::TimeHelpers

@@ -1,4 +1,4 @@
-class ExpiredAuthRequestWorker < ApplicationWorker
+class ExpiredAuthRequestJob < ApplicationJob
   def perform
     AuthRequest.expired.delete_all
   end

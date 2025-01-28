@@ -1,4 +1,4 @@
-RSpec.describe ExpiredSensitiveExceptionWorker do
+RSpec.describe ExpiredSensitiveExceptionJob do
   before { freeze_time }
 
   it "deletes old exceptions" do

@@ -1,4 +1,4 @@
-RSpec.describe ExpiredAuthRequestWorker do
+RSpec.describe ExpiredAuthRequestJob do
   before { freeze_time }
 
   it "deletes old state" do

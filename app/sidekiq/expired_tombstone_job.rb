@@ -1,4 +1,4 @@
-class ExpiredTombstoneWorker < ApplicationWorker
+class ExpiredTombstoneJob < ApplicationJob
   def perform
     Tombstone.expired.delete_all
   end

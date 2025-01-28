@@ -1,4 +1,4 @@
-RSpec.describe ExpiredTombstoneWorker do
+RSpec.describe ExpiredTombstoneJob do
   before { freeze_time }
 
   it "deletes old tombstones" do
