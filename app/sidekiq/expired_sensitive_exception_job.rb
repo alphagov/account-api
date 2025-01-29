@@ -1,4 +1,4 @@
-class ExpiredSensitiveExceptionWorker < ApplicationWorker
+class ExpiredSensitiveExceptionJob < ApplicationJob
   def perform
     SensitiveException.expired.delete_all
   end

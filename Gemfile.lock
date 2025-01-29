@@ -208,12 +208,11 @@ GEM
     govuk_schemas (5.0.4)
       faker (~> 3.4.1)
       json-schema (>= 2.8, < 4.4)
-    govuk_sidekiq (8.0.1)
+    govuk_sidekiq (9.0.4)
       gds-api-adapters (>= 19.1.0)
       govuk_app_config (>= 1.1)
-      redis (< 5)
-      redis-namespace (~> 1.6)
-      sidekiq (~> 6.5, >= 6.5.12)
+      redis-client (>= 0.22.2)
+      sidekiq (~> 7.0, < 8)
     govuk_test (4.1.0)
       brakeman (>= 5.0.2)
       capybara (>= 3.36)
@@ -274,7 +273,7 @@ GEM
     mime-types (3.6.0)
       logger
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2024.1203)
+    mime-types-data (3.2025.0107)
     mini_mime (1.1.5)
     mini_portile2 (2.8.8)
     minitest (5.25.4)
@@ -654,9 +653,10 @@ GEM
       ffi (~> 1.0)
     rdoc (6.11.0)
       psych (>= 4.0.0)
-    redis (4.8.1)
-    redis-namespace (1.11.0)
-      redis (>= 4)
+    redis (5.3.0)
+      redis-client (>= 0.22.0)
+    redis-client (0.23.2)
+      connection_pool
     regexp_parser (2.10.0)
     reline (0.6.0)
       io-console (~> 0.5)
@@ -742,10 +742,12 @@ GEM
       sidekiq (>= 3.0)
     shoulda-matchers (6.4.0)
       activesupport (>= 5.2.0)
-    sidekiq (6.5.12)
-      connection_pool (>= 2.2.5, < 3)
-      rack (~> 2.0)
-      redis (>= 4.5.0, < 5)
+    sidekiq (7.3.8)
+      base64
+      connection_pool (>= 2.3.0)
+      logger
+      rack (>= 2.2.4)
+      redis-client (>= 0.22.2)
     sidekiq-scheduler (5.0.6)
       rufus-scheduler (~> 3.2)
       sidekiq (>= 6, < 8)
@@ -851,6 +853,7 @@ DEPENDENCIES
   pry-byebug
   pry-rails
   rails (= 8.0.1)
+  redis
   rspec-rails
   rubocop-govuk
   sentry-sidekiq

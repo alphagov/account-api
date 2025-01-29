@@ -4,6 +4,7 @@ require "simplecov"
 SimpleCov.start "rails" do
   enable_coverage :branch
   minimum_coverage line: 95
+  add_filter "lib/tasks/lint.rake"
 end
 
 require File.expand_path("../config/environment", __dir__)
@@ -30,7 +31,7 @@ RSpec.configure do |config|
 
   config.before do
     Rails.application.load_seed
-    Sidekiq::Worker.clear_all
+    Sidekiq::Job.clear_all
   end
 
   config.include ActiveSupport::Testing::TimeHelpers
