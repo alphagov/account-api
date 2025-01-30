@@ -5,14 +5,14 @@
   - default
 :scheduler:
   :schedule:
-    expired_auth_request_worker:
+    expired_auth_request_job:
       every: '1h'
-      class: ExpiredAuthRequestWorker
+      class: ExpiredAuthRequestJob
 
-    expired_sensitive_exception_worker:
+    expired_sensitive_exception_job:
       every: '1h'
-      class: ExpiredSensitiveExceptionWorker
+      class: ExpiredSensitiveExceptionJob
 
-    expired_tombstone_worker:
+    expired_tombstone_job:
       every: '1h'
-      class: ExpiredTombstoneWorker
+      class: ExpiredTombstoneJob
