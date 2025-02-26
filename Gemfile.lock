@@ -195,7 +195,7 @@ GEM
     govuk_personalisation (1.1.0)
       plek (>= 1.9.0)
       rails (>= 6, < 9)
-    govuk_publishing_components (52.1.0)
+    govuk_publishing_components (53.0.0)
       govuk_app_config
       govuk_personalisation (>= 0.7.0)
       kramdown
@@ -334,7 +334,7 @@ GEM
       validate_url
       webfinger (~> 2.0)
     opentelemetry-api (1.4.0)
-    opentelemetry-common (0.21.0)
+    opentelemetry-common (0.22.0)
       opentelemetry-api (~> 1.0)
     opentelemetry-exporter-otlp (0.29.1)
       google-protobuf (>= 3.18)
@@ -531,14 +531,14 @@ GEM
       opentelemetry-helpers-sql-obfuscation
       opentelemetry-instrumentation-base (~> 0.23.0)
       opentelemetry-semantic_conventions (>= 1.8.0)
-    opentelemetry-registry (0.3.1)
+    opentelemetry-registry (0.4.0)
       opentelemetry-api (~> 1.1)
-    opentelemetry-sdk (1.7.0)
+    opentelemetry-sdk (1.8.0)
       opentelemetry-api (~> 1.1)
       opentelemetry-common (~> 0.20)
       opentelemetry-registry (~> 0.2)
       opentelemetry-semantic_conventions
-    opentelemetry-semantic_conventions (1.10.1)
+    opentelemetry-semantic_conventions (1.11.0)
       opentelemetry-api (~> 1.0)
     ostruct (0.6.1)
     pact (1.66.1)
@@ -798,7 +798,7 @@ GEM
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
     uniform_notifier (1.16.0)
-    uri (1.0.2)
+    uri (1.0.3)
     useragent (0.16.11)
     validate_url (1.0.15)
       activemodel (>= 3.0.0)
