@@ -21,10 +21,6 @@ def oidc_user
   OidcUser.find_or_create_by_sub!("user-id")
 end
 
-def url_encode(str)
-  ERB::Util.url_encode(str)
-end
-
 Pact.configure do |config|
   config.reports_dir = "spec/reports/pacts"
   config.include PactStubHelpers
@@ -42,8 +38,8 @@ Pact.service_provider "Account API" do
       pact_uri ENV["PACT_URI"]
     else
       base_url = "https://govuk-pact-broker-6991351eca05.herokuapp.com"
-      path = "pacts/provider/#{url_encode(name)}/consumer/#{url_encode(consumer_name)}"
-      version_modifier = "versions/#{url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'branch-main'))}"
+      path = "pacts/provider/#{ERB::Util.url_encode(name)}/consumer/#{ERB::Util.url_encode(consumer_name)}"
+      version_modifier = "versions/#{ERB::Util.url_encode(ENV.fetch('PACT_CONSUMER_VERSION', 'branch-main'))}"
 
       pact_uri("#{base_url}/#{path}/#{version_modifier}")
     end
