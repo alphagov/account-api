@@ -181,7 +181,7 @@ GEM
       rake (>= 13)
     googleapis-common-protos-types (1.20.0)
       google-protobuf (>= 3.18, < 5.a)
-    govuk_app_config (9.17.3)
+    govuk_app_config (9.17.4)
       logstasher (~> 2.1)
       opentelemetry-exporter-otlp (>= 0.25, < 0.31)
       opentelemetry-instrumentation-all (>= 0.39.1, < 0.77.0)
@@ -592,7 +592,7 @@ GEM
       racc
     parslet (2.0.0)
     pg (1.5.9)
-    plek (5.2.1)
+    plek (5.2.2)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -649,7 +649,7 @@ GEM
       activesupport (= 8.0.2)
       bundler (>= 1.15.0)
       railties (= 8.0.2)
-    rails-dom-testing (2.2.0)
+    rails-dom-testing (2.3.0)
       activesupport (>= 5.0.0)
       minitest
       nokogiri (>= 1.6)
@@ -845,7 +845,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.2)
+    zeitwerk (2.7.3)
 
 PLATFORMS
   aarch64-linux
