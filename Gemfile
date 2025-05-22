@@ -24,7 +24,7 @@ gem "redis"
 gem "sentry-sidekiq"
 
 # https://github.com/moove-it/sidekiq-scheduler/issues/345
-gem "sidekiq-scheduler", "6.0.0"
+gem "sidekiq-scheduler", "6.0.1"
 
 group :development, :test do
   gem "awesome_print"
