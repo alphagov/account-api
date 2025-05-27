@@ -118,7 +118,7 @@ GEM
     dig_rb (1.0.1)
     docile (1.4.1)
     domain_name (0.6.20240107)
-    drb (2.2.1)
+    drb (2.2.3)
     email_validator (2.2.4)
       activemodel
     erb (5.0.1)
@@ -181,7 +181,7 @@ GEM
       rake (>= 13)
     googleapis-common-protos-types (1.20.0)
       google-protobuf (>= 3.18, < 5.a)
-    govuk_app_config (9.17.4)
+    govuk_app_config (9.17.5)
       logstasher (~> 2.1)
       opentelemetry-exporter-otlp (>= 0.25, < 0.31)
       opentelemetry-instrumentation-all (>= 0.39.1, < 0.77.0)
@@ -615,7 +615,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (2.2.15)
+    rack (2.2.16)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
