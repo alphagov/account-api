@@ -12,7 +12,7 @@ gem "bootsnap", require: false
 gem "dalli"
 gem "gds-api-adapters"
 gem "gds-sso"
-gem "govuk_app_config", "9.22.0"
+gem "govuk_app_config", "9.22.2"
 gem "govuk_personalisation"
 gem "govuk_publishing_components"
 gem "govuk_sidekiq"
