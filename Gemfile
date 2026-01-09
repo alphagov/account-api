@@ -9,7 +9,7 @@ gem "rails", "8.1.2"
 
 gem "attr_required"
 gem "bootsnap", require: false
-gem "connection_pool", "< 4"
+gem "connection_pool", "< 3"
 gem "dalli"
 gem "gds-api-adapters"
 gem "gds-sso"
