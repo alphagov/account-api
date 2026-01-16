@@ -13,7 +13,7 @@ gem "connection_pool", "< 3" # Do not bump via Dependabot - https://github.com/a
 gem "dalli"
 gem "gds-api-adapters"
 gem "gds-sso"
-gem "govuk_app_config", "9.23.2"
+gem "govuk_app_config", github: "alphagov/govuk_app_config", branch: "fix-logstasher-crash"
 gem "govuk_personalisation"
 gem "govuk_publishing_components"
 gem "govuk_sidekiq"
