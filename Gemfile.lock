@@ -110,7 +110,8 @@ GEM
       rexml
     crass (1.0.6)
     csv (3.3.5)
-    dalli (3.2.8)
+    dalli (4.0.0)
+      logger
     database_cleaner-active_record (2.2.2)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0)
