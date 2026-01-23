@@ -82,7 +82,7 @@ GEM
     attr_required (1.0.2)
     awesome_print (1.9.2)
     base64 (0.3.0)
-    bigdecimal (3.3.1)
+    bigdecimal (4.0.1)
     bindata (2.5.1)
     bootsnap (1.21.1)
       msgpack (~> 1.2)
@@ -206,8 +206,8 @@ GEM
       rouge
       sprockets (>= 3)
       sprockets-rails
-    govuk_schemas (6.2.0)
-      json-schema (>= 2.8, < 6.1)
+    govuk_schemas (6.2.1)
+      json-schema (>= 2.8, < 6.2)
     govuk_sidekiq (10.0.0)
       gds-api-adapters (>= 19.1.0)
       govuk_app_config (>= 1.1)
@@ -242,9 +242,9 @@ GEM
       bindata
       faraday (~> 2.0)
       faraday-follow_redirects
-    json-schema (6.0.0)
+    json-schema (6.1.0)
       addressable (~> 2.8)
-      bigdecimal (~> 3.1)
+      bigdecimal (>= 3.1, < 5)
     jsonpath (1.1.5)
       multi_json
     jwt (3.1.2)
@@ -574,7 +574,7 @@ GEM
     psych (5.3.1)
       date
       stringio
-    public_suffix (7.0.0)
+    public_suffix (7.0.2)
     puma (7.2.0)
       nio4r (~> 2.0)
     raabro (1.4.0)
