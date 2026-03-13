@@ -208,7 +208,7 @@ GEM
       sprockets-rails
     govuk_schemas (6.2.3)
       json-schema (>= 2.8, < 6.3)
-    govuk_sidekiq (10.1.0)
+    govuk_sidekiq (11.0.1)
       gds-api-adapters (>= 19.1.0)
       govuk_app_config (>= 1.1)
       redis-client (>= 0.22.2)
@@ -337,7 +337,8 @@ GEM
       tzinfo
       validate_url
       webfinger (~> 2.0)
-    opentelemetry-api (1.7.0)
+    opentelemetry-api (1.8.0)
+      logger
     opentelemetry-common (0.23.0)
       opentelemetry-api (~> 1.0)
     opentelemetry-exporter-otlp (0.31.1)
@@ -642,7 +643,7 @@ GEM
       tsort
     redis (5.4.1)
       redis-client (>= 0.22.0)
-    redis-client (0.26.4)
+    redis-client (0.27.0)
       connection_pool
     regexp_parser (2.11.3)
     reline (0.6.3)
