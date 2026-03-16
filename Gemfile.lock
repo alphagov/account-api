@@ -196,7 +196,7 @@ GEM
     govuk_personalisation (1.1.0)
       plek (>= 1.9.0)
       rails (>= 6, < 9)
-    govuk_publishing_components (65.0.0)
+    govuk_publishing_components (65.1.0)
       govuk_app_config
       govuk_personalisation (>= 0.7.0)
       kramdown
@@ -337,7 +337,8 @@ GEM
       tzinfo
       validate_url
       webfinger (~> 2.0)
-    opentelemetry-api (1.7.0)
+    opentelemetry-api (1.8.0)
+      logger
     opentelemetry-common (0.23.0)
       opentelemetry-api (~> 1.0)
     opentelemetry-exporter-otlp (0.31.1)
