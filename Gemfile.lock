@@ -842,7 +842,7 @@ DEPENDENCIES
   listen
   notifications-ruby-client
   openid_connect
-  pact
+  pact (~> 1.67)
   pact_broker-client
   pg
   pry-byebug
