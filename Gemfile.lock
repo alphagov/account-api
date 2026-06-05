@@ -123,8 +123,6 @@ GEM
     docile (1.4.1)
     domain_name (0.6.20240107)
     drb (2.2.3)
-    email_validator (2.2.4)
-      activemodel
     erb (6.0.4)
     erubi (1.13.1)
     et-orbi (1.4.0)
@@ -142,7 +140,7 @@ GEM
       logger
     faraday-follow_redirects (0.5.0)
       faraday (>= 1, < 3)
-    faraday-net_http (3.4.3)
+    faraday-net_http (3.4.4)
       net-http (~> 0.5)
     ffi (1.17.3-aarch64-linux-gnu)
     ffi (1.17.3-arm64-darwin)
@@ -326,10 +324,9 @@ GEM
     omniauth-oauth2 (1.9.0)
       oauth2 (>= 2.0.2, < 3)
       omniauth (~> 2.0)
-    openid_connect (2.4.0)
+    openid_connect (2.5.0)
       activemodel
       attr_required (>= 1.0.0)
-      email_validator
       faraday (~> 2.0)
       faraday-follow_redirects
       json-jwt (>= 1.16)
