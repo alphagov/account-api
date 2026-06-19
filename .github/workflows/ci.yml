@@ -52,10 +52,10 @@ jobs:
         uses: alphagov/govuk-infrastructure/.github/actions/setup-redis@main
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Checkout Publishing API (for Content Schemas)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           repository: alphagov/publishing-api
           path: vendor/publishing-api
