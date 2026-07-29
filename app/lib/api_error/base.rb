@@ -1,7 +1,7 @@
 module ApiError
   class Base < StandardError
     def status_code
-      :unprocessable_entity
+      :unprocessable_content
     end
 
     def type

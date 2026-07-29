@@ -54,7 +54,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
       it "returns a 422" do
         get(personalisation_check_email_subscription_path, params:, headers:)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
 
       context "when the session is invalid" do
@@ -88,7 +88,7 @@ RSpec.describe "Personalisation - Check Email Subscription" do
 
           it "returns a 422" do
             get(personalisation_check_email_subscription_path, params:, headers:)
-            expect(response).to have_http_status(:unprocessable_entity)
+            expect(response).to have_http_status(:unprocessable_content)
           end
         end
 
