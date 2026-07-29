@@ -5,8 +5,8 @@ class Personalisation::CheckEmailSubscriptionController < PersonalisationControl
     @base_path = params[:base_path]
     @topic_slug = params[:topic_slug]
 
-    head :unprocessable_entity if @base_path && @topic_slug
-    head :unprocessable_entity unless @base_path || @topic_slug
+    head :unprocessable_content if @base_path && @topic_slug
+    head :unprocessable_content unless @base_path || @topic_slug
   end
 
   def show
