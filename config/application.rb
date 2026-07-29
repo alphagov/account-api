@@ -42,8 +42,5 @@ module AccountApi
     config.api_only = true
 
     config.x.user_attributes = config_for("user_attributes")
-
-    # Opt-in to timezone preservation - remove in 8.1, when it will be the default
-    config.active_support.to_time_preserves_timezone = :zone
   end
 end
