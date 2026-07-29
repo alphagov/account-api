@@ -13,7 +13,7 @@ gem "connection_pool", "< 3" # Do not bump via Dependabot - https://github.com/a
 gem "dalli"
 gem "gds-api-adapters"
 gem "gds-sso"
-gem "govuk_app_config", "9.25.1"
+gem "govuk_app_config"
 gem "govuk_personalisation"
 gem "govuk_sidekiq"
 gem "json-jwt"

@@ -811,7 +811,7 @@ DEPENDENCIES
   factory_bot_rails
   gds-api-adapters
   gds-sso
-  govuk_app_config (= 9.25.1)
+  govuk_app_config
   govuk_personalisation
   govuk_schemas
   govuk_sidekiq
@@ -837,7 +837,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 4.0.6p0
+  ruby 4.0.6p0
 
 BUNDLED WITH
-   4.0.17
+  4.0.17
