@@ -820,6 +820,7 @@ DEPENDENCIES
   listen
   notifications-ruby-client
   openid_connect
+  ostruct
   pact (~> 1.67)
   pact_broker-client
   pg
