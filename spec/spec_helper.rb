@@ -1,10 +1,12 @@
 ENV["RAILS_ENV"] ||= "test"
 
-require "simplecov"
-SimpleCov.start "rails" do
-  enable_coverage :branch
-  minimum_coverage line: 95
-  skip "lib/tasks/lint.rake"
+unless ARGV.include?("pact")
+  require "simplecov"
+  SimpleCov.start "rails" do
+    enable_coverage :branch
+    minimum_coverage line: 95
+    skip "lib/tasks/lint.rake"
+  end
 end
 
 require File.expand_path("../config/environment", __dir__)
@@ -24,6 +26,8 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 
 RSpec.configure do |config|
+  config.filter_run_excluding pact: true unless config.filter.rules.key?(:pact)
+
   if Bullet.enable?
     config.before { Bullet.start_request }
     config.after { Bullet.end_request }
