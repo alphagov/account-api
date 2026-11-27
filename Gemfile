@@ -35,7 +35,7 @@ group :development, :test do
   gem "govuk_schemas"
   gem "govuk_test"
   gem "listen"
-  gem "pact", "~> 1.67", require: false
+  gem "pact"
   gem "pact_broker-client"
   gem "pry-byebug"
   gem "pry-rails"
